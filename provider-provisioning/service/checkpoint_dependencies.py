@@ -55,6 +55,14 @@ for parent in ("gateway", "management"):
         f"{parent}.vm_boot_diagnostics_storage": ("../common/storage-account", "modules/common/storage-account"),
         f"{parent}.vnet": ("../common/vnet", "modules/common/vnet"),
     })
+VMSS_EXPECTED_MODULES = {**EXPECTED_MODULES, "gateway": ("./modules/vmss", "modules/vmss")}
+VMSS_ARTIFACT_SHA256 = "0b23dd8fed59393768c3c964b8de6da08a8365250b93331568b07a65959f70fe"
+
+
+def _topology(topology: str) -> bool:
+    if topology not in ("single", "vmss"):
+        raise CheckpointDependencyError("Unsupported Check Point topology")
+    return topology == "vmss"
 
 
 class CheckpointDependencyError(ValueError):
@@ -142,7 +150,7 @@ def verify_checkpoint_provider_packages(directory: Path, target: str | None = No
             raise CheckpointDependencyError("Check Point provider package checksum mismatch")
 
 
-def verify_checkpoint_provider_runtime(directory: Path) -> None:
+def verify_checkpoint_provider_runtime(directory: Path, topology: str = "single") -> None:
     """Require immutable provider paths and verify the initialized dependency graph."""
     target = _provider_target(None)
     root = directory / ".terraform/providers/registry.terraform.io"
@@ -161,7 +169,7 @@ def verify_checkpoint_provider_runtime(directory: Path) -> None:
             finally:
                 if fd is not None:
                     os.close(fd)
-    verify_checkpoint_dependencies(directory)
+    verify_checkpoint_dependencies(directory, topology=topology)
 
 
 def _read_bounded(path: Path, limit: int) -> bytes:
@@ -177,7 +185,8 @@ def _read_bounded(path: Path, limit: int) -> bytes:
     return data
 
 
-def verify_checkpoint_artifact(directory: Path) -> None:
+def verify_checkpoint_artifact(directory: Path, topology: str = "single") -> None:
+    expected_digest = VMSS_ARTIFACT_SHA256 if _topology(topology) else ARTIFACT_SHA256
     if directory.is_symlink() or not directory.is_dir():
         raise CheckpointDependencyError("Invalid Check Point artifact directory")
     files = []
@@ -207,11 +216,12 @@ def verify_checkpoint_artifact(directory: Path) -> None:
         digest.update(path.relative_to(directory).as_posix().encode("utf-8"))
         digest.update(b"\0")
         digest.update(hashlib.sha256(content).digest())
-    if digest.hexdigest() != ARTIFACT_SHA256:
+    if digest.hexdigest() != expected_digest:
         raise CheckpointDependencyError("Check Point artifact checksum mismatch")
 
 
-def verify_checkpoint_dependencies(directory: Path, target: str | None = None) -> None:
+def verify_checkpoint_dependencies(directory: Path, target: str | None = None, topology: str = "single") -> None:
+    expected_modules = VMSS_EXPECTED_MODULES if _topology(topology) else EXPECTED_MODULES
     if any(path.is_symlink() for path in (directory, directory / ".terraform", directory / ".terraform/modules")):
         raise CheckpointDependencyError("Invalid Check Point dependency directory")
     lock = _read_bounded(directory / ".terraform.lock.hcl", 256 * 1024)
@@ -226,9 +236,9 @@ def verify_checkpoint_dependencies(directory: Path, target: str | None = None) -
     if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
         raise CheckpointDependencyError("Invalid Check Point module manifest")
     keys = [item.get("Key") for item in entries]
-    if (len(entries) != len(EXPECTED_MODULES) or not all(isinstance(key, str) for key in keys)
-            or set(keys) != set(EXPECTED_MODULES)
-            or any((item.get("Source"), item.get("Dir")) != EXPECTED_MODULES[item["Key"]] for item in entries)):
+    if (len(entries) != len(expected_modules) or not all(isinstance(key, str) for key in keys)
+            or set(keys) != set(expected_modules)
+            or any((item.get("Source"), item.get("Dir")) != expected_modules[item["Key"]] for item in entries)):
         raise CheckpointDependencyError("Unexpected Check Point module graph")
     selected = [item for item in entries if item["Key"] in REGIONS_KEYS]
     for item in selected:

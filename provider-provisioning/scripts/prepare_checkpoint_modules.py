@@ -23,6 +23,11 @@ VERSION_FILES = {
     "management": "be58f30155358eaa9ea4c083257e934f780d17d0e9ea6f91d9b4560c94285bf7",
     "single-gateway": "3f450b39203645e42936f5af851396207dd82c477508b6fc1e3ed32b455de3c8",
 }
+VMSS_VERSION_FILES = {
+    "management": VERSION_FILES["management"],
+    "vmss": "3f450b39203645e42936f5af851396207dd82c477508b6fc1e3ed32b455de3c8",
+}
+TOPOLOGIES = ("single", "vmss")
 LOCAL_ROOT = ROOT / ".local"
 MAX_ARCHIVE_BYTES = 8 * 1024 * 1024
 MAX_FILES = 100
@@ -65,6 +70,42 @@ resource "azurerm_public_ip" "public_ip" {
   }
 }
 '''
+
+VMSS_OVERRIDE = '''# FaaS adaptation of Check Point v1.6.2. See ../../LICENSE.
+module "common" {
+  create_resource_group = false
+  resource_group_id     = var.faas_existing_resource_group_id
+  vm_os_version         = var.faas_image_version
+}
+
+resource "azurerm_public_ip" "public_ip_lb" {
+  lifecycle {
+    ignore_changes = [ip_tags]
+  }
+}
+
+# FaaS runs a fixed instance count; autoscale would need Azure Monitor write access.
+resource "azurerm_monitor_autoscale_setting" "vmss_settings" {
+  count = 0
+}
+
+# Upstream indexes the scale set identity even when custom metrics (and the identity) are off.
+locals {
+  vmss_principal_id = ""
+}
+'''
+
+VMSS_NOTICE = f"""FaaS adaptation of Check Point CloudGuard Terraform modules v1.6.2.
+Source: https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security
+Pinned commit: {UPSTREAM_COMMIT}
+The Apache-2.0 upstream license is included in LICENSE.
+The management and vmss versions.tf files were modified to remove
+module-local provider configurations. The common regions module source is
+pinned to commit {REGIONS_COMMIT}, with telemetry disabled as in upstream.
+Added FaaS inputs and override files use an existing FaaS environment group,
+require an explicit image version, ignore platform-assigned public IP tags
+and remove the scale set autoscale setting for a fixed instance count.
+"""
 
 NOTICE = f"""FaaS adaptation of Check Point CloudGuard Terraform modules v1.6.2.
 Source: https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security
@@ -123,7 +164,8 @@ def _extract(archive: bytes, destination: Path) -> None:
         raise PreparationError("Upstream license is missing")
 
 
-def _adapt(destination: Path) -> None:
+def _adapt(destination: Path, topology: str = "single") -> None:
+    vmss = topology == "vmss"
     common = destination / "modules/common/common/main.tf"
     original_common = common.read_bytes()
     old_regions = (b'  source  = "Azure/avm-utl-regions/azurerm"\n'
@@ -134,7 +176,7 @@ def _adapt(destination: Path) -> None:
             or original_common.count(b'enable_telemetry          = false') != 1):
         raise PreparationError("Unexpected upstream regions module configuration")
     common.write_bytes(original_common.replace(old_regions, new_regions, 1))
-    for name, digest in VERSION_FILES.items():
+    for name, digest in (VMSS_VERSION_FILES if vmss else VERSION_FILES).items():
         directory = destination / "modules" / name
         versions = directory / "versions.tf"
         original = versions.read_bytes()
@@ -147,16 +189,19 @@ def _adapt(destination: Path) -> None:
         versions.write_bytes(
             b"# FaaS modification: providers are configured by the calling root module.\n" + prefix)
         (directory / "faas_variables.tf").write_text(INPUTS)
-        (directory / "faas_override.tf").write_text(OVERRIDE)
-    lock = ROOT / "infra/checkpoint/.terraform.lock.hcl"
+        (directory / "faas_override.tf").write_text(VMSS_OVERRIDE if name == "vmss" else OVERRIDE)
+    root = ROOT / "infra" / ("checkpoint-vmss" if vmss else "checkpoint")
+    lock = root / ".terraform.lock.hcl"
     if hashlib.sha256(lock.read_bytes()).hexdigest() != PROVIDER_LOCK_SHA256:
         raise PreparationError("Terraform provider lock mismatch")
     for name in ("main.tf", "variables.tf", ".terraform.lock.hcl"):
-        shutil.copyfile(ROOT / "infra" / "checkpoint" / name, destination / name)
-    (destination / "FAAS-UPSTREAM-NOTICE.txt").write_text(NOTICE)
+        shutil.copyfile(root / name, destination / name)
+    (destination / "FAAS-UPSTREAM-NOTICE.txt").write_text(VMSS_NOTICE if vmss else NOTICE)
 
 
-def prepare(source: Path, output: Path) -> None:
+def prepare(source: Path, output: Path, topology: str = "single") -> None:
+    if topology not in TOPOLOGIES:
+        raise PreparationError("Unsupported Check Point topology")
     source = source.resolve(strict=True)
     local = LOCAL_ROOT.resolve(strict=True)
     output = output.resolve()
@@ -168,11 +213,12 @@ def prepare(source: Path, output: Path) -> None:
             or _git(source, "rev-parse", f"{UPSTREAM_COMMIT}^{{tree}}").decode().strip() != UPSTREAM_TREE):
         raise PreparationError("Upstream repository is not at the pinned release")
     archive = _git(source, "archive", "--format=tar", UPSTREAM_COMMIT, "--",
-                   "LICENSE", "modules/common", "modules/management", "modules/single-gateway")
+                   "LICENSE", "modules/common", "modules/management",
+                   "modules/vmss" if topology == "vmss" else "modules/single-gateway")
     output.mkdir(mode=0o700)
     try:
         _extract(archive, output)
-        _adapt(output)
+        _adapt(output, topology)
     except (OSError, tarfile.TarError, PreparationError):
         shutil.rmtree(output)
         raise
@@ -182,9 +228,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True, type=Path, help="Local Git checkout of the pinned upstream release")
     parser.add_argument("--output", required=True, type=Path, help="New directory directly under .local")
+    parser.add_argument("--topology", choices=TOPOLOGIES, default="single")
     args = parser.parse_args()
     try:
-        prepare(args.source, args.output)
+        prepare(args.source, args.output, args.topology)
     except (OSError, PreparationError, tarfile.TarError) as exc:
         raise SystemExit(f"Module preparation failed: {type(exc).__name__}: {exc}") from None
     print("Prepared experimental modules locally; no deployment was performed.")

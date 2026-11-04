@@ -6,6 +6,7 @@ validated plan only after independent dependency, identity and lifecycle checks.
 import base64
 import hashlib
 import hmac
+import ipaddress
 import re
 from dataclasses import dataclass
 
@@ -47,6 +48,30 @@ MANAGEMENT_BOOTSTRAP_SHA256 = "63859b9a417e997fffe5ccf48639cd3bec21702acb0b6b680
 GATEWAY_BOOTSTRAP_TEMPLATE = '#!/usr/bin/python3 /etc/cloud_config.py\n\ninstallationType="gateway"\nallowUploadDownload="false"\nosVersion="R82"\ntemplateName="single_terraform_registry"\ntemplateVersion="1.0.9"\ntemplateType="terraform"\nisBlink="true"\nbootstrapScript64=""\nlocation="eastus2"\nadminShell="/etc/cli.sh"\nsicKey="<REDACTED>"\nmanagementGUIClientNetwork="172.22.40.0/23"\ncustomMetrics="no"\npasswordHash=""\nMaintenanceModePassword=""'
 MANAGEMENT_BOOTSTRAP_TEMPLATE = '#!/usr/bin/python3 /etc/cloud_config.py\n\ninstallationType="management"\nallowUploadDownload="false"\nosVersion="R82"\ntemplateName="management_terraform_registry"\ntemplateVersion="1.0.9"\ntemplateType="terraform"\nisBlink="true"\nbootstrapScript64=""\nlocation="eastus2"\nmanagementGUIClientNetwork="172.22.40.0/23"\nenableApi="gui_clients"\nadminShell="/etc/cli.sh"\npasswordHash=""\nMaintenanceModePassword=""\n'
 _SIC_PLACEHOLDER = 'sicKey="<REDACTED>"'
+
+_MANAGEMENT_EXPECTED = {address: kind for address, kind in EXPECTED.items() if address.startswith("module.management.")}
+VMSS_EXPECTED = {
+    **_MANAGEMENT_EXPECTED,
+    "module.gateway.azurerm_lb.backend_lb[0]": "azurerm_lb",
+    "module.gateway.azurerm_lb.frontend_lb[0]": "azurerm_lb",
+    "module.gateway.azurerm_lb_backend_address_pool.backend_lb_pool[0]": "azurerm_lb_backend_address_pool",
+    "module.gateway.azurerm_lb_backend_address_pool.frontend_lb_pool[0]": "azurerm_lb_backend_address_pool",
+    "module.gateway.azurerm_lb_probe.azure_lb_healprob[0]": "azurerm_lb_probe",
+    "module.gateway.azurerm_lb_probe.azure_lb_healprob[1]": "azurerm_lb_probe",
+    "module.gateway.azurerm_lb_rule.lbnatrule_standard[0]": "azurerm_lb_rule",
+    "module.gateway.azurerm_lb_rule.lbnatrule_standard[1]": "azurerm_lb_rule",
+    "module.gateway.azurerm_linux_virtual_machine_scale_set.vmss[0]": "azurerm_linux_virtual_machine_scale_set",
+    "module.gateway.azurerm_public_ip.public_ip_lb[0]": "azurerm_public_ip",
+    "module.gateway.random_id.random_id": "random_id",
+}
+VMSS_OUTPUTS = {"gatewayScaleSetId", "internalLoadBalancerIp", "managementPrivateIp", "managementVmId",
+                "publicLoadBalancerIp"}
+VMSS_INSTANCES = 2
+VMSS_SKU = "sg-ngtp"
+VMSS_INTERNAL_LB_IP = "172.22.20.4"
+VMSS_BOOTSTRAP_SHA256 = "0d7066622c0e93da84b0f7111ab068215cb569fd10fbd51eeb63cedb6a708eff"
+VMSS_BOOTSTRAP_TEMPLATE = '#!/usr/bin/python3 /etc/cloud_config.py\n\ninstallationType="vmss"\nallowUploadDownload="false"\nosVersion="R82"\ntemplateName="vmss_terraform_registry"\ntemplateVersion="1.0.9"\ntemplateType="terraform"\nisBlink="true"\nbootstrapScript64=""\nlocation="eastus2"\nsicKey="<REDACTED>"\nvnet="172.22.10.0/24"\ncustomMetrics="no"\nadminShell="/etc/cli.sh"\npasswordHash=""\nMaintenanceModePassword=""\nsetHealthProbe="false"\n'
+TOPOLOGIES = ("single", "vmss")
 
 
 class CheckpointPlanError(ValueError):
@@ -125,12 +150,185 @@ def _secret_equal(value: object, expected: str) -> bool:
     return isinstance(value, str) and value.isascii() and hmac.compare_digest(value, expected)
 
 
+def _single(value: object) -> dict | None:
+    return value[0] if isinstance(value, list) and len(value) == 1 and isinstance(value[0], dict) else None
+
+
+def _validate_vmss_gateway(address: str, kind: str, change: dict, creating: bool, group_name: str, group_id: str,
+                           suffix: str, gateway_image_version: str, gateway_vm_size: str, expected_key: bytes,
+                           credentials: CheckpointCredentials) -> None:
+    after, unknown = change["after"], change.get("after_unknown", {})
+    network = group_id + "/providers/Microsoft.Network"
+    vnet = network + "/virtualNetworks/vnet-cp-security-" + suffix
+    scale_set, app = "cp-vmss-" + suffix, "cp-vmss-" + suffix + "-app-1"
+    lbs = {"backend": network + "/loadBalancers/backend-lb", "frontend": network + "/loadBalancers/frontend-lb"}
+    pools = {"backend": lbs["backend"] + "/backendAddressPools/backend-lb-pool",
+             "frontend": lbs["frontend"] + "/backendAddressPools/" + app}
+    side = "backend" if address.endswith(("backend_lb[0]", "backend_lb_pool[0]", "healprob[1]", "standard[1]")) \
+        else "frontend"
+    if kind in {"azurerm_lb", "azurerm_public_ip", "azurerm_linux_virtual_machine_scale_set"}:
+        if (not _same_id(after.get("resource_group_name"), group_name) or after.get("location") != "eastus2"
+                or not all(_known(unknown.get(key)) for key in ("resource_group_name", "location", "name"))
+                or after.get("zones") not in (None, []) or not _known(unknown.get("zones"))):
+            raise CheckpointPlanError("Check Point plan targets an unexpected group or region")
+    if kind == "azurerm_lb":
+        config, config_unknown = _single(after.get("frontend_ip_configuration")), \
+            _single(unknown.get("frontend_ip_configuration")) or {}
+        if (after.get("name") != side + "-lb" or after.get("sku") != "Standard" or config is None
+                or not _known(unknown.get("sku"))
+                or not _reference(after.get("id"), unknown.get("id"), lbs[side], creating)):
+            raise CheckpointPlanError("Invalid Check Point load balancer")
+        if side == "backend":
+            valid = (config.get("name") == "backend-lb" and config.get("private_ip_address") == VMSS_INTERNAL_LB_IP
+                     and config.get("private_ip_address_allocation") == "Static"
+                     and _same_id(config.get("subnet_id"), vnet + "/subnets/firewall-backend")
+                     and config.get("public_ip_address_id") in (None, "")
+                     and all(_known(config_unknown.get(key)) for key in (
+                         "name", "private_ip_address", "private_ip_address_allocation", "subnet_id")))
+        else:
+            valid = (config.get("name") == app and config.get("subnet_id") in (None, "")
+                     and _known(config_unknown.get("subnet_id"))
+                     and _reference(config.get("public_ip_address_id"), config_unknown.get("public_ip_address_id"),
+                                    network + "/publicIPAddresses/" + app, creating))
+        if not valid:
+            raise CheckpointPlanError("Invalid Check Point load balancer frontend")
+    elif kind == "azurerm_lb_backend_address_pool":
+        name = "backend-lb-pool" if side == "backend" else app
+        if (after.get("name") != name or after.get("virtual_network_id") not in (None, "")
+                or after.get("tunnel_interface") not in (None, [])
+                or not _reference(after.get("loadbalancer_id"), unknown.get("loadbalancer_id"), lbs[side], creating)
+                or not _reference(after.get("id"), unknown.get("id"), pools[side], creating)):
+            raise CheckpointPlanError("Invalid Check Point load balancer pool")
+    elif kind == "azurerm_lb_probe":
+        name = "backend-lb" if side == "backend" else app
+        if (after.get("name") != name or after.get("protocol") != "Tcp" or after.get("port") != 8117
+                or after.get("interval_in_seconds") != 5 or after.get("number_of_probes") != 2
+                or after.get("request_path") not in (None, "")
+                or not _reference(after.get("loadbalancer_id"), unknown.get("loadbalancer_id"), lbs[side], creating)
+                or not _reference(after.get("id"), unknown.get("id"), lbs[side] + "/probes/" + name, creating)):
+            raise CheckpointPlanError("Invalid Check Point load balancer probe")
+    elif kind == "azurerm_lb_rule":
+        backend = side == "backend"
+        name = "backend-lb" if backend else app
+        pool_ids, pool_unknown = after.get("backend_address_pool_ids"), unknown.get("backend_address_pool_ids")
+        pool_marker = pool_unknown[0] if isinstance(pool_unknown, list) and len(pool_unknown) == 1 else None
+        if (after.get("name") != name or after.get("frontend_ip_configuration_name") != name
+                or after.get("protocol") != ("All" if backend else "Tcp")
+                or after.get("frontend_port") != (0 if backend else 80)
+                or after.get("backend_port") != (0 if backend else 80)
+                or after.get("floating_ip_enabled") is not True
+                or after.get("disable_outbound_snat") not in (None, False)
+                or not isinstance(pool_ids, list) or len(pool_ids) != 1
+                or not _reference(pool_ids[0], pool_marker, pools[side], creating)
+                or not _reference(after.get("loadbalancer_id"), unknown.get("loadbalancer_id"), lbs[side], creating)
+                or not _reference(after.get("probe_id"), unknown.get("probe_id"),
+                                  lbs[side] + "/probes/" + name, creating)):
+            raise CheckpointPlanError("Invalid Check Point load balancer rule")
+    elif kind == "azurerm_public_ip":
+        if (after.get("name") != app or after.get("sku") != "Standard" or after.get("allocation_method") != "Static"
+                or not _known(unknown.get("sku")) or not _known(unknown.get("allocation_method"))
+                or not _reference(after.get("id"), unknown.get("id"), network + "/publicIPAddresses/" + app, creating)):
+            raise CheckpointPlanError("Invalid Check Point public IP")
+    elif kind == "random_id":
+        if (after.get("keepers") != {"rg_id": group_id} or after.get("byte_length") != 13
+                or not _known(unknown.get("keepers")) or not _known(unknown.get("byte_length"))):
+            raise CheckpointPlanError("Invalid Check Point plan identity")
+    elif kind == "azurerm_linux_virtual_machine_scale_set":
+        compute = group_id + "/providers/Microsoft.Compute"
+        image, marketplace = _single(after.get("source_image_reference")), _single(after.get("plan"))
+        disk, ssh = _single(after.get("os_disk")), _single(after.get("admin_ssh_key"))
+        sensitive = change.get("after_sensitive")
+        nics = after.get("network_interface")
+        checks = (
+            ("name", lambda: after.get("name") != scale_set or after.get("computer_name_prefix") != scale_set),
+            ("size", lambda: after.get("sku") != gateway_vm_size or not _known(unknown.get("sku"))),
+            ("capacity", lambda: after.get("instances") != VMSS_INSTANCES or after.get("overprovision") is not False
+                or after.get("upgrade_mode") != "Manual" or not _known(unknown.get("instances"))),
+            ("id", lambda: not _reference(after.get("id"), unknown.get("id"),
+                                          compute + "/virtualMachineScaleSets/" + scale_set, creating)),
+            ("image", lambda: image is None or after.get("source_image_id") not in (None, "")
+                or image != {"publisher": "checkpoint", "offer": "check-point-cg-r82",
+                             "sku": VMSS_SKU, "version": gateway_image_version}),
+            ("plan", lambda: marketplace != {"name": VMSS_SKU, "product": "check-point-cg-r82",
+                                             "publisher": "checkpoint"}),
+            ("identity", lambda: after.get("identity") not in (None, []) or not _known(unknown.get("identity"))),
+            ("extensions", lambda: after.get("extension") not in (None, []) or after.get("data_disk") not in (None, [])
+                or not _known(unknown.get("extension")) or not _known(unknown.get("data_disk"))),
+            ("diagnostics", lambda: _single(after.get("boot_diagnostics")) is None
+                or after["boot_diagnostics"][0].get("storage_account_uri") not in (None, "")),
+            ("os-disk", lambda: disk is None or disk.get("caching") != "ReadWrite"
+                or disk.get("storage_account_type") != "StandardSSD_LRS" or disk.get("disk_size_gb") != 100),
+            ("sensitive", lambda: not isinstance(sensitive, dict) or sensitive.get("custom_data") is not True
+                or sensitive.get("admin_password") is not True),
+            ("authentication", lambda: after.get("admin_username") != "notused"
+                or after.get("disable_password_authentication") is not True
+                or ssh is None or ssh.get("username") != "notused" or not isinstance(ssh.get("public_key"), str)),
+            ("network", lambda: not isinstance(nics, list) or len(nics) != 2
+                or any(not isinstance(nic, dict) for nic in nics)),
+        )
+        for label, failed in checks:
+            if failed():
+                raise CheckpointPlanError("Invalid Check Point scale set: " + label)
+        try:
+            if validate_checkpoint_public_key(ssh["public_key"]) != expected_key:
+                raise ValueError()
+        except (ValueError, CheckpointPlanError):
+            raise CheckpointPlanError("Invalid Check Point gateway authentication") from None
+        unknown_nics = unknown.get("network_interface")
+        unknown_nics = unknown_nics if isinstance(unknown_nics, list) and len(unknown_nics) == 2 else [{}, {}]
+        for index, (nic, nic_unknown) in enumerate(zip(nics, unknown_nics)):
+            backend = index == 1
+            config = _single(nic.get("ip_configuration"))
+            config_unknown = _single(nic_unknown.get("ip_configuration") if isinstance(nic_unknown, dict) else None) \
+                or {}
+            if (config is None or nic.get("name") != ("eth1" if backend else "eth0")
+                    or nic.get("primary") is not (not backend) or nic.get("enable_ip_forwarding") is not True
+                    or nic.get("network_security_group_id") not in (None, "")
+                    or config.get("name") != ("ipconfig2" if backend else "ipconfig1")
+                    or config.get("primary") is not True
+                    or not _same_id(config.get("subnet_id"),
+                                    vnet + "/subnets/" + ("firewall-backend" if backend else "firewall-frontend"))):
+                raise CheckpointPlanError("Invalid Check Point scale set network")
+            pool_ids, pool_unknown = config.get("load_balancer_backend_address_pool_ids"), \
+                config_unknown.get("load_balancer_backend_address_pool_ids")
+            pool_marker = pool_unknown[0] if isinstance(pool_unknown, list) and len(pool_unknown) == 1 else None
+            public = config.get("public_ip_address")
+            if (not isinstance(pool_ids, list) or len(pool_ids) != 1
+                    or not _reference(pool_ids[0], pool_marker, pools["backend" if backend else "frontend"], creating)
+                    or (backend and public not in (None, []))
+                    or (not backend and (_single(public) is None
+                                         or public[0].get("name") != scale_set + "-public-ip"
+                                         or public[0].get("public_ip_prefix_id") not in (None, "")))):
+                raise CheckpointPlanError("Invalid Check Point scale set network")
+        bootstrap = after.get("custom_data")
+        rendered = VMSS_BOOTSTRAP_TEMPLATE.replace(_SIC_PLACEHOLDER, f'sicKey="{credentials.sic_key}"', 1)
+        encoded = base64.b64encode(rendered.encode("ascii")).decode("ascii")
+        if (hashlib.sha256(VMSS_BOOTSTRAP_TEMPLATE.encode("ascii")).hexdigest() != VMSS_BOOTSTRAP_SHA256
+                or not (_secret_equal(bootstrap, encoded) or (not creating and bootstrap in ("", None)))):
+            raise CheckpointPlanError("Invalid Check Point scale set bootstrap")
+        tags = after.get("tags")
+        if tags != {
+                "LegacyVMNVA": "", "x-chkp-anti-spoofing": "eth0:false,eth1:false",
+                "x-chkp-ip-address": "private", "x-chkp-ip-version": "ipv4-only",
+                "x-chkp-management": "cp-management-" + suffix, "x-chkp-management-address": "172.22.30.4",
+                "x-chkp-management-interface": "eth0", "x-chkp-orchestration-mode": "Uniform",
+                "x-chkp-srcImageUri": "noCustomUri", "x-chkp-template": "faas-vmss-" + suffix,
+                "x-chkp-topology": "eth0:external,eth1:internal"}:
+            raise CheckpointPlanError("Invalid Check Point scale set tags")
+    else:
+        raise CheckpointPlanError("Unexpected Check Point plan resources")
+
+
 def validate_checkpoint_plan(
         plan: dict, provider_subscription: str, provider_tenant: str, provider_managed_identity_client_id: str,
         group_name: str, environment_id: str,
         gateway_image_version: str, management_image_version: str,
         gateway_vm_size: str, management_vm_size: str, provider_ssh_public_key: str,
-        credentials: CheckpointCredentials) -> CheckpointPlanSummary:
+        credentials: CheckpointCredentials, topology: str = "single") -> CheckpointPlanSummary:
+    if topology not in TOPOLOGIES:
+        raise CheckpointPlanError("Invalid Check Point plan scope or configuration")
+    vmss = topology == "vmss"
+    expected_resources = VMSS_EXPECTED if vmss else EXPECTED
     try:
         uuid_text(provider_subscription)
         uuid_text(provider_tenant)
@@ -166,7 +364,8 @@ def validate_checkpoint_plan(
     drift = plan.get("resource_drift", [])
     if not isinstance(drift, list) or any(
             not isinstance(item, dict) or item.get("mode") != "managed"
-            or EXPECTED.get(item.get("address")) is None or item.get("type") != EXPECTED[item["address"]]
+            or expected_resources.get(item.get("address")) is None
+            or item.get("type") != expected_resources[item["address"]]
             or not isinstance(item.get("change"), dict)
             or item["change"].get("actions") not in (["update"], ["no-op"])
             for item in drift):
@@ -207,8 +406,8 @@ def validate_checkpoint_plan(
     if not isinstance(resources, list) or any(not isinstance(item, dict) for item in resources):
         raise CheckpointPlanError("Invalid Check Point plan resources")
     addresses = [item.get("address") for item in resources]
-    if (len(addresses) != len(EXPECTED) or not all(isinstance(item, str) for item in addresses)
-            or set(addresses) != set(EXPECTED)):
+    if (len(addresses) != len(expected_resources) or not all(isinstance(item, str) for item in addresses)
+            or set(addresses) != set(expected_resources)):
         raise CheckpointPlanError("Unexpected Check Point plan resources")
 
     suffix = environment_id[:8]
@@ -220,7 +419,7 @@ def validate_checkpoint_plan(
     created: set[str] = set()
     for item in resources:
         address = item["address"]
-        kind = EXPECTED[address]
+        kind = expected_resources[address]
         change = item.get("change")
         provider = ("registry.terraform.io/hashicorp/random" if kind == "random_id"
                     else "registry.terraform.io/hashicorp/azurerm")
@@ -241,6 +440,10 @@ def validate_checkpoint_plan(
             created.add(address)
         after, unknown = change["after"], change.get("after_unknown", {})
         is_gateway = address.startswith("module.gateway.")
+        if vmss and is_gateway:
+            _validate_vmss_gateway(address, kind, change, creating, group_name, group_id, suffix,
+                                   gateway_image_version, gateway_vm_size, expected_key, credentials)
+            continue
         name = gateway if is_gateway else management
         if kind in {"azurerm_network_interface", "azurerm_public_ip", "azurerm_virtual_machine"}:
             if (not _same_id(after.get("resource_group_name"), group_name) or after.get("location") != "eastus2"
@@ -422,19 +625,40 @@ def validate_checkpoint_plan(
                 raise CheckpointPlanError("Invalid Check Point plan identity")
 
     outputs = plan.get("output_changes")
-    if not isinstance(outputs, dict) or set(outputs) != OUTPUTS:
+    if not isinstance(outputs, dict) or set(outputs) != (VMSS_OUTPUTS if vmss else OUTPUTS):
         raise CheckpointPlanError("Invalid Check Point plan outputs")
     expected_outputs = {
-        "gatewayFrontendPrivateIp": "172.22.10.4",
         "managementPrivateIp": "172.22.30.4",
-        "gatewayVmId": compute + "/virtualMachines/" + gateway,
         "managementVmId": compute + "/virtualMachines/" + management,
     }
-    output_creates = 0
+    if vmss:
+        expected_outputs.update({
+            "internalLoadBalancerIp": VMSS_INTERNAL_LB_IP,
+            "gatewayScaleSetId": compute + "/virtualMachineScaleSets/cp-vmss-" + suffix,
+        })
+        public = outputs["publicLoadBalancerIp"]
+        public_creating = isinstance(public, dict) and public.get("actions") == ["create"]
+        try:
+            known_public = (isinstance(public, dict) and public.get("actions") == ["no-op"]
+                            and public.get("after_unknown") in (None, False)
+                            and ipaddress.IPv4Address(public.get("after")).is_global)
+        except (TypeError, ValueError):
+            known_public = False
+        if (not isinstance(public, dict) or public.get("after_sensitive") is not False
+                or not ((public_creating and public.get("after") is None and public.get("after_unknown") is True)
+                        or known_public)):
+            raise CheckpointPlanError("Invalid Check Point plan outputs")
+    else:
+        expected_outputs.update({
+            "gatewayFrontendPrivateIp": "172.22.10.4",
+            "gatewayVmId": compute + "/virtualMachines/" + gateway,
+        })
+    output_creates = int(vmss and public_creating)
     for key, expected_value in expected_outputs.items():
         output = outputs[key]
         # After a partial apply the VM-id outputs exist as null and update to unknown with the VM create.
         vm_address = {"gatewayVmId": "module.gateway.azurerm_virtual_machine.single_gateway_vm_instance[0]",
+                      "gatewayScaleSetId": "module.gateway.azurerm_linux_virtual_machine_scale_set.vmss[0]",
                       "managementVmId": "module.management.azurerm_virtual_machine.mgmt_vm_instance"}.get(key)
         if (isinstance(output, dict) and output.get("actions") == ["update"] and vm_address in created
                 and output.get("before") is None and output.get("before_sensitive") is False
@@ -444,7 +668,7 @@ def validate_checkpoint_plan(
                 or output.get("after_sensitive") is not False
                 or not _reference(output.get("after"), output.get("after_unknown"),
                                   expected_value, output["actions"] == ["create"])
-                or (key.endswith("PrivateIp") and output.get("after_unknown") is True)):
+                or (key.endswith("Ip") and output.get("after_unknown") is True)):
             raise CheckpointPlanError("Invalid Check Point plan outputs")
         output_creates += int(output["actions"] == ["create"])
     if type(plan.get("applyable")) is not bool or ((creates or output_creates) and plan["applyable"] is not True):
@@ -457,14 +681,16 @@ def validate_checkpoint_destroy_plan(
         plan: dict, provider_subscription: str, provider_tenant: str, provider_managed_identity_client_id: str,
         group_name: str, environment_id: str, gateway_image_version: str, management_image_version: str,
         gateway_vm_size: str, management_vm_size: str, provider_ssh_public_key: str,
-        credentials: CheckpointCredentials) -> CheckpointDestroySummary:
+        credentials: CheckpointCredentials, topology: str = "single") -> CheckpointDestroySummary:
     """Validate only the CP Terraform-owned resources, never a resource group or managed application."""
+    if topology not in TOPOLOGIES:
+        raise CheckpointPlanError("Incomplete or unsupported Check Point destroy plan")
     if not isinstance(plan, dict) or plan.get("applyable") is not True:
         raise CheckpointPlanError("Incomplete or unsupported Check Point destroy plan")
     resources, outputs = plan.get("resource_changes"), plan.get("output_changes")
     if (not isinstance(resources, list) or not isinstance(outputs, dict)
             or any(not isinstance(item, dict) for item in resources)
-            or set(outputs) != OUTPUTS):
+            or set(outputs) != (VMSS_OUTPUTS if topology == "vmss" else OUTPUTS)):
         raise CheckpointPlanError("Invalid Check Point destroy plan")
     normalized_resources = []
     for item in resources:
@@ -494,7 +720,9 @@ def validate_checkpoint_destroy_plan(
     summary = validate_checkpoint_plan(
         normalized, provider_subscription, provider_tenant, provider_managed_identity_client_id,
         group_name, environment_id, gateway_image_version, management_image_version,
-        gateway_vm_size, management_vm_size, provider_ssh_public_key, credentials)
-    if summary.creates != 0 or summary.unchanged != len(EXPECTED) or summary.output_creates != 0:
+        gateway_vm_size, management_vm_size, provider_ssh_public_key, credentials, topology)
+    if (summary.creates != 0
+            or summary.unchanged != len(VMSS_EXPECTED if topology == "vmss" else EXPECTED)
+            or summary.output_creates != 0):
         raise CheckpointPlanError("Invalid Check Point destroy plan")
     return CheckpointDestroySummary(deletes=len(resources), output_deletes=len(outputs))
