@@ -245,8 +245,9 @@ IDs or disabling checks.
 1. Sign into **Azure Portal in the customer directory**.
 2. Open the deployment link. Confirm tenant/subscription and use a new dedicated
    customer resource group.
-3. Choose the firewall. **Ubuntu simulator is the default**; explicitly choose
-   **Check Point** when requested and enabled.
+3. Choose the firewall. The wizard defaults to the **Check Point CloudGuard
+   scale set** (2 PAYG gateways; the provider must enable it); choose
+   **Ubuntu simulator** or **Check Point BYOL** explicitly when requested.
 4. Supply the customer API credential and workload SSH **public** key. For
    Check Point, review/edit the public administrator IP/CIDR allowlist.
 5. Review the permissions, cost and backing-storage acknowledgement; deploy.

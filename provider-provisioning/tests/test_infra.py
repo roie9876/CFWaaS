@@ -1347,7 +1347,7 @@ class BicepTests(unittest.TestCase):
         self.assertEqual(parameters["firewallType"]["allowedValues"], ["ubuntu", "checkpoint-byol", "checkpoint-vmss"])
         self.assertEqual([choice["value"] for choice in firewall["constraints"]["allowedValues"]],
                          parameters["firewallType"]["allowedValues"])
-        self.assertEqual(firewall["defaultValue"], "Ubuntu simulator")
+        self.assertEqual(firewall["defaultValue"], firewall["constraints"]["allowedValues"][2]["label"])
         self.assertIn("lab preview", firewall["constraints"]["allowedValues"][1]["label"])
         self.assertIn("PAYG", firewall["constraints"]["allowedValues"][2]["label"])
         self.assertEqual(outputs["firewallType"], "[steps('basics').firewallType]")

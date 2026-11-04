@@ -37,8 +37,8 @@
               "name": "firewallType",
               "type": "Microsoft.Common.DropDown",
               "label": "Provider firewall",
-              "defaultValue": "Ubuntu simulator",
-              "toolTip": "Ubuntu remains the default lab path. Check Point options are lab previews that the provider must enable. The scale set uses two pay-as-you-go gateways behind internal and public load balancers.",
+              "defaultValue": "Check Point CloudGuard scale set, 2 PAYG gateways (lab preview)",
+              "toolTip": "The Check Point scale set is the default: two pay-as-you-go gateways behind internal and public load balancers. Check Point options are lab previews that the provider must enable; choose Ubuntu simulator for the lightweight lab path.",
               "constraints": {
                 "required": true,
                 "allowedValues": [

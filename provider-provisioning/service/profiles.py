@@ -114,7 +114,8 @@ class ProfilePublisher:
                 or not isinstance(choices, list)
                 or not all(isinstance(item, dict) for item in choices)
                 or [item.get("value") for item in choices] != FIREWALL_TYPES
-                or firewall_field.get("defaultValue") != choices[0].get("label")
+                or firewall_field.get("defaultValue") != next(
+                    (item.get("label") for item in choices if item.get("value") == "checkpoint-vmss"), None)
                 or form.get("view", {}).get("outputs", {}).get("parameters", {}).get("firewallType")
                 != "[steps('basics').firewallType]"
                 or not all(firewall_preflight(resource) for resource in (proof[0], network[0]))):

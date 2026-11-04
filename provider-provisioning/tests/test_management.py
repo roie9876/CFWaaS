@@ -417,7 +417,7 @@ def test_customer_profiles_never_default_the_api_secret(tmp_path):
         {"name": "apiClientSecret", "type": "Microsoft.Common.PasswordBox",
          "constraints": {"required": True}},
         {"name": "apiClientId"}, {"name": "runId"},
-        {"name": "firewallType", "defaultValue": "Ubuntu simulator",
+        {"name": "firewallType", "defaultValue": "Check Point scale set",
          "constraints": {"allowedValues": [
              {"label": "Ubuntu simulator", "value": "ubuntu"},
              {"label": "Check Point", "value": "checkpoint-byol"},
