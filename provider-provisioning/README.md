@@ -238,6 +238,18 @@ See the [Managed Applications overview](https://learn.microsoft.com/azure/azure-
   `100.64.0.0/10`; allocate provider ranges and ASNs per environment from a
   provider pool at onboarding; reject overlapping customer endpoints at request
   time and report overlapping BGP-learned prefixes at runtime.
+- [ ] Change the default provider IP schema to a range that rarely overlaps
+  customer networks (requested 2026-11-04). Candidate: carve the provider
+  ingress, delivery and security VNets (and the customer-side `172.18.0.0/16`
+  ingress range) from `100.64.0.0/10` (RFC 6598 shared address space), which
+  Azure VNets accept and enterprises rarely use internally. Check first for
+  customers that already use it (carrier-grade NAT, some Kubernetes and VMware
+  overlays); keep the range a provider setting rather than a hard-coded
+  constant. Every pinned address must move together: Bicep templates, plan
+  guard, foundation/runner validators, Gaia static routes, BGP router IDs, the
+  Route Server peers, NSG sources, firewall policy objects (RFC1918 groups would
+  need a `100.64.0.0/10` member) and the diagrams. Existing environments keep
+  their current ranges; only new environments use the new schema.
 - [ ] Check Point CloudGuard VMSS behind load balancers. **Implemented and
   offline-tested; not live-qualified.** Customer type `checkpoint-vmss`, gated
   by `FAAS_CHECKPOINT_VMSS_ENABLED`. Pinned upstream `modules/vmss` (Uniform,
