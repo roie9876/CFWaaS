@@ -14,7 +14,7 @@ from .admin_access import normalize_admin_sources
 
 ADMIN_SOURCES_FORM_OUTPUT = (
     "[if(or(equals(steps('basics').firewallType, 'ubuntu'), "
-    "empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), json('[]'), "
+    "empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), parse('[]'), "
     "split(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''), ','))]")
 FIREWALL_TYPES = ["ubuntu", "checkpoint-byol", "checkpoint-vmss"]
 

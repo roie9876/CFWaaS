@@ -287,10 +287,31 @@ def test_pinned_foundation_guard_rejects_unbounded_or_unscoped_admin_changes(tem
 def test_customer_form_uses_only_portal_supported_functions():
     import re
     # createUiDefinition rejects unknown functions at load time, even in unevaluated branches.
-    unsupported = {"trim", "format", "padLeft", "uniqueString", "toLowerInvariant"}
-    text = (Path(__file__).parents[1] / "portal/customer-form.json").read_text()
-    used = set(re.findall(r"\b([A-Za-z]+)\(", text))
-    assert not used & unsupported
+    supported = {
+        "contains", "empty", "filter", "first", "last", "length", "map", "skip", "split", "take",
+        "bool", "decodeBase64", "decodeUriComponent", "encodeBase64", "encodeUriComponent",
+        "float", "int", "parse", "string", "addHours", "addMinutes", "addSeconds", "utcNow",
+        "and", "coalesce", "equals", "greater", "greaterOrEquals", "if", "less", "lessOrEquals",
+        "not", "or", "add", "ceil", "div", "floor", "max", "min", "mod", "mul", "rand", "range",
+        "sub", "basics", "location", "resourceGroup", "steps", "subscription", "concat",
+        "endsWith", "guid", "indexOf", "lastIndexOf", "replace", "startsWith", "substring",
+        "toLower", "toUpper"}
+    form = json.loads((Path(__file__).parents[1] / "portal/customer-form.json").read_text())
+    expressions = []
+
+    def walk(value):
+        if isinstance(value, dict):
+            for item in value.values():
+                walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+        elif isinstance(value, str) and value.startswith("[") and value.endswith("]"):
+            expressions.append(re.sub(r"'[^']*'", "''", value))
+
+    walk(form)
+    used = {name for text in expressions for name in re.findall(r"\b([A-Za-z]+)\(", text)}
+    assert used and used <= supported, used - supported
 
 
 def test_provider_settings_validate_optional_office_home_defaults(monkeypatch):

@@ -206,7 +206,7 @@
       "parameters": {
         "location": "[steps('basics').customerLocation]",
         "firewallType": "[steps('basics').firewallType]",
-        "adminAllowedSources": "[if(or(equals(steps('basics').firewallType, 'ubuntu'), empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), json('[]'), split(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''), ','))]",
+        "adminAllowedSources": "[if(or(equals(steps('basics').firewallType, 'ubuntu'), empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), parse('[]'), split(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''), ','))]",
         "runId": "[steps('basics').runId]",
         "sshPublicKey": "[if(steps('basics').manualSshKey, steps('basics').sshPublicKey, steps('basics').sshCredentials.sshPublicKey)]",
         "apiClientId": "[steps('basics').apiClientId]",
