@@ -11,8 +11,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import prepare_checkpoint_modules as modules
 import probe_checkpoint_modules as probe
+import test_checkpoint_gaia as gaia_tests
 import test_checkpoint_modules as single
-from service import checkpoint_dependencies, checkpoint_plan
+from service import checkpoint_dependencies, checkpoint_gaia as gaia, checkpoint_plan, checkpoint_scale_set as scale_set
 from service.checkpoint_plan import (
     VMSS_BOOTSTRAP_TEMPLATE, VMSS_EXPECTED, CheckpointPlanError, validate_checkpoint_destroy_plan,
     validate_checkpoint_plan,
@@ -379,3 +380,123 @@ def test_foundation_template_requires_exact_vmss_probe_rule_and_single_default()
     tampered["parameters"]["firewallTopology"]["defaultValue"] = "vmss"
     with pytest.raises(ValueError, match="single gateway"):
         Templates.validate_checkpoint_foundation(tampered)
+
+
+GATEWAYS = [gaia.CheckpointGateway("cp-vmss-00000000-0", "172.22.10.4", "172.22.20.5"),
+            gaia.CheckpointGateway("cp-vmss-00000000-1", "172.22.10.5", "172.22.20.6")]
+
+
+class ScaleSetApi(gaia_tests.FakeApi):
+    """Track gateway objects by name so each scale set member is created and configured separately."""
+
+    def __init__(self):
+        super().__init__([])
+        self.gateways, self.script_targets = set(), []
+
+    def call(self, command, body, allowed=()):
+        if command == "run-script":
+            self.script_targets.append((body["script-name"], tuple(body["targets"])))
+        if command == "show-simple-gateway":
+            self.calls.append((command, body.get("name")))
+            self.requests.append((command, body))
+            if body["name"] not in self.gateways:
+                return {"code": "generic_err_object_not_found"}
+            return {"sic-state": "communicating", "logs-settings": {"send-logs-to-server": list(self.log_servers)}}
+        if command == "add-simple-gateway":
+            self.gateways.add(body["name"])
+        return super().call(command, body, allowed)
+
+
+def scale_set_configurator(api, logs):
+    return gaia.CheckpointConfigurator(api, "00000000-0000-0000-0000-000000000004", "s" * 48, "P" * 16,
+                                       gaia_tests.PEERS, 65515, logs.append, sleep=lambda _seconds: None,
+                                       gateways=GATEWAYS, internal_load_balancer_ip="172.22.20.4")
+
+
+def test_bgp_script_for_scale_set_sets_internal_load_balancer_next_hop_without_redistribution():
+    script = gaia.bgp_script(gaia_tests.PEERS, 65515, "172.22.10.5", "172.22.20.4")
+    assert "set router-id 172.22.10.5" in script
+    assert "set routemap faas-out id 10 action nexthop 172.22.20.4" in script
+    assert "export-routemap faas-out" in script and "match network 0.0.0.0/0 exact" in script
+    assert "route-redistribution" not in script and "nat" not in script.lower()
+    assert gaia.bgp_script(gaia_tests.PEERS, 65515) == gaia.bgp_script(gaia_tests.PEERS, 65515, "172.22.10.4")
+    with pytest.raises(gaia.CheckpointGaiaError):
+        gaia.bgp_script(gaia_tests.PEERS, 65515, "172.22.10.5", "8.8.8.8")
+
+
+def test_scale_set_configurator_registers_each_member_and_targets_all():
+    api, logs = ScaleSetApi(), []
+    status = scale_set_configurator(api, logs).run()
+    assert status == gaia.BgpStatus(4, 4)
+    adds = [body for command, body in api.requests if command == "add-simple-gateway"]
+    assert [body["name"] for body in adds] == [item.name for item in GATEWAYS]
+    assert [body["ip-address"] for body in adds] == ["172.22.10.4", "172.22.10.5"]
+    assert all(not interface["anti-spoofing"] for body in adds for interface in body["interfaces"])
+    install = next(body for command, body in api.requests if command == "install-policy")
+    assert install["targets"] == [item.name for item in GATEWAYS]
+    rules = {body["name"]: body for command, body in api.requests if command == "add-access-rule"}
+    assert rules[gaia.EAST_WEST_RULE]["install-on"] == [item.name for item in GATEWAYS]
+    probe_rule = rules[gaia.HEALTH_PROBE_RULE]
+    assert probe_rule["source"] == [gaia.AZURE_PROBE_HOST] and probe_rule["service"] == [gaia.AZURE_PROBE_SERVICE]
+    hosts = [body for command, body in api.requests if command == "add-host"]
+    assert hosts == [{"name": gaia.AZURE_PROBE_HOST, "ip-address": "168.63.129.16"}]
+    networks = [body for command, body in api.requests if command == "add-network"]
+    assert all(body["nat-settings"]["install-on"] == "All" for body in networks)
+    for script in ("faas-bgp", "faas-bgp-status", "faas-management-route"):
+        assert {targets for name, targets in api.script_targets if name == script} == {
+            (item.name,) for item in GATEWAYS}
+
+
+def test_single_gateway_configurator_rejects_unexpected_gateway_sets():
+    with pytest.raises(gaia.CheckpointGaiaError):
+        gaia.CheckpointConfigurator(ScaleSetApi(), "00000000-0000-0000-0000-000000000004", "s" * 48, "P" * 16,
+                                    gaia_tests.PEERS, 65515, print, gateways=GATEWAYS)
+    with pytest.raises(gaia.CheckpointGaiaError):
+        gaia.CheckpointConfigurator(ScaleSetApi(), "00000000-0000-0000-0000-000000000004", "s" * 48, "P" * 16,
+                                    gaia_tests.PEERS, 65515, print, gateways=GATEWAYS[:1],
+                                    internal_load_balancer_ip="172.22.20.4")
+
+
+def interfaces_document(addresses=(("0", "172.22.10.4", "172.22.20.5"), ("1", "172.22.10.5", "172.22.20.6"))):
+    scale_set = f"{GROUP_ID}/providers/Microsoft.Compute/virtualMachineScaleSets/cp-vmss-00000000"
+    value = []
+    for instance, front, back in addresses:
+        for name, address, subnet in (("eth0", front, "firewall-frontend"), ("eth1", back, "firewall-backend")):
+            value.append({"id": f"{scale_set}/virtualMachines/{instance}/networkInterfaces/{name}",
+                          "properties": {"primary": name == "eth0", "ipConfigurations": [{"properties": {
+                              "privateIPAddress": address, "subnet": {"id": f"{VNET}/subnets/{subnet}"}}}]}})
+    return {"value": value}
+
+
+def test_scale_set_discovery_requires_two_members_on_route_server_peer_addresses():
+    gateways = scale_set.parse_scale_set_gateways(interfaces_document(), GROUP_ID,
+                                                  probe.FIXTURE_VARIABLES["environment_id"])
+    assert gateways == GATEWAYS
+    bad = [interfaces_document((("0", "172.22.10.4", "172.22.20.5"),)),
+           interfaces_document((("0", "172.22.10.4", "172.22.20.5"), ("1", "172.22.10.6", "172.22.20.6"))),
+           interfaces_document((("0", "172.22.10.4", "172.22.20.4"), ("1", "172.22.10.5", "172.22.20.6"))),
+           {**interfaces_document(), "nextLink": "https://management.azure.com/next"}]
+    swapped = interfaces_document()
+    swapped["value"][1]["properties"]["ipConfigurations"][0]["properties"]["subnet"]["id"] = \
+        f"{VNET}/subnets/firewall-frontend"
+    other = interfaces_document()
+    other["value"][0]["id"] = other["value"][0]["id"].replace("cp-vmss-00000000", "cp-vmss-ffffffff")
+    for document in (*bad, swapped, other):
+        with pytest.raises(gaia.CheckpointGaiaError):
+            scale_set.parse_scale_set_gateways(document, GROUP_ID, probe.FIXTURE_VARIABLES["environment_id"])
+
+
+def test_runner_config_schema4_selects_vmss_and_keeps_single_unchanged():
+    import json
+    from service.checkpoint_runner_config import CheckpointRunnerConfigError, load_checkpoint_runner_config
+
+    single_config = single.fixture_runner_inputs().config
+    assert single_config.firewallTopology == "single" and single_config.schemaVersion == 1
+    value = single_config.model_dump()
+    value.update(schemaVersion=4, firewallTopology="vmss")
+    environment = {"FAAS_CONFIG": json.dumps(value), "FAAS_RUNNER_CLIENT_ID": value["runnerClientId"]}
+    assert load_checkpoint_runner_config(environment).firewallTopology == "vmss"
+    for update in ({"schemaVersion": 1}, {"firewallTopology": "single"}, {"firewallTopology": "ha"}):
+        environment["FAAS_CONFIG"] = json.dumps({**value, **update})
+        with pytest.raises(CheckpointRunnerConfigError):
+            load_checkpoint_runner_config(environment)

@@ -9,6 +9,7 @@ import json
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from typing import Literal
 
 from azure.core.exceptions import AzureError, ResourceNotFoundError
 from azure.identity import ManagedIdentityCredential
@@ -57,6 +58,7 @@ class CheckpointRuntimeConfig(StrictModel):
     adminAllowedSources: list[str] = Field(default_factory=list, max_length=16)
     managementRelayUrl: str = ""
     managementRelayClientId: str = ""
+    firewallTopology: Literal["single", "vmss"] = "single"
 
     @field_validator("adminAllowedSources", mode="before")
     @classmethod
@@ -115,9 +117,11 @@ def build_checkpoint_runner_config(
         group_name: str, environment_id: str, runner_client_id: str,
         gateway_image_version: str, management_image_version: str, gateway_vm_size: str, management_vm_size: str,
         provider_ssh_public_key: str, admin_allowed_sources: list[str] | None = None,
-        management_relay_url: str = "", management_relay_client_id: str = "") -> str:
+        management_relay_url: str = "", management_relay_client_id: str = "",
+        firewall_topology: str = "single") -> str:
     """Return compact, secret-free JSON from provider evidence/settings and validated admin sources."""
-    foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id)
+    foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id,
+                                                firewall_topology)
     private = validate_checkpoint_private_data_outputs(private_outputs, provider_subscription, group_name, environment_id)
     _validate_settings(gateway_image_version, management_image_version, gateway_vm_size, management_vm_size)
     try:
@@ -151,6 +155,9 @@ def build_checkpoint_runner_config(
     if management_relay_url or management_relay_client_id:
         config.update(schemaVersion=3, managementRelayUrl=management_relay_url,
                       managementRelayClientId=management_relay_client_id)
+    # Single-gateway configuration stays byte-identical to earlier releases.
+    if foundation.firewall_topology == "vmss":
+        config.update(schemaVersion=4, firewallTopology="vmss")
     text = json.dumps(config, sort_keys=True, separators=(",", ":"))
     load_checkpoint_runner_config({"FAAS_CONFIG": text, "FAAS_RUNNER_CLIENT_ID": runner_client_id})
     return text
@@ -181,8 +188,10 @@ def load_checkpoint_runner_config(environment: Mapping[str, str]) -> CheckpointR
             uuid_text(config.managementRelayClientId)
         group = config.group_name
         storage = re.fullmatch(r"https://(stcp[a-z0-9]{13})\.blob\.core\.windows\.net/", config.stateBlobEndpoint)
-        if (config.schemaVersion not in (1, 2, 3)
-                or config.schemaVersion != (3 if relay else 2 if config.adminAllowedSources else 1)
+        expected_schema = (4 if config.firewallTopology == "vmss" else 3 if relay
+                           else 2 if config.adminAllowedSources else 1)
+        if (config.schemaVersion not in (1, 2, 3, 4)
+                or config.schemaVersion != expected_schema
                 or config.runnerClientId != client
                 or not group.startswith("rg-faas-env-")
                 or environment_resource_group_name(group.removeprefix("rg-faas-env-")) != group
@@ -253,4 +262,5 @@ def validate_checkpoint_runner_plan(inputs: CheckpointRuntimeInputs, plan: dict)
         plan, config.providerSubscriptionId, config.providerTenantId, config.runnerClientId,
         config.group_name, config.environmentId,
         config.gatewayImageVersion, config.managementImageVersion,
-        config.gatewayVmSize, config.managementVmSize, config.providerSshPublicKey, inputs.credentials)
+        config.gatewayVmSize, config.managementVmSize, config.providerSshPublicKey, inputs.credentials,
+        topology=config.firewallTopology)

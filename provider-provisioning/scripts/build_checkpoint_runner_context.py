@@ -136,18 +136,20 @@ def build(source: Path, output: Path) -> dict:
     try:
         with tempfile.TemporaryDirectory(prefix="checkpoint-context-", dir=local) as temporary:
             home = Path(temporary)
-            checkpoint = output / "checkpoint"
-            prepare_checkpoint_modules.prepare(source, local / (output.name + "-modules"))
-            shutil.move(str(local / (output.name + "-modules")), checkpoint)
-            verify_checkpoint_artifact(checkpoint)
-            _run([terraform, f"-chdir={checkpoint}", "init", "-backend=false", "-input=false",
-                  "-lockfile=readonly", "-no-color"], _isolated_env(home))
-            _install_linux_providers(checkpoint, terraform, home)
-            # Git reflogs record the builder's name, login and host; the image is redistributable.
-            for reflog in (checkpoint / ".terraform/modules").glob("*/.git/logs"):
-                shutil.rmtree(reflog)
-            verify_checkpoint_dependencies(checkpoint, TARGET)
-            verify_checkpoint_artifact(checkpoint)
+            for topology, directory in (("single", "checkpoint"), ("vmss", "checkpoint-vmss")):
+                checkpoint = output / directory
+                staging = local / (output.name + "-" + directory)
+                prepare_checkpoint_modules.prepare(source, staging, topology)
+                shutil.move(str(staging), checkpoint)
+                verify_checkpoint_artifact(checkpoint, topology)
+                _run([terraform, f"-chdir={checkpoint}", "init", "-backend=false", "-input=false",
+                      "-lockfile=readonly", "-no-color"], _isolated_env(home))
+                _install_linux_providers(checkpoint, terraform, home)
+                # Git reflogs record the builder's name, login and host; the image is redistributable.
+                for reflog in (checkpoint / ".terraform/modules").glob("*/.git/logs"):
+                    shutil.rmtree(reflog)
+                verify_checkpoint_dependencies(checkpoint, TARGET, topology)
+                verify_checkpoint_artifact(checkpoint, topology)
             terraform_sha256 = _terraform_binary(output / "bin/terraform")
             _wheels(output, home)
             _application(output)
@@ -160,7 +162,8 @@ def build(source: Path, output: Path) -> dict:
         return metadata
     except BaseException:
         shutil.rmtree(output, ignore_errors=True)
-        shutil.rmtree(local / (output.name + "-modules"), ignore_errors=True)
+        for directory in ("checkpoint", "checkpoint-vmss"):
+            shutil.rmtree(local / (output.name + "-" + directory), ignore_errors=True)
         raise
 
 

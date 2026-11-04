@@ -37,6 +37,17 @@ RFC1918_GROUP = "faas-rfc1918"
 EAST_WEST_RULE, EGRESS_RULE, NO_NAT_RULE = "faas-east-west", "faas-north-south-egress", "faas-no-nat-east-west"
 MAX_RESPONSE_BYTES = 4 * 1024 * 1024
 ADMIN_RULE = "faas-approved-admin"
+HEALTH_PROBE_RULE = "faas-lb-health-probe"
+AZURE_PROBE_HOST, AZURE_PROBE_SERVICE = "faas-azure-lb-probe", "faas-lb-probe-8117"
+AZURE_PROBE_IP = "168.63.129.16"
+EXPORT_ROUTEMAP = "faas-out"
+
+
+@dataclass(frozen=True)
+class CheckpointGateway:
+    name: str
+    frontend_ip: str
+    backend_ip: str
 
 
 class CheckpointGaiaError(RuntimeError):
@@ -171,14 +182,18 @@ class ManagementApi:
                 pass
 
 
-def bgp_script(peers: tuple[str, str], peer_asn: int) -> str:
+def bgp_script(peers: tuple[str, str], peer_asn: int, router_id: str = GATEWAY_FRONTEND_IP,
+               next_hop: str | None = None) -> str:
     for peer in peers:
         if not ipaddress.ip_address(peer).is_private:
             raise CheckpointGaiaError("Invalid Route Server peer")
     if peer_asn != 65515:
         raise CheckpointGaiaError("Invalid Route Server ASN")
+    for address in (router_id, next_hop):
+        if address is not None and not ipaddress.ip_address(address).is_private:
+            raise CheckpointGaiaError("Invalid gateway BGP address")
     commands = [
-        f"set router-id {GATEWAY_FRONTEND_IP}",
+        f"set router-id {router_id}",
         f"set as {GATEWAY_ASN}",
         f"set static-route default nexthop gateway address {FRONTEND_ROUTER_IP} on",
         # The image routes RFC1918 via the backend NIC; Route Server only accepts the frontend peer IP.
@@ -188,8 +203,17 @@ def bgp_script(peers: tuple[str, str], peer_asn: int) -> str:
     for peer in peers:
         prefix = f"set bgp external remote-as {peer_asn} peer {peer}"
         commands += [f"{prefix} on", f"{prefix} multihop on", f"{prefix} ttl 5", f"{prefix} accept-routes none"]
-    # Export only the static default route, as the Ubuntu simulator's FAAS-OUT route map does.
-    commands += [f"set route-redistribution to bgp-as {peer_asn} from static-route default on", "save config"]
+    if next_hop is None:
+        # Export only the static default route, as the Ubuntu simulator's FAAS-OUT route map does.
+        commands.append(f"set route-redistribution to bgp-as {peer_asn} from static-route default on")
+    else:
+        # Scale set members advertise the same default with the internal load balancer as next hop,
+        # so Route Server forwards to one symmetric HA-ports frontend instead of individual members.
+        route_map = f"set routemap {EXPORT_ROUTEMAP} id 10"
+        commands += [f"{route_map} on", f"{route_map} allow", f"{route_map} match protocol static",
+                     f"{route_map} match network 0.0.0.0/0 exact", f"{route_map} action nexthop {next_hop}",
+                     f"set bgp external remote-as {peer_asn} export-routemap {EXPORT_ROUTEMAP} preference 1 on"]
+    commands.append("save config")
     lines = ["#!/bin/bash", "failed=0"]
     for index, command in enumerate(commands):
         lines.append(f'clish -c "{command}" >/dev/null 2>&1 || {{ failed=1; echo "faas-step-failed {index}"; }}')
@@ -222,9 +246,21 @@ class CheckpointConfigurator:
                  route_server_peers: tuple[str, str], route_server_asn: int,
                  log: Callable[[str], None], sleep: Callable[[float], None] = time.sleep,
                  clock: Callable[[], float] = time.monotonic,
-                 admin_allowed_sources: list[str] | None = None) -> None:
+                 admin_allowed_sources: list[str] | None = None,
+                 gateways: list[CheckpointGateway] | None = None,
+                 internal_load_balancer_ip: str | None = None) -> None:
         self.api, self.sleep, self.clock, self.log = api, sleep, clock, log
-        self.gateway = "cp-gateway-" + environment_id[:8]
+        default = CheckpointGateway("cp-gateway-" + environment_id[:8], GATEWAY_FRONTEND_IP, GATEWAY_BACKEND_IP)
+        self.gateways = list(gateways) if gateways else [default]
+        # A scale set has several gateway objects behind an internal load balancer used as BGP next hop.
+        self.scale_set = internal_load_balancer_ip is not None
+        self.next_hop = internal_load_balancer_ip
+        if (len({item.name for item in self.gateways}) != len(self.gateways)
+                or (self.scale_set and len(self.gateways) < 2)
+                or (not self.scale_set and self.gateways != [default])):
+            raise CheckpointGaiaError("Invalid Check Point gateway set")
+        self.gateway = self.gateways[0].name
+        self.gateway_names = [item.name for item in self.gateways]
         self.management = "cp-management-" + environment_id[:8]
         self.sic_key, self.password = sic_key, management_password
         self.peers, self.peer_asn = route_server_peers, route_server_asn
@@ -233,33 +269,43 @@ class CheckpointConfigurator:
     def _deadline(self, seconds: float) -> float:
         return self.clock() + seconds
 
-    def _gateway_body(self) -> dict:
+    def _install_on(self) -> str | list[str]:
+        return self.gateway_names if self.scale_set else self.gateway
+
+    def _gateway_body(self, gateway: CheckpointGateway | None = None) -> dict:
+        gateway = gateway or self.gateways[0]
+        # Scale set traffic enters eth1 from the internal load balancer, so upstream disables anti-spoofing.
+        spoofing = not self.scale_set
         return {
-            "name": self.gateway, "ip-address": GATEWAY_FRONTEND_IP, "version": "R82",
+            "name": gateway.name, "ip-address": gateway.frontend_ip, "version": "R82",
             "one-time-password": self.sic_key, "firewall": True,
             "interfaces": [
-                {"name": "eth0", "ipv4-address": GATEWAY_FRONTEND_IP, "ipv4-mask-length": 24,
-                 "topology": "external", "anti-spoofing": True},
-                {"name": "eth1", "ipv4-address": GATEWAY_BACKEND_IP, "ipv4-mask-length": 24,
-                 "topology": "internal", "anti-spoofing": True,
+                {"name": "eth0", "ipv4-address": gateway.frontend_ip, "ipv4-mask-length": 24,
+                 "topology": "external", "anti-spoofing": spoofing},
+                {"name": "eth1", "ipv4-address": gateway.backend_ip, "ipv4-mask-length": 24,
+                 "topology": "internal", "anti-spoofing": spoofing,
                  "topology-settings": {"ip-address-behind-this-interface":
                                        "network defined by the interface ip and net mask"}},
             ],
         }
 
     def ensure_gateway(self) -> None:
+        for gateway in self.gateways:
+            self._ensure_gateway(gateway)
+
+    def _ensure_gateway(self, gateway: CheckpointGateway) -> None:
         deadline = self._deadline(3600)
         while True:
-            found = self.api.call("show-simple-gateway", {"name": self.gateway},
+            found = self.api.call("show-simple-gateway", {"name": gateway.name},
                                   allowed=("generic_err_object_not_found",))
             if found.get("code") == "generic_err_object_not_found":
                 try:
-                    self.api.call("add-simple-gateway", self._gateway_body())
+                    self.api.call("add-simple-gateway", self._gateway_body(gateway))
                     self.api.publish(self._deadline(600))
                 except CheckpointGaiaError:
                     self.api.call("discard", {})
                     self.log("gateway-add-retry")
-                found = self.api.call("show-simple-gateway", {"name": self.gateway},
+                found = self.api.call("show-simple-gateway", {"name": gateway.name},
                                       allowed=("generic_err_object_not_found",))
             if found.get("sic-state") == "communicating":
                 self.log("gateway-sic-communicating")
@@ -268,7 +314,7 @@ class CheckpointConfigurator:
                 if self.admin_sources:
                     raise CheckpointGaiaError("Gateway SIC is not communicating; admin access will not reset it")
                 # The gateway first-time wizard may not have finished; recreate to retry SIC.
-                self.api.call("delete-simple-gateway", {"name": self.gateway})
+                self.api.call("delete-simple-gateway", {"name": gateway.name})
                 self.api.publish(self._deadline(600))
                 self.log("gateway-sic-retry")
             if self.clock() >= deadline:
@@ -301,25 +347,31 @@ class CheckpointConfigurator:
 
     def ensure_management_logging(self) -> None:
         host = self.api.call("show-checkpoint-host", {"name": self.management})
-        gateway = self.api.call("show-simple-gateway", {"name": self.gateway, "details-level": "full"})
-        servers = self._log_servers(gateway)
+        # Read every gateway's log destinations before changing anything.
+        current = {name: self._log_servers(self.api.call("show-simple-gateway",
+                                                         {"name": name, "details-level": "full"}))
+                   for name in self.gateway_names}
         changed = False
         if host.get("ipv4-address") != MANAGEMENT_IP:
             self.api.call("set-checkpoint-host", {"name": self.management, "ipv4-address": MANAGEMENT_IP})
             changed = True
-        if self.management not in servers:
-            self.api.call("set-simple-gateway", {
-                "name": self.gateway, "logs-settings": {"send-logs-to-server": [*servers, self.management]}})
-            changed = True
+        for name, servers in current.items():
+            if self.management not in servers:
+                self.api.call("set-simple-gateway", {
+                    "name": name, "logs-settings": {"send-logs-to-server": [*servers, self.management]}})
+                changed = True
         if changed:
             self.api.publish(self._deadline(600))
         host = self.api.call("show-checkpoint-host", {"name": self.management})
-        gateway = self.api.call("show-simple-gateway", {"name": self.gateway, "details-level": "full"})
-        if host.get("ipv4-address") != MANAGEMENT_IP or self.management not in self._log_servers(gateway):
+        if host.get("ipv4-address") != MANAGEMENT_IP or any(
+                self.management not in self._log_servers(self.api.call(
+                    "show-simple-gateway", {"name": name, "details-level": "full"}))
+                for name in self.gateway_names):
             raise CheckpointGaiaError("Management logging configuration did not persist")
-        output = self._run_script("faas-management-route", MANAGEMENT_ROUTE_SCRIPT)
-        if "faas-management-route-configured" not in output.splitlines():
-            raise CheckpointGaiaError("Management logging route configuration failed")
+        for name in self.gateway_names:
+            output = self._run_script("faas-management-route", MANAGEMENT_ROUTE_SCRIPT, target=name)
+            if "faas-management-route-configured" not in output.splitlines():
+                raise CheckpointGaiaError("Management logging route configuration failed")
         # Reinstall on retries even when the objects already match: a prior run may have
         # published successfully but stopped before the database reached the log server.
         data = self.api.call("install-database", {"targets": [self.management]})
@@ -359,8 +411,8 @@ class CheckpointConfigurator:
             "layer": ACCESS_LAYER, "position": "top", "name": ADMIN_RULE,
             "source": ["faas-admin-" + hashlib.sha256(source.encode()).hexdigest()[:16]
                        for source in self.admin_sources],
-            "destination": [self.gateway], "service": ["faas-admin-ssh", "faas-admin-https"],
-            "action": "Accept", "track": {"type": "Log"}, "install-on": self.gateway, "enabled": True,
+            "destination": self.gateway_names, "service": ["faas-admin-ssh", "faas-admin-https"],
+            "action": "Accept", "track": {"type": "Log"}, "install-on": self._install_on(), "enabled": True,
             "source-negate": False, "destination-negate": False, "service-negate": False,
         }
         found = self.api.call("show-access-rule", {"name": ADMIN_RULE, "layer": ACCESS_LAYER},
@@ -374,7 +426,7 @@ class CheckpointConfigurator:
                         for item in items if isinstance(item, (str, dict))}
             if (any(names(found.get(key)) != set(body[key]) for key in ("source", "destination", "service"))
                     or names(found.get("action")) != {"Accept"}
-                    or names(found.get("install-on")) != {self.gateway}
+                    or names(found.get("install-on")) != set(self.gateway_names)
                     or found.get("enabled") is not True
                     or any(found.get(key) is not False
                            for key in ("source-negate", "destination-negate", "service-negate"))
@@ -383,22 +435,36 @@ class CheckpointConfigurator:
                 raise CheckpointGaiaError("Admin access rule conflicts with existing configuration")
         self.log("admin-access-configured")
 
+    def ensure_health_probe_access(self) -> None:
+        """Accept only Azure load balancer probes to the Check Point probe port; scale sets only."""
+        if not self.scale_set:
+            return
+        self._ensure("show-host", "add-host", {"name": AZURE_PROBE_HOST, "ip-address": AZURE_PROBE_IP})
+        self._ensure("show-service-tcp", "add-service-tcp", {"name": AZURE_PROBE_SERVICE, "port": "8117"})
+        self._ensure("show-access-rule", "add-access-rule", {
+            "layer": ACCESS_LAYER, "position": "top", "name": HEALTH_PROBE_RULE,
+            "source": [AZURE_PROBE_HOST], "destination": self.gateway_names, "service": [AZURE_PROBE_SERVICE],
+            "action": "Accept", "track": {"type": "None"}, "install-on": self.gateway_names})
+        self.log("health-probe-access-configured")
+
     def ensure_policy(self) -> None:
         self.ensure_admin_access()
+        self.ensure_health_probe_access()
+        install_on = self._install_on()
         for name, subnet, mask in RFC1918:
             self._ensure("show-network", "add-network", {
                 "name": name, "subnet": subnet, "mask-length": mask,
                 "nat-settings": {"auto-rule": True, "method": "hide", "hide-behind": "gateway",
-                                 "install-on": self.gateway}})
+                                 "install-on": "All" if self.scale_set else self.gateway}})
         self._ensure("show-group", "add-group", {"name": RFC1918_GROUP, "members": [item[0] for item in RFC1918]})
         self._ensure("show-access-rule", "add-access-rule", {
             "layer": ACCESS_LAYER, "position": "top", "name": EAST_WEST_RULE,
             "source": RFC1918_GROUP, "destination": RFC1918_GROUP, "action": "Accept",
-            "track": {"type": "Log"}, "install-on": self.gateway})
+            "track": {"type": "Log"}, "install-on": install_on})
         self._ensure("show-access-rule", "add-access-rule", {
             "layer": ACCESS_LAYER, "position": {"below": EAST_WEST_RULE}, "name": EGRESS_RULE,
             "source": RFC1918_GROUP, "destination": RFC1918_GROUP, "destination-negate": True,
-            "action": "Accept", "track": {"type": "Log"}, "install-on": self.gateway})
+            "action": "Accept", "track": {"type": "Log"}, "install-on": install_on})
         rulebase = self.api.call("show-access-rulebase", {"name": ACCESS_LAYER, "limit": 50})
         rules = [rule for rule in rulebase.get("rulebase", []) if isinstance(rule, dict)
                  and rule.get("type") == "access-rule"]
@@ -415,10 +481,10 @@ class CheckpointConfigurator:
             self.api.call("add-nat-rule", {
                 "package": POLICY_PACKAGE, "position": "top", "name": NO_NAT_RULE, "method": "static",
                 "original-source": RFC1918_GROUP, "original-destination": RFC1918_GROUP,
-                "install-on": self.gateway, "enabled": True})
+                "install-on": install_on, "enabled": True})
         self.api.publish(self._deadline(600))
         task = self.api.call("install-policy", {"policy-package": POLICY_PACKAGE, "access": True,
-                                                "threat-prevention": False, "targets": [self.gateway]})
+                                                "threat-prevention": False, "targets": self.gateway_names})
         self.api.wait_task(task.get("task-id", ""), self._deadline(1800))
         self.log("policy-installed")
 
@@ -438,14 +504,20 @@ class CheckpointConfigurator:
             return ""
 
     def ensure_bgp(self) -> BgpStatus:
-        output = self._run_script("faas-bgp", bgp_script(self.peers, self.peer_asn))
-        if "faas-bgp-configured" not in output:
-            failed = sorted({int(item) for item in re.findall(r"faas-step-failed (\d{1,2})", output)})
-            raise CheckpointGaiaError("BGP configuration failed: steps " + ",".join(map(str, failed)))
+        for gateway in self.gateways:
+            script = (bgp_script(self.peers, self.peer_asn, gateway.frontend_ip, self.next_hop) if self.scale_set
+                      else bgp_script(self.peers, self.peer_asn))
+            output = self._run_script("faas-bgp", script, target=gateway.name)
+            if "faas-bgp-configured" not in output:
+                failed = sorted({int(item) for item in re.findall(r"faas-step-failed (\d{1,2})", output)})
+                raise CheckpointGaiaError("BGP configuration failed: steps " + ",".join(map(str, failed)))
         deadline = self._deadline(600)
         while True:
-            status = parse_bgp_peers(self._run_script("faas-bgp-status", BGP_STATUS_SCRIPT), self.peers)
-            if status.established == len(self.peers) or self.clock() >= deadline:
+            statuses = [parse_bgp_peers(self._run_script("faas-bgp-status", BGP_STATUS_SCRIPT, target=name),
+                                        self.peers) for name in self.gateway_names]
+            status = BgpStatus(sum(item.configured for item in statuses), sum(item.established for item in statuses))
+            if (all(item.established == len(self.peers) for item in statuses)
+                    or self.clock() >= deadline):
                 self.log(f"bgp-peers configured={status.configured} established={status.established}")
                 return status
             self.sleep(30)

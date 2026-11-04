@@ -17,9 +17,14 @@ def publish_checkpoint_access(inputs: CheckpointRuntimeInputs, identity) -> None
     try:
         with ResourceManagementClient(identity, config.providerSubscriptionId) as resources:
             addresses = {}
-            for name in ("management", "gateway"):
+            suffix = config.environmentId[:8]
+            # A scale set exposes its public load balancer frontend rather than one gateway address.
+            names = {"management": "cp-management-" + suffix,
+                     "gateway": ("cp-vmss-" + suffix + "-app-1" if config.firewallTopology == "vmss"
+                                 else "cp-gateway-" + suffix)}
+            for name, resource_name in names.items():
                 resource_id = (config.providerGroupId + "/providers/Microsoft.Network/publicIPAddresses/"
-                               + "cp-" + name + "-" + config.environmentId[:8])
+                               + resource_name)
                 resource = resources.resources.get_by_id(resource_id, "2024-05-01")
                 if (str(resource.id).lower() != resource_id.lower()
                         or not isinstance(resource.properties, dict)

@@ -10,6 +10,7 @@ FROM mcr.microsoft.com/azurelinux/base/python:3.12@sha256:71a1f5a1821f4c56e45aff
 COPY --from=build /opt/faas/site /opt/faas/site
 COPY app /opt/faas/app
 COPY checkpoint /opt/faas/checkpoint
+COPY checkpoint-vmss /opt/faas/checkpoint-vmss
 COPY bin/terraform /opt/faas/bin/terraform
 # Terraform (BSL 1.1), Check Point modules (Apache-2.0, under checkpoint/) and CFWaaS (MIT) terms.
 COPY licenses /opt/faas/licenses

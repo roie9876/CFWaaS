@@ -66,6 +66,7 @@
     "provider-provisioning/service/checkpoint_runner.py",
     "provider-provisioning/service/checkpoint_runner_config.py",
     "provider-provisioning/service/checkpoint_runner_entry.py",
+    "provider-provisioning/service/checkpoint_scale_set.py",
     "provider-provisioning/service/checkpoint_runner_journal.py",
     "provider-provisioning/service/checkpoint_saved_plan.py",
     "provider-provisioning/service/checkpoint_state.py",

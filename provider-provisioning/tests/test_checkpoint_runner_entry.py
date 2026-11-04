@@ -24,7 +24,8 @@ def runtime_inputs():
         environmentId="00000000-0000-0000-0000-000000000004",
         providerSshPublicKey="ssh-ed25519 fixture", gatewayImageVersion="1.2.3", managementImageVersion="1.2.3",
         gatewayVmSize="Standard_D4ds_v5", managementVmSize="Standard_D4ds_v5",
-        stateBlobEndpoint="https://stcpaaaaaaaaaaaaa.blob.core.windows.net/", stateContainer="terraform-state")
+        stateBlobEndpoint="https://stcpaaaaaaaaaaaaa.blob.core.windows.net/", stateContainer="terraform-state",
+        firewallTopology="single")
     return SimpleNamespace(config=config, credentials=SimpleNamespace(sic_key=SIC, management_password=PASSWORD))
 
 

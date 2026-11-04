@@ -27,6 +27,7 @@ from .checkpoint_vault import CheckpointVaultError
 
 
 ARTIFACT = Path("/opt/faas/checkpoint")
+ARTIFACTS = {"single": ARTIFACT, "vmss": Path("/opt/faas/checkpoint-vmss")}
 TERRAFORM = Path("/opt/faas/bin/terraform")
 EXIT_OK, EXIT_INPUTS, EXIT_RUNTIME, EXIT_TERRAFORM, EXIT_PLAN, EXIT_CONFIGURE = 0, 10, 20, 30, 40, 50
 TIMEOUT_SECONDS = {"init": 600, "plan": 1800, "show": 300, "apply": 5400}
@@ -74,10 +75,19 @@ def configure_checkpoint(inputs: CheckpointRuntimeInputs) -> None:
                                 "environmentId": config.environmentId}, **options)
 
     try:
+        gateways, next_hop = None, None
+        if config.firewallTopology == "vmss":
+            from .checkpoint_scale_set import INTERNAL_LOAD_BALANCER_IP, discover_scale_set_gateways
+            gateways = discover_scale_set_gateways(
+                lambda: identity.get_token("https://management.azure.com/.default").token,
+                config.providerGroupId, config.environmentId)
+            next_hop = INTERNAL_LOAD_BALANCER_IP
+            _log("scale-set-gateways-discovered")
         CheckpointConfigurator(
             ManagementApi(TlsPin(load, store)), config.environmentId, inputs.credentials.sic_key,
             inputs.credentials.management_password, config.routeServerPeers, config.routeServerAsn, _log,
-            admin_allowed_sources=config.adminAllowedSources,
+            admin_allowed_sources=config.adminAllowedSources, gateways=gateways,
+            internal_load_balancer_ip=next_hop,
         ).run()
         if config.managementRelayUrl:
             from .checkpoint_access_relay import publish_checkpoint_access
@@ -109,7 +119,7 @@ def _variables(inputs: CheckpointRuntimeInputs) -> dict[str, str]:
 
 
 def run_checkpoint_runner(
-        environment: Mapping[str, str], artifact: Path = ARTIFACT, terraform: Path = TERRAFORM,
+        environment: Mapping[str, str], artifact: Path | None = None, terraform: Path = TERRAFORM,
         work_parent: Path | None = None, execute: Callable[..., subprocess.CompletedProcess] = subprocess.run,
         read_inputs: Callable[[Mapping[str, str]], CheckpointRuntimeInputs] = read_checkpoint_runner_inputs,
         workspace_factory: Callable[[Path], CheckpointPlanWorkspace] = CheckpointPlanWorkspace,
@@ -120,10 +130,12 @@ def run_checkpoint_runner(
             inputs = read_inputs(environment)
         except (CheckpointRunnerConfigError, CheckpointVaultError, ValueError):
             raise _Failure(EXIT_INPUTS) from None
+        topology = inputs.config.firewallTopology
+        artifact = artifact or ARTIFACTS[topology]
         try:
             verify_terraform_runtime(terraform)
-            verify_checkpoint_artifact(artifact)
-            verify_checkpoint_provider_runtime(artifact)
+            verify_checkpoint_artifact(artifact, topology)
+            verify_checkpoint_provider_runtime(artifact, topology)
         except (CheckpointTerraformError, CheckpointDependencyError, OSError):
             raise _Failure(EXIT_RUNTIME) from None
         config = inputs.config
