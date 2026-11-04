@@ -284,6 +284,15 @@ def test_pinned_foundation_guard_rejects_unbounded_or_unscoped_admin_changes(tem
         Templates.validate_checkpoint_foundation(template)
 
 
+def test_customer_form_uses_only_portal_supported_functions():
+    import re
+    # createUiDefinition rejects unknown functions at load time, even in unevaluated branches.
+    unsupported = {"trim", "format", "padLeft", "uniqueString", "toLowerInvariant"}
+    text = (Path(__file__).parents[1] / "portal/customer-form.json").read_text()
+    used = set(re.findall(r"\b([A-Za-z]+)\(", text))
+    assert not used & unsupported
+
+
 def test_provider_settings_validate_optional_office_home_defaults(monkeypatch):
     values = {
         "FAAS_ADMIN_OBJECT_IDS": json.dumps([TENANT]),

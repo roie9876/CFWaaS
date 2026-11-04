@@ -13,9 +13,9 @@ from .enrollment import CustomerBinding
 from .admin_access import normalize_admin_sources
 
 ADMIN_SOURCES_FORM_OUTPUT = (
-    "[if(and(not(equals(steps('basics').firewallType, 'ubuntu')), "
-    "not(empty(trim(steps('basics').adminAllowedSources)))), "
-    "split(replace(steps('basics').adminAllowedSources, ' ', ''), ','), json('[]'))]")
+    "[if(or(equals(steps('basics').firewallType, 'ubuntu'), "
+    "empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), json('[]'), "
+    "split(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''), ','))]")
 FIREWALL_TYPES = ["ubuntu", "checkpoint-byol", "checkpoint-vmss"]
 
 
