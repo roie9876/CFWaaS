@@ -238,6 +238,13 @@ See the [Managed Applications overview](https://learn.microsoft.com/azure/azure-
   `100.64.0.0/10`; allocate provider ranges and ASNs per environment from a
   provider pool at onboarding; reject overlapping customer endpoints at request
   time and report overlapping BGP-learned prefixes at runtime.
+- [ ] Check Point CloudGuard VMSS behind load balancers (in progress). Agreed
+  scope: PAYG, fixed two instances, internal Standard LB (HA ports) and public
+  Standard LB, built from the pinned upstream `modules/vmss`. Each instance
+  peers with the Route Server and advertises the internal LB frontend as next
+  hop. Must still prove VPN-gateway route reflection honors that next hop,
+  stateful symmetry and original-IP (no NAT) east-west inspection before
+  release. The single-gateway option stays the default.
 
 ## Browser-based provider administration
 

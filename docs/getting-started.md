@@ -183,9 +183,22 @@ engineering task; the initial provider wizard does not yet do all of it.
 
 1. Accept Marketplace terms for the pinned gateway/management image plans.
    See [the technical Check Point guidance](../provider-provisioning/README.md).
-2. Build and publish the verified Linux runner using
+2. Put the runner image in your provider Azure Container Registry. The runner
+   only pulls from an Azure registry with its managed identity, so copy the
+   prebuilt public image there; you do not need Docker or a local build:
+
+   ```bash
+   az acr import --name <provider-acr-name> \
+     --source ghcr.io/roie9876/cfwaas-checkpoint-runner@sha256:99650f47611fc1199dce5e5dda100ddbc819c93ef1df419f4d17fb11cbed1a2f \
+     --image faas-checkpoint-runner:1.0.0
+   ```
+
+   The digest stays the same after import; pin that **exact digest**, not the
+   tag. Its bundled licenses are listed in
+   [Third-party notices](../THIRD_PARTY_NOTICES.md#prebuilt-check-point-runner-image).
+   To build it yourself instead, use
    `scripts/build_checkpoint_runner_context.py` and the existing runner
-   Dockerfile. Pin the **actual image digest**, not just a mutable image tag.
+   Dockerfile, then pin the digest of your own image.
 3. Configure the dedicated provider Check Point publisher identity and separate
    managed-application definition, its eight approved roles and its required
    ReadOnly definition lock. Do not broaden an unrelated Ubuntu identity.

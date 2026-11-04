@@ -77,12 +77,18 @@ def _terraform_binary(destination: Path) -> str:
     if len(archive) > MAX_DOWNLOAD_BYTES or hashlib.sha256(archive).hexdigest() != release["archive_sha256"]:
         raise ContextError("Terraform archive does not match its pin")
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
+        if {item.filename for item in source.infolist()} != {"terraform", "LICENSE.txt"}:
+            raise ContextError("Unexpected Terraform archive layout")
         binary = source.read("terraform")
+        license_text = source.read("LICENSE.txt")
     if hashlib.sha256(binary).hexdigest() != release["binary_sha256"]:
         raise ContextError("Terraform binary does not match its pin")
     destination.parent.mkdir(parents=True)
     destination.write_bytes(binary)
     destination.chmod(0o555)
+    licenses = destination.parent.parent / "licenses/terraform"
+    licenses.mkdir(parents=True)
+    (licenses / "LICENSE.txt").write_bytes(license_text)
     return hashlib.sha256(binary).hexdigest()
 
 
@@ -110,6 +116,10 @@ def _application(output: Path) -> None:
     service.mkdir(parents=True)
     for path in sorted((ROOT / "service").glob("*.py")):
         shutil.copyfile(path, service / path.name)
+    licenses = output / "licenses"
+    licenses.mkdir(exist_ok=True)
+    shutil.copyfile(ROOT.parent / "LICENSE", licenses / "CFWaaS-LICENSE")
+    shutil.copyfile(ROOT.parent / "THIRD_PARTY_NOTICES.md", licenses / "THIRD_PARTY_NOTICES.md")
 
 
 def build(source: Path, output: Path) -> dict:
@@ -133,6 +143,9 @@ def build(source: Path, output: Path) -> dict:
             _run([terraform, f"-chdir={checkpoint}", "init", "-backend=false", "-input=false",
                   "-lockfile=readonly", "-no-color"], _isolated_env(home))
             _install_linux_providers(checkpoint, terraform, home)
+            # Git reflogs record the builder's name, login and host; the image is redistributable.
+            for reflog in (checkpoint / ".terraform/modules").glob("*/.git/logs"):
+                shutil.rmtree(reflog)
             verify_checkpoint_dependencies(checkpoint, TARGET)
             verify_checkpoint_artifact(checkpoint)
             terraform_sha256 = _terraform_binary(output / "bin/terraform")

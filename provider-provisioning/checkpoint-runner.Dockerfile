@@ -11,6 +11,11 @@ COPY --from=build /opt/faas/site /opt/faas/site
 COPY app /opt/faas/app
 COPY checkpoint /opt/faas/checkpoint
 COPY bin/terraform /opt/faas/bin/terraform
+# Terraform (BSL 1.1), Check Point modules (Apache-2.0, under checkpoint/) and CFWaaS (MIT) terms.
+COPY licenses /opt/faas/licenses
+LABEL org.opencontainers.image.source="https://github.com/roie9876/CFWaaS" \
+      org.opencontainers.image.title="cfwaas-checkpoint-runner" \
+      org.opencontainers.image.description="CFWaaS Check Point provisioning runner; see /opt/faas/licenses"
 # Runtime checks require root-owned, non-writable code and dependencies for the non-root runner.
 RUN chown -R 0:0 /opt/faas && chmod -R a=rX /opt/faas && chmod 0555 /opt/faas/bin/terraform
 ENV PYTHONPATH=/opt/faas/site PYTHONDONTWRITEBYTECODE=1
