@@ -8,6 +8,19 @@ param enableBgp bool = false
 param useExistingLocalGateway bool = false
 @secure()
 param sharedKey string
+@description('Lab default: IPsec encryption None (ESP integrity only). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches.')
+param ipsecPolicies array = [
+  {
+    ikeEncryption: 'AES256'
+    ikeIntegrity: 'SHA256'
+    dhGroup: 'DHGroup14'
+    ipsecEncryption: 'None'
+    ipsecIntegrity: 'SHA256'
+    pfsGroup: 'None'
+    saLifeTimeSeconds: 27000
+    saDataSizeKilobytes: 102400000
+  }
+]
 resource localGateway 'Microsoft.Network/localNetworkGateways@2025-05-01' = if (!useExistingLocalGateway) {
   name: 'lng-${name}'
   location: location
@@ -30,6 +43,7 @@ resource connection 'Microsoft.Network/connections@2025-05-01' = {
     enableBgp: enableBgp
     sharedKey: sharedKey
     connectionProtocol: 'IKEv2'
+    ipsecPolicies: ipsecPolicies
   }
   dependsOn: [localGateway]
 }

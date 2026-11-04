@@ -882,6 +882,15 @@ VPN termination on the simulated firewall. Customer prefixes used by the test
 remain fixed; automating onboarding does not solve arbitrary-prefix ingress
 insertion or qualify real Check Point licensing/VMSS/state synchronization.
 
+Every provider and customer connection is built from
+`infra/modules/connection.bicep`, whose default IPsec policy is IKEv2
+AES256/SHA256/DHGroup14 with IPsec encryption **None** (ESP integrity SHA256
+only, PFS None). Both tunnel ends must use the same policy, so override
+`ipsecPolicies` on all four connections together or not at all. In Lab 16,
+encryption None measured the same east-west RTT as the encrypted default
+(median ~7.2 ms vs ~7.3 ms), so it is not a latency fix; with None, tunnel
+traffic is not encrypted on the Microsoft backbone.
+
 ### Replacement lab results (2026-10-30)
 
 The customer foundation and provider environment `21b09315` deployed

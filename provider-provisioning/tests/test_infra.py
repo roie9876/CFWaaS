@@ -1484,6 +1484,15 @@ class BicepTests(unittest.TestCase):
         connection = self.compiled["modules/connection.bicep"]
         self.assertFalse(connection["parameters"]["enableBgp"]["defaultValue"])
         self.assertFalse(connection["parameters"]["useExistingLocalGateway"]["defaultValue"])
+        policies = connection["parameters"]["ipsecPolicies"]["defaultValue"]
+        self.assertEqual([(p["ipsecEncryption"], p["ipsecIntegrity"], p["pfsGroup"]) for p in policies],
+                         [("None", "SHA256", "None")])
+        resource = next(r for r in connection["resources"] if r["type"] == "Microsoft.Network/connections")
+        self.assertEqual(resource["properties"]["ipsecPolicies"], "[parameters('ipsecPolicies')]")
+        for name in ("provider-dataplane.bicep", "provider-checkpoint-foundation.bicep", "customer-connections.bicep"):
+            for module in (r for r in self.compiled[name]["resources"] if r["type"] == "Microsoft.Resources/deployments"
+                           and "sharedKey" in r["properties"].get("parameters", {})):
+                self.assertNotIn("ipsecPolicies", module["properties"]["parameters"])
         for name in ("provider-dataplane.bicep", "customer-connections.bicep"):
             modules = [r for r in self.compiled[name]["resources"] if r["type"] == "Microsoft.Resources/deployments"
                        and "sharedKey" in r["properties"].get("parameters", {})]
