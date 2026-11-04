@@ -416,7 +416,7 @@ def scale_set_configurator(api, logs):
 def test_bgp_script_for_scale_set_sets_internal_load_balancer_next_hop_without_redistribution():
     script = gaia.bgp_script(gaia_tests.PEERS, 65515, "172.22.10.5", "172.22.20.4")
     assert "set router-id 172.22.10.5" in script
-    assert "set routemap faas-out id 10 action nexthop 172.22.20.4" in script
+    assert "set routemap faas-out id 10 action nexthop ip 172.22.20.4" in script
     assert "export-routemap faas-out" in script and "match network 0.0.0.0/0 exact" in script
     assert "route-redistribution" not in script and "nat" not in script.lower()
     assert gaia.bgp_script(gaia_tests.PEERS, 65515) == gaia.bgp_script(gaia_tests.PEERS, 65515, "172.22.10.4")

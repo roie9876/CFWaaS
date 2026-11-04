@@ -211,7 +211,7 @@ def bgp_script(peers: tuple[str, str], peer_asn: int, router_id: str = GATEWAY_F
         # so Route Server forwards to one symmetric HA-ports frontend instead of individual members.
         route_map = f"set routemap {EXPORT_ROUTEMAP} id 10"
         commands += [f"{route_map} on", f"{route_map} allow", f"{route_map} match protocol static",
-                     f"{route_map} match network 0.0.0.0/0 exact", f"{route_map} action nexthop {next_hop}",
+                     f"{route_map} match network 0.0.0.0/0 exact", f"{route_map} action nexthop ip {next_hop}",
                      f"set bgp external remote-as {peer_asn} export-routemap {EXPORT_ROUTEMAP} preference 1 on"]
     commands.append("save config")
     lines = ["#!/bin/bash", "failed=0"]
