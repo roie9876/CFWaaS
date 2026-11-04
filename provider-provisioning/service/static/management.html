@@ -193,12 +193,23 @@ function renderConnectionDetails(records) {
       section.append(missing); container.append(section); continue;
     }
     for (const [label, connection] of [["Management", record.management], ["Gateway", record.gateway]]) {
-      if (!connection || !/^(?:\d{1,3}\.){3}\d{1,3}$/.test(connection.publicIp)) {
+      const scaleSet = label === "Gateway" && connection && connection.topology === "Two-instance scale set";
+      const address = scaleSet ? connection.publicLoadBalancerIp : connection && connection.publicIp;
+      if (!connection || !/^(?:\d{1,3}\.){3}\d{1,3}$/.test(address)) {
         throw new Error("InvalidConnectionDetailsResponse");
       }
       const heading = document.createElement("h4"); heading.textContent = label;
       const details = document.createElement("p"); details.className = "details";
       details.style.whiteSpace = "pre-line";
+      if (scaleSet) {
+        details.textContent = "Topology: " + connection.topology + "\nUsername: " + connection.username +
+          "\nPublic load balancer IP (TCP 80 only): " + address +
+          "\nInternal load balancer IP (NOT the customer UDR next hop): " + connection.internalLoadBalancerIp +
+          "\nInstance frontend IPs: " + connection.instanceFrontendPrivateIps.join(", ") +
+          "\nSSH: " + connection.ssh + "\nAuthentication: " + connection.authentication;
+        section.append(heading, details);
+        continue;
+      }
       details.textContent = "Username: " + connection.username + "\nPublic IP: " + connection.publicIp +
         (connection.privateIp ? "\nPrivate IP: " + connection.privateIp : "") +
         (connection.frontendPrivateIp ? "\nProvider frontend IP: " + connection.frontendPrivateIp +

@@ -12,7 +12,7 @@ param expectedCustomerSubscriptionId string = ''
 param customerSubscriptionId string
 param customerResourceGroup string
 param enrolledCustomerResourceGroupId string = ''
-@allowed(['ubuntu', 'checkpoint-byol'])
+@allowed(['ubuntu', 'checkpoint-byol', 'checkpoint-vmss'])
 param firewallType string = 'ubuntu'
 @maxLength(16)
 param adminAllowedSources array = []
@@ -34,7 +34,7 @@ param approveDeploymentScriptBackingException bool
 @minValue(60)
 // Check Point provisioning adds managed VPN gateways, Route Server and appliance first boot.
 @maxValue(14100)
-param waitSeconds int = firewallType == 'checkpoint-byol' ? 14100 : 6900
+param waitSeconds int = firewallType != 'ubuntu' ? 14100 : 6900
 param networkAttemptTag string = utcNow()
 resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'customer-network-connector'
@@ -44,7 +44,7 @@ resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${customerIdentityId}': {} } }
   properties: {
     azCliVersion: '2.77.0'
-    timeout: firewallType == 'checkpoint-byol' ? 'PT4H' : 'PT2H'
+    timeout: firewallType != 'ubuntu' ? 'PT4H' : 'PT2H'
     cleanupPreference: 'Always'
     retentionInterval: 'P1D'
     forceUpdateTag: networkAttemptTag

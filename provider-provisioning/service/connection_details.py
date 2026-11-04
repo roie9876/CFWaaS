@@ -8,7 +8,9 @@ from pydantic import Field, field_validator
 
 from .decommission import EnvironmentDecommissions
 from .enrollment import EnrollmentError, PARTITION
-from .models import Endpoint, RoutingAddress, StrictModel, parse_stored_environment_request
+from .models import (
+    CHECKPOINT_TOPOLOGIES, Endpoint, RoutingAddress, StrictModel, parse_stored_environment_request,
+)
 from .store import Change, Conflict
 from .config import uuid_text
 
@@ -72,7 +74,7 @@ class ConnectionDetails:
         operation = self._operation(customer_id, body.environmentId)
         customer = self.registry._customer(customer_id)
         request, _, _ = parse_stored_environment_request(operation["request"])
-        if (customer.get("status") != "Ready" or request.firewallType != "checkpoint-byol"
+        if (customer.get("status") != "Ready" or request.firewallType not in CHECKPOINT_TOPOLOGIES
                 or operation["providerGroupName"] != body.providerGroupName
                 or operation.get("status") not in ("Running", "Ready")):
             raise EnrollmentError(409, "ConnectionDetailsPublicationRejected")
@@ -113,7 +115,7 @@ class ConnectionDetails:
                 continue
             row = self._operation(customer_id, view["environmentId"])
             request, _, _ = parse_stored_environment_request(row["request"])
-            if request.firewallType != "checkpoint-byol":
+            if request.firewallType not in CHECKPOINT_TOPOLOGIES:
                 continue
             routing = row.get("customerRoutingApplianceIp")
             if not routing:
@@ -161,12 +163,7 @@ class ConnectionDetails:
                             or access.providerGroupName != row["providerGroupName"]):
                         raise EnrollmentError(503, "ConnectionDetailsBindingInvalid")
                     self._operation(customer_id, view["environmentId"])
-                    item.update(credentialStatus="available", management={
-                        "username": "admin", "publicIp": access.managementPublicIp,
-                        "privateIp": "172.22.30.4", "httpsUrl": "https://" + access.managementPublicIp,
-                        "ssh": "ssh admin@" + access.managementPublicIp,
-                        "password": access.managementPassword,
-                    }, gateway={
+                    gateway = {
                         "username": "admin", "publicIp": access.gatewayPublicIp,
                         "frontendPrivateIp": "172.22.10.4", "backendPrivateIp": "172.22.20.4",
                         "httpsUrl": "https://" + access.gatewayPublicIp,
@@ -175,6 +172,23 @@ class ConnectionDetails:
                             "Deployment uses the provider SSH key; no gateway password is managed. "
                             "Any manually configured web password is unchanged and is not recoverable here."
                         ),
-                    })
+                    }
+                    if CHECKPOINT_TOPOLOGIES[request.firewallType] == "vmss":
+                        gateway = {
+                            "username": "admin", "topology": "Two-instance scale set",
+                            "publicLoadBalancerIp": access.gatewayPublicIp,
+                            "internalLoadBalancerIp": "172.22.20.4",
+                            "instanceFrontendPrivateIps": ["172.22.10.4", "172.22.10.5"],
+                            "ssh": "ssh -i <provider-private-key> admin@<instance public IP>",
+                            "authentication": gateway["authentication"] + (
+                                " Each instance has its own public IP, shown on the scale set's "
+                                "Instances > Networking page; the public load balancer forwards TCP 80 only."),
+                        }
+                    item.update(credentialStatus="available", management={
+                        "username": "admin", "publicIp": access.managementPublicIp,
+                        "privateIp": "172.22.30.4", "httpsUrl": "https://" + access.managementPublicIp,
+                        "ssh": "ssh admin@" + access.managementPublicIp,
+                        "password": access.managementPassword,
+                    }, gateway=gateway)
             result.append(item)
         return result

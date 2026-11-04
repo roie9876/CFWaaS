@@ -411,7 +411,7 @@ def test_customer_profiles_never_default_the_api_secret(tmp_path):
                               for name in ("customer-authorization-proof", "customer-provider-connection")]}
     template["parameters"]["apiClientSecret"] = {"type": "securestring"}
     template["parameters"]["firewallType"] = {"type": "string", "defaultValue": "ubuntu",
-                                              "allowedValues": ["ubuntu", "checkpoint-byol"]}
+                                              "allowedValues": ["ubuntu", "checkpoint-byol", "checkpoint-vmss"]}
     form = {"view": {"properties": {"title": "FaaS customer deployment - recovery-enabled release",
                                    "steps": [{"elements": [
         {"name": "apiClientSecret", "type": "Microsoft.Common.PasswordBox",
@@ -420,7 +420,8 @@ def test_customer_profiles_never_default_the_api_secret(tmp_path):
         {"name": "firewallType", "defaultValue": "Ubuntu simulator",
          "constraints": {"allowedValues": [
              {"label": "Ubuntu simulator", "value": "ubuntu"},
-             {"label": "Check Point", "value": "checkpoint-byol"}]}}]}]},
+             {"label": "Check Point", "value": "checkpoint-byol"},
+             {"label": "Check Point scale set", "value": "checkpoint-vmss"}]}}]}]},
         "outputs": {"parameters": {"firewallType": "[steps('basics').firewallType]"}}}}
     for name, value in (("customer.json", template), ("customer-form.json", form),
                         ("customer-connections.json", {"resources": []})):

@@ -50,13 +50,16 @@ class RoutingAddress(StrictModel):
         return Endpoint.private_ip(value)
 
 
+CHECKPOINT_TOPOLOGIES = {"checkpoint-byol": "single", "checkpoint-vmss": "vmss"}
+
+
 class EnvironmentRequest(StrictModel):
     region: Literal["eastus2"] = "eastus2"
     tier: Literal["lab"] = "lab"
     mode: Literal["proof", "network"] = "proof"
     customerIngress: Endpoint | None = None
     customerDelivery: Endpoint | None = None
-    firewallType: Literal["ubuntu", "checkpoint-byol"] = "ubuntu"
+    firewallType: Literal["ubuntu", "checkpoint-byol", "checkpoint-vmss"] = "ubuntu"
     adminAllowedSources: list[str] = Field(default_factory=list, max_length=16)
 
     @field_validator("adminAllowedSources", mode="before")
@@ -66,7 +69,7 @@ class EnvironmentRequest(StrictModel):
 
     @model_validator(mode="after")
     def endpoints_required(self) -> "EnvironmentRequest":
-        if self.adminAllowedSources and self.firewallType != "checkpoint-byol":
+        if self.adminAllowedSources and self.firewallType not in CHECKPOINT_TOPOLOGIES:
             raise ValueError("Public admin sources require Check Point")
         if bool(self.customerIngress) != bool(self.customerDelivery):
             raise ValueError("Both customer endpoints are required together")

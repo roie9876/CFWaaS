@@ -56,7 +56,7 @@ def build_checkpoint_runner_spec(
         foundation_outputs: dict, private_outputs: dict, provider_subscription: str, provider_tenant: str,
         group_name: str, environment_id: str, control_group: str, identity: dict,
         registry_server: str, image_sha256: str, settings: CheckpointRunnerSettings,
-        admin_allowed_sources: list[str] | None = None) -> CheckpointRunnerSpec:
+        admin_allowed_sources: list[str] | None = None, firewall_topology: str = "single") -> CheckpointRunnerSpec:
     """Bind provider release/identity evidence and narrowly validated public admin sources."""
     try:
         uuid_text(provider_subscription)
@@ -71,7 +71,8 @@ def build_checkpoint_runner_spec(
             raise ValueError()
     except (TypeError, ValueError, AttributeError):
         raise CheckpointRunnerError("Invalid Check Point runner configuration") from None
-    foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id)
+    foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id,
+                                                firewall_topology)
     group_id = f"/subscriptions/{provider_subscription}/resourceGroups/{group_name}"
     if not isinstance(identity, dict) or not isinstance(identity.get("properties"), dict):
         raise CheckpointRunnerError("Invalid Check Point runner identity")
@@ -100,7 +101,8 @@ def build_checkpoint_runner_spec(
         foundation_outputs, private_outputs, provider_subscription, provider_tenant, group_name, environment_id,
         client_id, settings.gateway_image_version, settings.management_image_version,
         settings.gateway_vm_size, settings.management_vm_size, settings.provider_ssh_public_key,
-        admin_allowed_sources, settings.management_relay_url, settings.management_relay_client_id)
+        admin_allowed_sources, settings.management_relay_url, settings.management_relay_client_id,
+        firewall_topology)
     environment = (("FAAS_CONFIG", config), ("FAAS_RUNNER_CLIENT_ID", client_id))
     return CheckpointRunnerSpec(
         job_id=checkpoint_runner_resource_id(group_id, environment_id),
@@ -138,11 +140,12 @@ def build_checkpoint_runner_request(
         foundation_outputs: dict, private_outputs: dict, provider_subscription: str, provider_tenant: str,
         group_name: str, environment_id: str, control_group: str, identity: dict,
         registry_server: str, image_sha256: str, settings: CheckpointRunnerSettings,
-        admin_allowed_sources: list[str] | None = None) -> tuple[CheckpointRunnerSpec, bytes]:
+        admin_allowed_sources: list[str] | None = None,
+        firewall_topology: str = "single") -> tuple[CheckpointRunnerSpec, bytes]:
     """Prepare a secret-free request from validated provider inputs; do not launch or authorize it."""
     spec = build_checkpoint_runner_spec(
         foundation_outputs, private_outputs, provider_subscription, provider_tenant, group_name, environment_id,
-        control_group, identity, registry_server, image_sha256, settings, admin_allowed_sources)
+        control_group, identity, registry_server, image_sha256, settings, admin_allowed_sources, firewall_topology)
     body = json.dumps(_checkpoint_runner_request(spec), sort_keys=True, separators=(",", ":")).encode()
     return spec, body
 

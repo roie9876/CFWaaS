@@ -238,13 +238,20 @@ See the [Managed Applications overview](https://learn.microsoft.com/azure/azure-
   `100.64.0.0/10`; allocate provider ranges and ASNs per environment from a
   provider pool at onboarding; reject overlapping customer endpoints at request
   time and report overlapping BGP-learned prefixes at runtime.
-- [ ] Check Point CloudGuard VMSS behind load balancers (in progress). Agreed
-  scope: PAYG, fixed two instances, internal Standard LB (HA ports) and public
-  Standard LB, built from the pinned upstream `modules/vmss`. Each instance
-  peers with the Route Server and advertises the internal LB frontend as next
-  hop. Must still prove VPN-gateway route reflection honors that next hop,
-  stateful symmetry and original-IP (no NAT) east-west inspection before
-  release. The single-gateway option stays the default.
+- [ ] Check Point CloudGuard VMSS behind load balancers. **Implemented and
+  offline-tested; not live-qualified.** Customer type `checkpoint-vmss`, gated
+  by `FAAS_CHECKPOINT_VMSS_ENABLED`. Pinned upstream `modules/vmss` (Uniform,
+  PAYG `sg-ngtp`, fixed two instances, autoscale removed), public Standard LB on
+  eth0 and internal HA-ports Standard LB at `172.22.20.4` on eth1, TCP 8117
+  probes. The foundation adds a second Route Server peer (`172.22.10.5`) and an
+  `AzureLoadBalancer` NSG allow when admin sources are set. The runner discovers
+  both instances (their frontends must be `172.22.10.4/.5`), registers each as a
+  simple gateway without CME, disables anti-spoofing as upstream does, adds a
+  probe-only access rule and advertises the BGP default with the internal LB as
+  next hop through route map `faas-out`. Still to prove live: the Gaia route-map
+  syntax, Route Server and VPN gateway honoring that next hop, symmetric HA-ports
+  flows and original-IP (no NAT) east-west inspection. A replaced instance is not
+  re-registered automatically. The single-gateway option stays the default.
 
 ## Browser-based provider administration
 

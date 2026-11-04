@@ -95,8 +95,10 @@ Stopping a VM does not remove all network or hosting charges. Review the
 
 ## Qualification limits
 
-- Current Check Point delivery is **single gateway + management**, not VMSS,
-  active/active, failover or state synchronization.
+- Live-qualified Check Point delivery is **single gateway + management**, not VMSS,
+  active/active, failover or state synchronization. An optional two-instance
+  PAYG scale set (`checkpoint-vmss`) with internal and public load balancers is
+  implemented and offline-tested, but **not yet live-qualified**.
 - No production fail-closed, selective-denial or licensing-longevity claim.
 - Earlier traffic bypassed the firewall before VPN convergence; later bounded
   successful tests do not establish that bypass is impossible.

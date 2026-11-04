@@ -139,6 +139,13 @@ def create_app(settings: Settings | None = None, store: Store | CustomerStores |
             raise HTTPException(409, "CheckpointDeploymentUnavailable")
         return {"firewallType": "checkpoint-byol", "status": "ready"}
 
+    @app.get("/v1/firewall-types/checkpoint-vmss/readiness")
+    def checkpoint_vmss_readiness(owner: Owner = Depends(caller)) -> dict:
+        settings = app.state.settings
+        if not (settings.checkpoint_enabled and settings.checkpoint_vmss_enabled):
+            raise HTTPException(409, "CheckpointDeploymentUnavailable")
+        return {"firewallType": "checkpoint-vmss", "status": "ready"}
+
     @app.post("/v1/environments", status_code=202)
     def provision(body: EnvironmentRequest, response: Response,
                   owner: Owner = Depends(caller),

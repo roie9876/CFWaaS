@@ -13,9 +13,10 @@ from .enrollment import CustomerBinding
 from .admin_access import normalize_admin_sources
 
 ADMIN_SOURCES_FORM_OUTPUT = (
-    "[if(and(equals(steps('basics').firewallType, 'checkpoint-byol'), "
+    "[if(and(not(equals(steps('basics').firewallType, 'ubuntu')), "
     "not(empty(trim(steps('basics').adminAllowedSources)))), "
     "split(replace(steps('basics').adminAllowedSources, ' ', ''), ','), json('[]'))]")
+FIREWALL_TYPES = ["ubuntu", "checkpoint-byol", "checkpoint-vmss"]
 
 
 class ProfilePublisher:
@@ -109,10 +110,10 @@ class ProfilePublisher:
 
         if (len(proof) != 1
                 or firewall.get("defaultValue") != "ubuntu"
-                or firewall.get("allowedValues") != ["ubuntu", "checkpoint-byol"]
+                or firewall.get("allowedValues") != FIREWALL_TYPES
                 or not isinstance(choices, list)
                 or not all(isinstance(item, dict) for item in choices)
-                or [item.get("value") for item in choices] != ["ubuntu", "checkpoint-byol"]
+                or [item.get("value") for item in choices] != FIREWALL_TYPES
                 or firewall_field.get("defaultValue") != choices[0].get("label")
                 or form.get("view", {}).get("outputs", {}).get("parameters", {}).get("firewallType")
                 != "[steps('basics').firewallType]"
@@ -125,7 +126,7 @@ class ProfilePublisher:
                 admin.get("type") == "array" and admin.get("defaultValue") == []
                 and admin.get("maxLength") == 16
                 and admin_field.get("type") == "Microsoft.Common.TextBox"
-                and admin_field.get("visible") == "[equals(steps('basics').firewallType, 'checkpoint-byol')]"
+                and admin_field.get("visible") == "[not(equals(steps('basics').firewallType, 'ubuntu'))]"
                 and form["view"]["outputs"]["parameters"].get("adminAllowedSources") == ADMIN_SOURCES_FORM_OUTPUT)
             for resource in (proof[0], network[0]):
                 properties = resource["properties"]

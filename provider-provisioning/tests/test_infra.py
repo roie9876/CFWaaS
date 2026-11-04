@@ -470,6 +470,20 @@ class ConnectorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             customer_connector.request_body("proof", firewall_type="unknown")
 
+    def test_checkpoint_scale_set_uses_its_own_readiness_and_request_type(self):
+        endpoints = json.loads(connector_env()["FAAS_CUSTOMER_ENDPOINTS"])
+        body = customer_connector.request_body("network", endpoints, "checkpoint-vmss", ["8.8.8.8"])
+        self.assertEqual((body["firewallType"], body["adminAllowedSources"]), ("checkpoint-vmss", ["8.8.8.8/32"]))
+        env = connector_env("network")
+        env["FAAS_FIREWALL_TYPE"] = "checkpoint-vmss"
+        with patch.object(customer_connector, "az"), patch.object(customer_connector, "customer_scope") as scope, \
+                patch.object(customer_connector, "request",
+                             return_value={"firewallType": "checkpoint-byol", "status": "ready"}) as request:
+            with self.assertRaises(customer_connector.FirewallUnavailable):
+                customer_connector.run(env)
+        scope.assert_not_called()
+        self.assertEqual(request.call_args.args[2], "/v1/firewall-types/checkpoint-vmss/readiness")
+
     def test_network_uses_only_endpoints_and_never_outputs_material(self):
         env = connector_env()
         material = {"environmentId": uid(10), "ingressSharedKey": "unit-ingress-material",
@@ -1330,11 +1344,12 @@ class BicepTests(unittest.TestCase):
         self.assertEqual(outputs["location"], "[steps('basics').customerLocation]")
         firewall = fields["firewallType"]
         self.assertEqual(parameters["firewallType"]["defaultValue"], "ubuntu")
-        self.assertEqual(parameters["firewallType"]["allowedValues"], ["ubuntu", "checkpoint-byol"])
+        self.assertEqual(parameters["firewallType"]["allowedValues"], ["ubuntu", "checkpoint-byol", "checkpoint-vmss"])
         self.assertEqual([choice["value"] for choice in firewall["constraints"]["allowedValues"]],
                          parameters["firewallType"]["allowedValues"])
         self.assertEqual(firewall["defaultValue"], "Ubuntu simulator")
         self.assertIn("lab preview", firewall["constraints"]["allowedValues"][1]["label"])
+        self.assertIn("PAYG", firewall["constraints"]["allowedValues"][2]["label"])
         self.assertEqual(outputs["firewallType"], "[steps('basics').firewallType]")
         self.assertIn("not available", fields["checkpointUnavailable"]["options"]["text"])
         for name in ("customer-foundation.bicep", "customer-connections.bicep", "customer-network.bicep"):

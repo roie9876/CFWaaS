@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from uuid import uuid4
 
 from .config import uuid_text
-from .models import environment_resource_group_name, parse_stored_environment_request
+from .models import CHECKPOINT_TOPOLOGIES, environment_resource_group_name, parse_stored_environment_request
 from .store import Conflict, Lease, LostLease, Row, Store
 
 
@@ -43,7 +43,7 @@ class CheckpointCredentialJournal:
         expected = f"/subscriptions/{self.subscription}/resourceGroups/{group_name}"
         if (operation.get("environmentId") != lease.environment_id
                 or operation.get("status") != "Running"
-                or request.mode != "network" or request.firewallType != "checkpoint-byol"
+                or request.mode != "network" or request.firewallType not in CHECKPOINT_TOPOLOGIES
                 or not isolated or operation.get("providerGroupMode") != "isolated"
                 or operation.get("providerGroupState") != "created"
                 or str(operation.get("providerGroupId", "")).lower() != expected.lower()):

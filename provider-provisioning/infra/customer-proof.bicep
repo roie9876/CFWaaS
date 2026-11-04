@@ -20,7 +20,7 @@ param customerSubscriptionId string = ''
 param customerResourceGroup string = ''
 param enrolledCustomerResourceGroupId string = ''
 param enrollCustomerScope bool = false
-@allowed(['ubuntu', 'checkpoint-byol'])
+@allowed(['ubuntu', 'checkpoint-byol', 'checkpoint-vmss'])
 param firewallType string = 'ubuntu'
 @maxLength(16)
 param adminAllowedSources array = []

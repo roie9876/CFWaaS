@@ -3667,6 +3667,27 @@ def test_checkpoint_provisioner_rejects_unsupported_requests(checkpoint_journal)
         fixture.provisioner.provision(lease, store, operation, EnvironmentRequest.model_validate(NETWORK), Mock())
     assert error.value.code == "CheckpointDeploymentUnavailable"
     fixture.groups.ensure.assert_not_called()
+    # A scale set request needs a foundation template that supports the topology parameter.
+    vmss = EnvironmentRequest.model_validate({**NETWORK, "firewallType": "checkpoint-vmss"})
+    with pytest.raises(ProvisionError) as error:
+        fixture.provisioner.provision(lease, store, operation, vmss, Mock())
+    assert error.value.code == "CheckpointDeploymentUnavailable"
+    fixture.groups.ensure.assert_not_called()
+
+
+def test_checkpoint_provisioner_passes_scale_set_topology_to_foundation(checkpoint_journal):
+    store, _, lease, _ = checkpoint_journal
+    fixture = checkpoint_provisioner_fixture(store, lease, [None])
+    fixture.provisioner.settings = replace(
+        fixture.provisioner.settings, foundation_template={"parameters": {"firewallTopology": {"type": "string"}}})
+    operation = store.operation(lease)
+    vmss = EnvironmentRequest.model_validate({**NETWORK, "firewallType": "checkpoint-vmss"})
+    with pytest.raises(ProvisionError) as error:
+        fixture.provisioner.provision(lease, store, operation, vmss, lambda: store.checked_job(lease))
+    # The single-gateway fixture outputs carry no scale set marker, so validation must stop the run.
+    assert error.value.code == "InvalidCheckpointFoundation"
+    assert fixture.arm.starts[0][2]["firewallTopology"] == {"value": "vmss"}
+    assert not fixture.puts
 
 
 def test_worker_routes_checkpoint_only_to_configured_provisioner(checkpoint_journal, templates, target):
@@ -3959,3 +3980,36 @@ def test_admin_sources_block_old_foundation_before_provider_changes(checkpoint_j
     fixture.groups.ensure.assert_not_called()
     fixture.vault.ensure.assert_not_called()
     assert not fixture.arm.starts and not fixture.puts
+
+
+def test_checkpoint_scale_set_requires_separate_provider_opt_in(settings, backend, store, auth, signing_key,
+                                                                claims, monkeypatch):
+    with pytest.raises(ValueError):
+        replace(settings, provider_group_mode="isolated", checkpoint_vmss_enabled=True)
+    byol_only = Store(backend, replace(settings, provider_group_mode="isolated", checkpoint_enabled=True))
+    with pytest.raises(DomainError) as error:
+        byol_only.reserve(OWNER, "vmss-disabled", EnvironmentRequest.model_validate(
+            {**NETWORK, "firewallType": "checkpoint-vmss"}))
+    assert error.value.code == "CheckpointDeploymentUnavailable"
+    enabled_settings = replace(settings, provider_group_mode="isolated", checkpoint_enabled=True,
+                               checkpoint_vmss_enabled=True)
+    operation = Store(backend, enabled_settings).reserve(OWNER, "vmss-enabled", EnvironmentRequest.model_validate(
+        {**NETWORK, "firewallType": "checkpoint-vmss", "adminAllowedSources": ["8.8.8.8"]}))
+    request, _parallel, isolated = parse_stored_environment_request(str(operation["request"]))
+    assert request.firewallType == "checkpoint-vmss" and isolated
+    headers = {"Authorization": "Bearer " + token(signing_key, claims)}
+    for configured, expected in ((byol_only.settings, 409), (enabled_settings, 200)):
+        with TestClient(create_app(configured, store, auth, Mock(spec=Vault)),
+                        raise_server_exceptions=False) as client:
+            response = client.get("/v1/firewall-types/checkpoint-vmss/readiness", headers=headers)
+        assert response.status_code == expected
+    assert response.json() == {"firewallType": "checkpoint-vmss", "status": "ready"}
+    for name, value in {"FAAS_API_AUDIENCE": AUDIENCE, "FAAS_TABLE_ENDPOINT": "https://t.table.core.windows.net",
+                        "FAAS_VAULT_URL": "https://v.vault.azure.net", "FAAS_AUTH_MODE": "provider-api-registry",
+                        "FAAS_AUTHORITY_TENANT_ID": TENANT, "FAAS_PROVIDER_GROUP_MODE": "isolated",
+                        "FAAS_ALLOW_ISOLATED_LAB_RISK": "true", "FAAS_CHECKPOINT_VMSS_ENABLED": "true"}.items():
+        monkeypatch.setenv(name, value)
+    with pytest.raises(ValueError):
+        Settings.from_env()
+    monkeypatch.setenv("FAAS_CHECKPOINT_ENABLED", "true")
+    assert Settings.from_env().checkpoint_vmss_enabled is True

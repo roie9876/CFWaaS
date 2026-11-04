@@ -63,6 +63,7 @@ class Settings:
     provider_group_mode: str = "shared"
     parallel_provider_networking: bool = False
     checkpoint_enabled: bool = False
+    checkpoint_vmss_enabled: bool = False
 
     def __post_init__(self) -> None:
         if self.auth_mode not in ("customer-managed-identity", "provider-api-client",
@@ -75,6 +76,9 @@ class Settings:
         if type(self.checkpoint_enabled) is not bool or (
                 self.checkpoint_enabled and self.provider_group_mode != "isolated"):
             raise ValueError("Check Point deployments require isolated provider groups")
+        if type(self.checkpoint_vmss_enabled) is not bool or (
+                self.checkpoint_vmss_enabled and not self.checkpoint_enabled):
+            raise ValueError("Check Point scale sets require Check Point enablement")
         if self.auth_mode != "provider-api-registry" and self.customer is None:
             raise ValueError("A bound customer is required")
         if self.authority_tenant is None:
@@ -101,6 +105,10 @@ class Settings:
         checkpoint = os.getenv("FAAS_CHECKPOINT_ENABLED", "false").strip().lower()
         if checkpoint not in ("true", "false"):
             raise ValueError("Invalid Check Point enablement setting")
+        # PAYG scale sets need separate Marketplace terms, so the provider opts in explicitly.
+        checkpoint_vmss = os.getenv("FAAS_CHECKPOINT_VMSS_ENABLED", "false").strip().lower()
+        if checkpoint_vmss not in ("true", "false") or (checkpoint_vmss == "true" and checkpoint != "true"):
+            raise ValueError("Invalid Check Point scale set enablement setting")
         customer = None if mode == "provider-api-registry" else Customer(
             os.environ["FAAS_TRUSTED_TENANT_ID"],
             os.environ["FAAS_TRUSTED_PRINCIPAL_ID"],
@@ -132,6 +140,7 @@ class Settings:
             provider_group_mode=provider_group_mode,
             parallel_provider_networking=parallel == "true",
             checkpoint_enabled=checkpoint == "true",
+            checkpoint_vmss_enabled=checkpoint_vmss == "true",
         )
         if (not settings.audience or settings.required_role != "FirewallDeployment.Request"
                   or min(settings.max_caller_active, settings.max_caller_running,

@@ -183,6 +183,12 @@ engineering task; the initial provider wizard does not yet do all of it.
 
 1. Accept Marketplace terms for the pinned gateway/management image plans.
    See [the technical Check Point guidance](../provider-provisioning/README.md).
+   For the optional two-instance scale set (`checkpoint-vmss`, lab preview, not
+   yet live-qualified), also accept the PAYG gateway plan
+   (`az vm image terms accept --publisher checkpoint --offer check-point-cg-r82 --plan sg-ngtp`)
+   and set `FAAS_CHECKPOINT_VMSS_ENABLED=true` on the API app. The scale set adds
+   Check Point hourly charges for two gateways and uses a gateway VM size that
+   supports accelerated networking.
 2. Put the runner image in your provider Azure Container Registry. The runner
    only pulls from an Azure registry with its managed identity, so copy the
    prebuilt public image there; you do not need Docker or a local build:

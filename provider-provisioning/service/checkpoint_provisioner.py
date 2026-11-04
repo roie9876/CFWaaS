@@ -23,7 +23,7 @@ from .checkpoint_runner import (
 from .checkpoint_runner_config import CheckpointRunnerSettings
 from .checkpoint_runner_journal import CheckpointRunnerJournal, CheckpointRunnerStateError
 from .config import CheckpointWorkerSettings
-from .models import ConnectionManifest, EnvironmentRequest
+from .models import CHECKPOINT_TOPOLOGIES, ConnectionManifest, EnvironmentRequest
 from .provisioner import Arm, ProvisionError
 from .store import Lease, Store
 
@@ -161,8 +161,11 @@ class CheckpointProvisioner:
 
     def provision(self, lease: Lease, store: Store, operation: dict, request: EnvironmentRequest,
                   check: Callable[[], None]) -> dict:
-        if (request.firewallType != "checkpoint-byol" or request.mode != "network"
+        if (request.firewallType not in CHECKPOINT_TOPOLOGIES or request.mode != "network"
                 or request.region != "eastus2" or operation.get("providerGroupMode") != "isolated"):
+            raise ProvisionError("CheckpointDeploymentUnavailable", False)
+        topology = CHECKPOINT_TOPOLOGIES[request.firewallType]
+        if topology == "vmss" and "firewallTopology" not in self.settings.foundation_template.get("parameters", {}):
             raise ProvisionError("CheckpointDeploymentUnavailable", False)
         if request.adminAllowedSources:
             parameter = self.settings.foundation_template.get("parameters", {}).get("adminAllowedSources", {})
@@ -188,11 +191,14 @@ class CheckpointProvisioner:
             }.items()}
             if request.adminAllowedSources:
                 parameters["adminAllowedSources"] = {"value": request.adminAllowedSources}
+            if topology == "vmss":
+                parameters["firewallTopology"] = {"value": "vmss"}
             foundation_outputs = self._deploy(arm, "faas-cp-foundation-" + environment_id,
                                               self.settings.foundation_template, parameters, check)
             foundation_outputs = self._current_route_server_peers(foundation_outputs, group, environment_id)
             try:
-                foundation = validate_checkpoint_foundation(foundation_outputs, self.subscription, group, environment_id)
+                foundation = validate_checkpoint_foundation(foundation_outputs, self.subscription, group,
+                                                            environment_id, topology)
             except ValueError:
                 raise ProvisionError("InvalidCheckpointFoundation", False) from None
             private_outputs = self._deploy(arm, "faas-cp-private-" + environment_id, self.settings.private_template,
@@ -205,7 +211,7 @@ class CheckpointProvisioner:
                 spec, body = build_checkpoint_runner_request(
                     foundation_outputs, private_outputs, self.subscription, self.tenant, group, environment_id,
                     self.settings.control_group, identity, self.settings.registry_server,
-                    self.settings.image_sha256, self.settings.runner, request.adminAllowedSources)
+                    self.settings.image_sha256, self.settings.runner, request.adminAllowedSources, topology)
             except (ValueError, CheckpointRunnerError):
                 raise ProvisionError("InvalidCheckpointRunner", False) from None
             journal = CheckpointRunnerJournal(CheckpointCredentialJournal(store, self.subscription))

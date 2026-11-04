@@ -8,7 +8,7 @@ from uuid import NAMESPACE_URL, uuid4, uuid5
 from .auth import Owner
 from .config import Settings
 from .models import (
-    EnvironmentRequest, environment_resource_group_name, parse_stored_environment_request,
+    CHECKPOINT_TOPOLOGIES, EnvironmentRequest, environment_resource_group_name, parse_stored_environment_request,
     stored_environment_request,
 )
 
@@ -97,7 +97,8 @@ class Store:
             raise DomainError(400, "InvalidIdempotencyKey")
         checkpoint = body.firewallType != "ubuntu"
         if checkpoint and not (self.settings.checkpoint_enabled and body.mode == "network"
-                               and body.region == "eastus2"):
+                               and body.region == "eastus2"
+                               and (body.firewallType != "checkpoint-vmss" or self.settings.checkpoint_vmss_enabled)):
             raise DomainError(409, "CheckpointDeploymentUnavailable")
         identity = f"{owner.tenant}:{owner.key}:{key}"
         digest = hashlib.sha256(identity.encode()).hexdigest()
@@ -227,7 +228,7 @@ class Store:
             request, _, _ = parse_stored_environment_request(str(operation["request"]))
         except (KeyError, TypeError, ValueError):
             return False
-        return request.firewallType == "checkpoint-byol" and request.mode == "network"
+        return request.firewallType in CHECKPOINT_TOPOLOGIES and request.mode == "network"
 
     def _resume_checkpoint(self, owner: Owner, environment_id: str) -> Row:
         for _ in range(8):

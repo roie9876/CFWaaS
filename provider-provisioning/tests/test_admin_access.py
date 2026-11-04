@@ -204,7 +204,7 @@ def test_compiled_form_contract_propagates_sources_and_preserves_legacy_defaults
 def test_customer_public_ips_return_routes_and_scoped_nsgs_are_conditional(templates):
     module = next(item for item in templates["customer-deployment"]["resources"] if item.get("name") == "customer-foundation")
     foundation = module["properties"]["template"]
-    assert "checkpoint-byol" in module["properties"]["parameters"]["adminAllowedSources"]
+    assert "not(equals(parameters('firewallType'), 'ubuntu'))" in module["properties"]["parameters"]["adminAllowedSources"]
     pips = [item for item in foundation["resources"] if item["type"] == "Microsoft.Network/publicIPAddresses"]
     assert len(pips) == 1 and pips[0]["condition"] == "[not(empty(variables('adminSources')))]"
     assert "adminReturnRoutes" in json.dumps(foundation)

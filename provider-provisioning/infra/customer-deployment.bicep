@@ -4,7 +4,7 @@ targetScope = 'resourceGroup'
 param location string = 'eastus2'
 @allowed(['proof', 'network'])
 param deploymentMode string = 'network'
-@allowed(['ubuntu', 'checkpoint-byol'])
+@allowed(['ubuntu', 'checkpoint-byol', 'checkpoint-vmss'])
 param firewallType string = 'ubuntu'
 @description('Up to 16 public IPv4 admin hosts/CIDRs. Bare hosts are normalized to /32. Check Point only.')
 @maxLength(16)
@@ -103,7 +103,7 @@ module foundation 'customer-foundation.bicep' = if (deploymentMode == 'network')
     routingApplianceBandwidthGbps: routingApplianceBandwidthGbps
     customerIngressVpnGatewaySku: customerIngressVpnGatewaySku
     customerDeliveryVpnGatewaySku: customerDeliveryVpnGatewaySku
-    adminAllowedSources: firewallType == 'checkpoint-byol' ? adminAllowedSources : []
+    adminAllowedSources: firewallType != 'ubuntu' ? adminAllowedSources : []
   }
   dependsOn: [proof, enrollmentTags]
 }

@@ -38,12 +38,13 @@
               "type": "Microsoft.Common.DropDown",
               "label": "Provider firewall",
               "defaultValue": "Ubuntu simulator",
-              "toolTip": "Ubuntu remains the default lab path. Check Point BYOL is a lab preview that the provider must enable.",
+              "toolTip": "Ubuntu remains the default lab path. Check Point options are lab previews that the provider must enable. The scale set uses two pay-as-you-go gateways behind internal and public load balancers.",
               "constraints": {
                 "required": true,
                 "allowedValues": [
                   {"label": "Ubuntu simulator", "value": "ubuntu"},
-                  {"label": "Check Point CloudGuard BYOL (lab preview)", "value": "checkpoint-byol"}
+                  {"label": "Check Point CloudGuard BYOL (lab preview)", "value": "checkpoint-byol"},
+                  {"label": "Check Point CloudGuard scale set, 2 PAYG gateways (lab preview)", "value": "checkpoint-vmss"}
                 ]
               }
             },
@@ -52,7 +53,7 @@
               "type": "Microsoft.Common.TextBox",
               "label": "Public admin IPv4 hosts or CIDRs (comma separated)",
               "defaultValue": "",
-              "visible": "[equals(steps('basics').firewallType, 'checkpoint-byol')]",
+              "visible": "[not(equals(steps('basics').firewallType, 'ubuntu'))]",
               "toolTip": "Optional: up to 16 public unicast IPv4 sources for management HTTPS/SSH/SmartConsole, gateway HTTPS/SSH, and customer test VM SSH. Bare IPs become /32. No private, reserved, IPv6 or /0 ranges. Provider may preset office/home; edit or clear them. Validated before customer network deployment.",
               "constraints": {
                 "required": false,
@@ -63,9 +64,9 @@
             {
               "name": "checkpointUnavailable",
               "type": "Microsoft.Common.TextBlock",
-              "visible": "[equals(steps('basics').firewallType, 'checkpoint-byol')]",
+              "visible": "[not(equals(steps('basics').firewallType, 'ubuntu'))]",
               "options": {
-                "text": "Check Point lab preview: the provider deploys a real CloudGuard gateway and management server, which takes about 90 minutes. The deployment stops before any change if Check Point is not available from the provider."
+                "text": "Check Point lab preview: the provider deploys real CloudGuard gateways (one BYOL gateway, or a two-instance PAYG scale set with load balancers) and a management server, which takes about 90 minutes. The scale set adds Check Point pay-as-you-go charges. The deployment stops before any change if the selected option is not available from the provider."
               }
             },
             {
@@ -205,7 +206,7 @@
       "parameters": {
         "location": "[steps('basics').customerLocation]",
         "firewallType": "[steps('basics').firewallType]",
-        "adminAllowedSources": "[if(and(equals(steps('basics').firewallType, 'checkpoint-byol'), not(empty(trim(steps('basics').adminAllowedSources)))), split(replace(steps('basics').adminAllowedSources, ' ', ''), ','), json('[]'))]",
+        "adminAllowedSources": "[if(and(not(equals(steps('basics').firewallType, 'ubuntu')), not(empty(trim(steps('basics').adminAllowedSources)))), split(replace(steps('basics').adminAllowedSources, ' ', ''), ','), json('[]'))]",
         "runId": "[steps('basics').runId]",
         "sshPublicKey": "[if(steps('basics').manualSshKey, steps('basics').sshPublicKey, steps('basics').sshCredentials.sshPublicKey)]",
         "apiClientId": "[steps('basics').apiClientId]",

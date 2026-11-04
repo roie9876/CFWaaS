@@ -22,6 +22,7 @@ from uuid import UUID, uuid4
 TRANSIENT = {408, 429, 500, 502, 503, 504}
 TERMINAL = {"Ready", "Failed", "NeedsAttention"}
 CHECKPOINT_READINESS = "/v1/firewall-types/checkpoint-byol/readiness"
+CHECKPOINT_TYPES = ("checkpoint-byol", "checkpoint-vmss")
 
 
 class FirewallUnavailable(RuntimeError):
@@ -157,10 +158,10 @@ def request_body(mode: str, endpoints: dict | None = None, firewall_type: str = 
                  admin_allowed_sources: object = None) -> dict:
     if mode not in {"proof", "network"}:
         raise ValueError("Invalid mode")
-    if firewall_type not in {"ubuntu", "checkpoint-byol"}:
+    if firewall_type not in {"ubuntu", *CHECKPOINT_TYPES}:
         raise ValueError("Invalid firewall type")
     sources = admin_sources([] if admin_allowed_sources is None else admin_allowed_sources)
-    if sources and firewall_type != "checkpoint-byol":
+    if sources and firewall_type not in CHECKPOINT_TYPES:
         raise ValueError("Public admin sources require Check Point")
     body = {"mode": mode, "region": "eastus2", "tier": "lab"}
     if mode == "network":
@@ -393,9 +394,10 @@ def run(env: dict) -> dict:
     if template is not None:
         validate_connection_template(template)
     az(["login", "--identity", "--client-id", client, "--allow-no-subscriptions"], deadline, "none")
-    if firewall_type == "checkpoint-byol":
-        available = request(url, resource, CHECKPOINT_READINESS, deadline, auth=auth)
-        if available != {"firewallType": "checkpoint-byol", "status": "ready"}:
+    if firewall_type in CHECKPOINT_TYPES:
+        available = request(url, resource, CHECKPOINT_READINESS.replace("checkpoint-byol", firewall_type),
+                            deadline, auth=auth)
+        if available != {"firewallType": firewall_type, "status": "ready"}:
             raise FirewallUnavailable("Check Point deployment is not available")
     scope = customer_scope(env, deadline) if (
         mode == "network" or env.get("FAAS_VALIDATE_CUSTOMER_SCOPE", "false").lower() == "true") else None
