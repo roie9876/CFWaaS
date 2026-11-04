@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "status": "draft",
+    "executionApproved": false,
+    "temporaryApplicationApprovedRun": null
+  },
+  "inputs": {
+    "purpose": "Template only; replace with an explicitly reviewed environment-specific plan",
+    "providerAccount": "A",
+    "customerAccount": "B"
+  },
+  "plan": {
+    "firewallSimulators": 2,
+    "privateWorkloads": 6,
+    "retention": "keep",
+    "approvalRequired": true
+  }
+}

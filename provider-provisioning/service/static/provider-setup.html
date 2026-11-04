@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check Point FaaS provider setup</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+header { border-bottom: 1px solid var(--cp-border); background: var(--cp-surface); padding: 24px max(24px, calc((100vw - 900px)/2)); }
+main { max-width: 948px; padding: 24px; margin: auto; }
+h1 { margin: 4px 0; font-size: 28px; } h2 { font-size: 19px; margin: 0 0 12px; }
+p { margin: 8px 0; } .muted, small { color: var(--cp-text-muted); }
+.brand { color: var(--cp-accent); font-weight: 700; font-size: 12px; letter-spacing: 1px; }
+.card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+.warning { border-left: 4px solid var(--cp-warning); }
+button { font: inherit; border-radius: 0.625rem; padding: 10px 16px; border: 1px solid var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); cursor: pointer; }
+button:hover { background: var(--cp-accent-hover); } button:disabled { opacity: .55; cursor: wait; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 3px; }
+a { color: var(--cp-link); } code { font: 20px Consolas, "Courier New", Courier, monospace; }
+#notice { min-height: 28px; color: var(--cp-text-muted); } #notice.error { color: var(--cp-danger); }
+#notice.success { color: var(--cp-success); } ul { padding-left: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">CHECK POINT / FAAS</div>
+  <h1>Set up the provider platform</h1>
+  <p class="muted">A provider-tenant administrator signs in and approves this one-time setup.</p>
+</header>
+<main>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <section class="card warning">
+    <h2>Review before you sign in</h2>
+    <p>This setup requests provider-tenant Microsoft Graph delegated permissions to manage applications and app-role assignments. It then grants these <strong>application</strong> permissions to the FaaS management identity:</p>
+    <ul><li>Application.ReadWrite.OwnedBy</li><li>Application.Read.All</li><li>AppRoleAssignment.ReadWrite.All</li></ul>
+    <p>These are privileged provider-directory permissions. A suitably authorized Entra administrator must review and approve the Microsoft sign-in prompt. No customer tenant access is requested.</p>
+    <p>The management app enables ID tokens for App Service's hybrid sign-in flow; implicit access tokens remain disabled.</p>
+    <button id="signin" type="button">Sign in and review permissions</button>
+  </section>
+  <section id="device" class="card" hidden>
+    <h2>Complete Microsoft sign-in</h2>
+    <p>Open the Microsoft page, enter this code and sign in using the provider administrator account:</p>
+    <p><code id="user-code"></code></p>
+    <p><a id="verification" target="_blank" rel="noopener noreferrer">Open Microsoft sign-in</a></p>
+    <p><small>Only enter the code shown on this page. Confirm the application name and requested permissions on Microsoft's sign-in screen.</small></p>
+  </section>
+  <section id="confirm" class="card" hidden>
+    <h2>Create provider setup</h2>
+    <p>Sign-in succeeded. Continue to create the provider API and management identities, grant the listed Graph application permissions, and save the generated management credential and NVA SSH key in the private provider Key Vault.</p>
+    <p>No secret or private key will be placed in the deployment link. An interrupted or uncertain directory operation stops for review rather than silently creating a duplicate.</p>
+    <button id="create" type="button">Create provider setup</button>
+  </section>
+  <section id="installation" class="card" hidden>
+    <h2>Deploy provider platform</h2>
+    <p>The provider identities are prepared. Open the Azure deployment form to select the provider resource groups and create the hosting resources.</p>
+    <p><a id="installer" target="_blank" rel="noopener noreferrer">Open provider deployment wizard</a></p>
+    <p id="expiry" class="muted"></p>
+    <p><small>The link is short-lived and contains read-only artifact access, not an API credential. Deployment creates billable Azure resources.</small></p>
+  </section>
+</main>
+<script>
+"use strict";
+const notice = document.getElementById("notice");
+let timer;
+function message(text, kind = "") { notice.textContent = text; notice.className = kind; }
+async function post(path, body = {}) {
+  const response = await fetch(path, {method: "POST", credentials: "same-origin", cache: "no-store",
+    headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const result = await response.json();
+  if (!response.ok) throw new Error(typeof result.detail === "string" ? result.detail : "SetupRequestFailed");
+  return result;
+}
+async function poll() {
+  try {
+    const result = await post("/setup/poll");
+    if (result.status === "Waiting") {
+      timer = setTimeout(poll, Math.max(1000, result.retryAfter * 1000));
+      return;
+    }
+    if (result.status !== "SignedIn") throw new Error("UnexpectedSignInStatus");
+    document.getElementById("device").hidden = true;
+    document.getElementById("confirm").hidden = false;
+    message("Provider administrator sign-in completed.", "success");
+  } catch (error) {
+    message(error.message + ". Restart sign-in if the session expired.", "error");
+    document.getElementById("signin").disabled = false;
+  }
+}
+document.getElementById("signin").addEventListener("click", async event => {
+  clearTimeout(timer); event.target.disabled = true;
+  document.getElementById("confirm").hidden = true;
+  try {
+    const result = await post("/setup/signin");
+    const uri = new URL(result.verificationUri);
+    if (!["https://microsoft.com/devicelogin", "https://login.microsoft.com/device"].includes(uri.href)) {
+      throw new Error("UnexpectedMicrosoftSignInAddress");
+    }
+    document.getElementById("user-code").textContent = result.userCode;
+    document.getElementById("verification").href = uri.href;
+    document.getElementById("device").hidden = false;
+    message("Waiting for provider administrator sign-in...");
+    timer = setTimeout(poll, 5000);
+  } catch (error) { event.target.disabled = false; message(error.message, "error"); }
+});
+document.getElementById("create").addEventListener("click", async event => {
+  event.target.disabled = true;
+  message("Creating and verifying provider identities. Do not refresh this page...");
+  try {
+    const result = await post("/setup/create", {confirmGraphPermissions: true});
+    const uri = new URL(result.portalUrl);
+    if (uri.origin !== "https://portal.azure.com") throw new Error("UnexpectedPortalAddress");
+    document.getElementById("installer").href = uri.href;
+    document.getElementById("expiry").textContent = "Link expires " + result.expiresAt;
+    document.getElementById("confirm").hidden = true;
+    document.getElementById("installation").hidden = false;
+    message("Provider setup is ready for Azure deployment.", "success");
+  } catch (error) {
+    message(error.message + ". Reauthenticate before retrying; uncertain writes require review.", "error");
+    document.getElementById("signin").disabled = false;
+  }
+});
+window.addEventListener("pagehide", () => clearTimeout(timer));
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "planId": "ipsec-vwan-routing-experiment",
+    "status": "draft",
+    "executionApproved": false,
+    "retention": "not-approved",
+    "enforcedBillingCap": false
+  },
+  "inputs": {
+    "providerAccount": "A",
+    "customerAccount": "B",
+    "purpose": "Template only; obtain reviewed scope, costs, secret handling and explicit cleanup/retention authorization"
+  },
+  "plan": {
+    "simulatorOnly": true,
+    "providerVms": 1,
+    "privateCustomerVms": 2,
+    "customerVwanVpnGateway": 1,
+    "approvalRequired": true
+  }
+}

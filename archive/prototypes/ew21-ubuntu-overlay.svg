@@ -1,0 +1,713 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" style="background: transparent; background-color: transparent; color-scheme: light;" version="1.1" width="1944px" height="1603px" viewBox="0 0 1944 1603">
+  <defs>
+    <symbol id="mx-image-1hhu9j8" viewBox="0 0 80 80">
+      <svg id="icon-0-shape-0" width="80" height="80" viewBox="0 0 18 16.629999" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-0-shape-1">
+          <linearGradient id="icon-0-shape-2" x1="8.8800001" y1="12.21" x2="8.8800001" y2="0.20999999" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0078d4" id="icon-0-shape-3" />
+            <stop offset="0.82" stop-color="#5ea0ef" id="icon-0-shape-4" />
+          </linearGradient>
+          <linearGradient id="icon-0-shape-5" x1="8.8800001" y1="16.84" x2="8.8800001" y2="12.21" gradientUnits="userSpaceOnUse">
+            <stop offset="0.15" stop-color="#ccc" id="icon-0-shape-6" />
+            <stop offset="1" stop-color="#707070" id="icon-0-shape-7" />
+          </linearGradient>
+        </defs>
+        <title id="icon-0-shape-8">Icon-compute-21</title>
+        <rect x="0" y="0" width="18" height="12" rx="0.60000002" id="icon-0-shape-9" style="fill:url(#icon-0-shape-2)" />
+        <polygon points="8.88,9.71 8.88,6.21 11.88,4.46 11.88,7.95 " id="icon-0-shape-10" style="fill:#50e6ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,4.46 8.88,2.71 11.88,4.46 8.88,6.22 " id="icon-0-shape-11" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,7.95 5.88,4.46 8.88,6.22 8.88,9.71 " id="icon-0-shape-12" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 5.88,7.95 8.88,6.21 " id="icon-0-shape-13" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 11.88,7.95 8.88,6.21 " id="icon-0-shape-14" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <path d="M 12.61,15.63 C 10.83,15.35 10.76,14.07 10.76,12 H 7.23 c 0,2.07 -0.06,3.35 -1.84,3.63 a 1,1 0 0 0 -0.89,1 h 9 a 1,1 0 0 0 -0.89,-1 z" id="icon-0-shape-15" style="fill:url(#icon-0-shape-5)" />
+      </svg>
+    </symbol>
+    <symbol id="mx-image-4zvl3h" viewBox="0 0 32 32" preserveAspectRatio="none">
+      <svg id="icon-1-shape-0" width="32" height="32" viewBox="0 0 17 15" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-1-shape-1">
+          <linearGradient id="icon-1-shape-2" x1="9.0100002" y1="16.5" x2="9.0100002" y2="1.5" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#5e9641" id="icon-1-shape-3" />
+            <stop offset="0.34" stop-color="#6baa42" id="icon-1-shape-4" />
+            <stop offset="0.67" stop-color="#73b743" id="icon-1-shape-5" />
+            <stop offset="1" stop-color="#76bb43" id="icon-1-shape-6" />
+          </linearGradient>
+        </defs>
+        <title id="icon-1-shape-7">Icon-networking-80</title>
+        <path d="m 15.39,1.41 h 1.27 A 0.34,0.34 0 0 1 17,1.75 v 3.5 a 0.34,0.34 0 0 1 -0.34,0.34 h -1.27 z" id="icon-1-shape-8" style="fill:#ffca00" />
+        <path d="m 15.39,7.5 h 1.27 A 0.34,0.34 0 0 1 17,7.84 v 5.86 a 0.34,0.34 0 0 1 -0.34,0.34 h -1.27 z" id="icon-1-shape-9" style="fill:#ffca00" />
+        <rect x="1.6300001" y="0" width="13.76" height="15" rx="0.69" id="icon-1-shape-10" style="fill:url(#icon-1-shape-2)" />
+        <path d="M 5.4,11.4 H 4.69 A 0.2,0.2 0 0 1 4.5,11.19 V 2.84 A 0.19,0.19 0 0 1 4.69,2.64 H 6.62 A 0.19,0.19 0 0 1 6.81,2.84 0.2,0.2 0 0 1 6.62,3.05 H 4.88 v 7.93 H 5.4 A 0.2,0.2 0 0 1 5.59,11.19 0.21,0.21 0 0 1 5.4,11.4 Z" id="icon-1-shape-11" style="fill:#b4ec36" />
+        <path d="M 5.5,12.42 H 3.9 A 0.2,0.2 0 0 1 3.71,12.21 L 3.58,1.88 A 0.2,0.2 0 0 1 3.64,1.73 0.16,0.16 0 0 1 3.77,1.67 H 6.62 V 2.08 H 3.97 L 4.09,12 H 5.5 Z" id="icon-1-shape-12" style="fill:#b4ec36" />
+        <path d="M 11.5,11.5 H 9.91 A 0.19,0.19 0 0 1 9.77,11.43 0.18,0.18 0 0 1 9.71,11.29 V 6.4 A 0.19,0.19 0 0 1 9.9,6.2 h 0.91 V 3.95 h 0.38 V 6.39 A 0.2,0.2 0 0 1 11.01,6.6 H 10.1 v 4.42 h 1.4 z" id="icon-1-shape-13" style="fill:#b4ec36" />
+        <rect x="6.5700002" y="0.78999996" width="6.1399999" height="3.1099999" rx="0.25999999" id="icon-1-shape-14" style="fill:#365615" />
+        <rect x="9.29" y="-8.3500004" width="4.9000001" height="1.09" rx="0.25999999" transform="rotate(90)" id="icon-1-shape-15" style="fill:#365615" />
+        <rect x="9.3100004" y="-6.4899998" width="4.9000001" height="1.09" rx="0.25999999" transform="rotate(90)" id="icon-1-shape-16" style="fill:#365615" />
+        <rect x="9.3099995" y="-12.47" width="4.9000001" height="1.09" rx="0.25999999" transform="rotate(90)" id="icon-1-shape-17" style="fill:#f2f2f2" />
+        <ellipse cx="7.6099997" cy="6.5600004" rx="1.04" ry="1.12" id="icon-1-shape-18" style="fill:#f2f2f2" />
+        <path d="M 1.61,10.75 H 0.34 A 0.34,0.34 0 0 1 0,10.45 L 0,4.59 A 0.34,0.34 0 0 1 0.34,4.25 h 1.27 z" id="icon-1-shape-19" style="fill:#3b3b3b" />
+      </svg>
+    </symbol>
+  </defs>
+  <g>
+    <g data-cell-id="0">
+      <g data-cell-id="1">
+        <g data-cell-id="title">
+          <g>
+            <rect x="1" y="1" width="1940" height="65" rx="1.95" ry="1.95" fill="#ffffff" stroke="#ffffff" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="45" fill="#243746" font-family="Arial" font-size="27px" style="fill: rgb(36, 55, 70);">ARCHIVED EW-21 | Ubuntu + WireGuard | Not a deployment candidate</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="isolation">
+          <g>
+            <rect x="1" y="76" width="1940" height="65" rx="1.95" ry="1.95" fill="#fff9cc" stroke="#d6b656" stroke-width="2" pointer-events="all" style="fill: rgb(255, 249, 204); stroke: rgb(214, 182, 86);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="111" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                <tspan x="13" y="111">ONE physical tenant / subscription; provider and customer below are logical roles.</tspan>
+                <tspan x="13" y="133">Thick outer boundaries = roles; shaded boxes = VNets; dashed boxes = subnets. No cross-side peering.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="provider">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1" y="161" width="920" height="1120" rx="27.6" ry="27.6" fill="#e6f2ff" stroke="#0078d4" stroke-width="3" pointer-events="all" style="fill: rgb(230, 242, 255); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="201" fill="#243746" font-family="Arial" font-size="23px" style="fill: rgb(36, 55, 70);">FWaaS PROVIDER | logical lab role</text>
+            </g>
+          </g>
+          <g data-cell-id="vnet-p">
+            <g>
+              <rect x="31" y="236" width="860" height="1040" rx="25.8" ry="25.8" fill="#d9eaff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(217, 234, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="43" y="271" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Provider hub VNet | 10.202.0.0/16</text>
+              </g>
+            </g>
+            <g data-cell-id="wan-p">
+              <g>
+                <rect x="66" y="306" width="790" height="200" rx="6" ry="6" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="78" y="341" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">wan | 10.202.10.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="router-p-card">
+                <g transform="translate(0.5,0.5)">
+                  <rect x="86" y="341" width="750" height="145" rx="4.35" ry="4.35" fill="#f7fbff" stroke="#aab8c2" pointer-events="all" style="fill: rgb(247, 251, 255); stroke: rgb(170, 184, 194);" />
+                </g>
+                <g>
+                  <g>
+                    <text x="98" y="376" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">vm-overlay-p | Router | 3 Azure NICs + 2 WireGuard interfaces</text>
+                  </g>
+                </g>
+                <g data-cell-id="router-p">
+                  <g>
+                    <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="98" y="378" width="80" height="80" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="138" y="483" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">Ubuntu</text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="p-inspect">
+                  <g>
+                    <rect x="206" y="381" width="250" height="40" rx="1.2" ry="1.2" fill="#ffffff" stroke="#ff8c00" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 140, 0);" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="332" y="396" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="332" y="396">wg-inspect</tspan>
+                        <tspan x="332" y="418">10.254.21.2</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="p-wan-nic">
+                  <g>
+                    <rect x="206" y="431" width="250" height="45" rx="1.35" ry="1.35" fill="#ffffff" stroke="#0078d4" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 120, 212);" />
+                    <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="211" y="437.5" width="32" height="32" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="349" y="449" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="349" y="449">vm-overlay-p | WAN NIC</tspan>
+                        <tspan x="349" y="471">10.202.10.4</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="p-deliver">
+                  <g>
+                    <rect x="516" y="431" width="250" height="40" rx="1.2" ry="1.2" fill="#ffffff" stroke="#ff8c00" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 140, 0);" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="642" y="446" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="642" y="446">wg-deliver</tspan>
+                        <tspan x="642" y="468">10.254.21.5</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="pre-p">
+              <g>
+                <rect x="66" y="541" width="340" height="280" rx="8.4" ry="8.4" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="78" y="576" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">PRE | 10.202.20.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="p-pre-nic">
+                <g>
+                  <rect x="96" y="596" width="280" height="65" rx="1.95" ry="1.95" fill="#ffffff" stroke="#0078d4" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 120, 212);" />
+                  <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="101" y="612.5" width="32" height="32" />
+                </g>
+                <g>
+                  <g>
+                    <text x="257" y="624" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="257" y="624">vm-overlay-p | PRE NIC</tspan>
+                      <tspan x="257" y="646">10.202.20.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="fw-pre-nic">
+                <g>
+                  <rect x="96" y="726" width="280" height="65" rx="1.95" ry="1.95" fill="#ffffff" stroke="#00897b" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 137, 123);" />
+                  <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="101" y="742.5" width="32" height="32" />
+                </g>
+                <g>
+                  <g>
+                    <text x="257" y="754" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="257" y="754">vm-overlay-fw | PRE NIC</tspan>
+                      <tspan x="257" y="776">10.202.20.5</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="post-p">
+              <g>
+                <rect x="456" y="541" width="400" height="280" rx="8.4" ry="8.4" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="468" y="576" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">POST | 10.202.30.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="p-post-nic">
+                <g>
+                  <rect x="486" y="596" width="320" height="65" rx="1.95" ry="1.95" fill="#ffffff" stroke="#0078d4" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 120, 212);" />
+                  <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="491" y="612.5" width="32" height="32" />
+                </g>
+                <g>
+                  <g>
+                    <text x="667" y="624" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="667" y="624">vm-overlay-p | POST NIC</tspan>
+                      <tspan x="667" y="646">10.202.30.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="fw-post-nic">
+                <g>
+                  <rect x="486" y="726" width="320" height="65" rx="1.95" ry="1.95" fill="#ffffff" stroke="#00897b" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 137, 123);" />
+                  <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="491" y="742.5" width="32" height="32" />
+                </g>
+                <g>
+                  <g>
+                    <text x="667" y="754" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="667" y="754">vm-overlay-fw | POST NIC</tspan>
+                      <tspan x="667" y="776">10.202.30.5</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="fw-card">
+              <g>
+                <rect x="66" y="871" width="790" height="160" rx="4.8" ry="4.8" fill="#e8f5f2" stroke="#00897b" stroke-width="2" pointer-events="all" style="fill: rgb(232, 245, 242); stroke: rgb(0, 137, 123);" />
+              </g>
+              <g>
+                <g>
+                  <text x="78" y="908" fill="#243746" font-family="Arial" font-size="20px" style="fill: rgb(36, 55, 70);">vm-overlay-fw | Plain firewall | 2 Azure NICs</text>
+                </g>
+              </g>
+              <g data-cell-id="fw">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="83" y="908" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="123" y="1013" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">NO VPN</text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="fw-nic-summary">
+                <g>
+                  <rect x="206" y="916" width="620" height="95" rx="2.85" ry="2.85" fill="#e8f5f2" stroke="#e8f5f2" stroke-width="0.1" pointer-events="all" style="fill: rgb(232, 245, 242); stroke: rgb(232, 245, 242);" />
+                </g>
+                <g>
+                  <g>
+                    <text x="218" y="951" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                      <tspan x="218" y="951">PRE: nic-overlay-fw-0 | 10.202.20.5</tspan>
+                      <tspan x="218" y="973">POST: nic-overlay-fw-1 | 10.202.30.5</tspan>
+                      <tspan x="218" y="995">Both NICs belong to this VM; no tunnel interfaces.</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="p-notes">
+              <g transform="translate(0.5,0.5)">
+                <rect x="66" y="1061" width="790" height="160" rx="4.8" ry="4.8" fill="#f7fbff" stroke="#aab8c2" pointer-events="all" style="fill: rgb(247, 251, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="78" y="1096" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                    <tspan x="78" y="1096">FIXED PROVIDER: RFC1918 private IPv4 coverage (not a customer allocation).</tspan>
+                    <tspan x="78" y="1118">PRE UDR -&gt; firewall 10.202.20.5; POST UDR -&gt; router 10.202.30.4.</tspan>
+                    <tspan x="78" y="1140">WG AllowedIPs 0.0.0.0/0; explicit service tables, not Internet default.</tspan>
+                    <tspan x="78" y="1162">No per-VNet provider route, NSG or WireGuard update.</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="customer">
+          <g transform="translate(0.5,0.5)">
+            <rect x="961" y="161" width="980" height="1120" rx="29.4" ry="29.4" fill="#fff4e6" stroke="#ff8c00" stroke-width="3" pointer-events="all" style="fill: rgb(255, 244, 230); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g>
+              <text x="973" y="201" fill="#243746" font-family="Arial" font-size="23px" style="fill: rgb(36, 55, 70);">FWaaS CUSTOMER | logical lab role</text>
+            </g>
+          </g>
+          <g data-cell-id="vnet-c">
+            <g>
+              <rect x="991" y="236" width="920" height="500" rx="15" ry="15" fill="#ffead1" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1003" y="271" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Customer hub VNet | 10.201.0.0/16</text>
+              </g>
+            </g>
+            <g data-cell-id="wan-c">
+              <g>
+                <rect x="1021" y="306" width="860" height="200" rx="6" ry="6" fill="#fff7ed" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 247, 237); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1033" y="341" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">wan / source ingress | 10.201.10.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="router-c-card">
+                <g transform="translate(0.5,0.5)">
+                  <rect x="1041" y="341" width="820" height="145" rx="4.35" ry="4.35" fill="#fffaf4" stroke="#aab8c2" pointer-events="all" style="fill: rgb(255, 250, 244); stroke: rgb(170, 184, 194);" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1053" y="376" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">vm-overlay-c | Ubuntu router | 2 NICs + 2 WireGuard interfaces</text>
+                  </g>
+                </g>
+                <g data-cell-id="c-inspect">
+                  <g>
+                    <rect x="1061" y="381" width="250" height="40" rx="1.2" ry="1.2" fill="#ffffff" stroke="#ff8c00" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 140, 0);" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="1187" y="396" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="1187" y="396">wg-inspect</tspan>
+                        <tspan x="1187" y="418">10.254.21.1</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="c-deliver">
+                  <g>
+                    <rect x="1061" y="431" width="250" height="40" rx="1.2" ry="1.2" fill="#ffffff" stroke="#ff8c00" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 140, 0);" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="1187" y="446" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="1187" y="446">wg-deliver</tspan>
+                        <tspan x="1187" y="468">10.254.21.6</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="c-ingress-nic">
+                  <g>
+                    <rect x="1416" y="381" width="250" height="40" rx="1.2" ry="1.2" fill="#ffffff" stroke="#5c2d91" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(92, 45, 145);" />
+                    <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="1421" y="385" width="32" height="32" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="1562" y="396" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                        <tspan x="1562" y="396">Workload ingress NIC</tspan>
+                        <tspan x="1562" y="418">10.201.10.4</tspan>
+                      </text>
+                    </g>
+                  </g>
+                </g>
+                <g data-cell-id="router-c">
+                  <g>
+                    <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="1733" y="378" width="80" height="80" />
+                  </g>
+                  <g>
+                    <g>
+                      <text x="1773" y="483" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">Ubuntu</text>
+                    </g>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="post-c">
+              <g>
+                <rect x="1021" y="556" width="860" height="130" rx="3.9" ry="3.9" fill="#fff7ed" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 247, 237); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1033" y="591" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">post / destination delivery | 10.201.20.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="c-post-nic">
+                <g>
+                  <rect x="1361" y="601" width="280" height="55" rx="1.65" ry="1.65" fill="#ffffff" stroke="#00897b" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 137, 123);" />
+                  <use href="#mx-image-4zvl3h" ns1:href="#mx-image-4zvl3h" x="1366" y="612.5" width="32" height="32" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1522" y="624" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1522" y="624">7 | Customer delivery table</tspan>
+                      <tspan x="1522" y="646">10.201.20.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="vnet-a">
+            <g>
+              <rect x="1021" y="811" width="400" height="270" rx="8.1" ry="8.1" fill="#ffead1" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1033" y="846" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Workload VNet A | 10.203.0.0/16</text>
+              </g>
+            </g>
+            <g data-cell-id="subnet-a">
+              <g>
+                <rect x="1041" y="881" width="360" height="170" rx="5.1" ry="5.1" fill="#fff7ed" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 247, 237); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1053" y="916" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">lan | 10.203.0.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="vm-a">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="1093" y="918" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1133" y="1023" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1133" y="1023">vm-overlay-a</tspan>
+                      <tspan x="1133" y="1045">10.203.0.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="udr-a">
+                <g>
+                  <rect x="1221" y="946" width="150" height="70" rx="2.1" ry="2.1" fill="#ffffff" stroke="#5c2d91" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(92, 45, 145);" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1297" y="965" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1297" y="965">1 | UDR: other /16</tspan>
+                      <tspan x="1297" y="987">next hop</tspan>
+                      <tspan x="1297" y="1009">10.201.10.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="vnet-b">
+            <g>
+              <rect x="1481" y="811" width="400" height="270" rx="8.1" ry="8.1" fill="#ffead1" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1493" y="846" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Workload VNet B | 10.204.0.0/16</text>
+              </g>
+            </g>
+            <g data-cell-id="subnet-b">
+              <g>
+                <rect x="1501" y="881" width="360" height="170" rx="5.1" ry="5.1" fill="#fff7ed" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 247, 237); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1513" y="916" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">lan | 10.204.0.0/24</text>
+                </g>
+              </g>
+              <g data-cell-id="vm-b">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="1553" y="918" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1593" y="1023" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1593" y="1023">vm-overlay-b</tspan>
+                      <tspan x="1593" y="1045">10.204.0.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="udr-b">
+                <g>
+                  <rect x="1681" y="946" width="150" height="70" rx="2.1" ry="2.1" fill="#ffffff" stroke="#5c2d91" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(92, 45, 145);" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1757" y="965" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1757" y="965">UDR: other /16</tspan>
+                      <tspan x="1757" y="987">next hop</tspan>
+                      <tspan x="1757" y="1009">10.201.10.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="peering-a">
+          <g>
+            <path d="M 1175 736 L 1175 765 Q 1175 771 1181 771 L 1215 771 Q 1221 771 1221 777 L 1221 811" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="1148" y="761" width="107" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1201" y="779">VNet peering</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="peering-b">
+          <g>
+            <path d="M 1727 736 L 1727 765 Q 1727 771 1721 771 L 1687 771 Q 1681 771 1681 777 L 1681 811" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="1648" y="761" width="107" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1701" y="779">VNet peering</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="source-udr">
+          <g>
+            <path d="M 1296 946 L 1296 797 Q 1296 791 1302 791 L 1915 791 Q 1921 791 1921 785 L 1921 537 Q 1921 531 1915 531 L 1507 531 Q 1501 531 1501 525 L 1501 427 Q 1501 421 1507 421 L 1530.76 421" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 1538.76 421 L 1530.76 425 L 1530.76 417 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+        </g>
+        <g data-cell-id="c-pre">
+          <g>
+            <path d="M 1416 401 L 1321.24 401" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 1313.24 401 L 1321.24 397 L 1321.24 405 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="1327" y="391" width="74" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1363" y="409">PBR 100</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="tunnel-1">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 1061 401 L 468.35 401" fill="none" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(255, 140, 0);" />
+            <path d="M 459.35 401 L 468.35 396.5 L 468.35 405.5 Z" fill="#ff8c00" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(255, 140, 0); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g fill="#ff8c00" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(255, 140, 0);">
+              <rect fill="#ffffff" stroke="none" x="605" y="391" width="308" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="758" y="409">2 | WireGuard inspection / UDP 51820</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="p-pre">
+          <g>
+            <path d="M 206 421 L 197 421 Q 191 421 191 427 L 191 525 Q 191 531 197 531 L 420 531 Q 426 531 426 537 L 426 622.5 Q 426 628.5 420 628.5 L 386.24 628.5" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+            <path d="M 378.24 628.5 L 386.24 624.5 L 386.24 632.5 Z" fill="#0078d4" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="271" y="521" width="99" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="320" y="539">3 | PBR 100</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="to-firewall">
+          <g>
+            <path d="M 236 661 L 236 715.76" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 236 723.76 L 232 715.76 L 240 715.76 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="195" y="684" width="83" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="236" y="702">PRE UDR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="fw-egress">
+          <g>
+            <path d="M 376 758.5 L 475.76 758.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 483.76 758.5 L 475.76 762.5 L 475.76 754.5 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="347" y="688" width="169" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="431" y="706.5">4 | firewall inspection</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="post-udr">
+          <g>
+            <path d="M 646 726 L 646 671.24" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 646 663.24 L 650 671.24 L 642 671.24 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="599" y="683" width="95" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="646" y="701">POST UDR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="p-delivery">
+          <g>
+            <path d="M 806 628.5 L 806 624.75 Q 806 621 812 621 L 865 621 Q 871 621 871 615 L 871 537 Q 871 531 865 531 L 647 531 Q 641 531 641 525 L 641 481.24" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 641 473.24 L 645 481.24 L 637 481.24 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="759" y="521" width="99" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="807.5" y="539">5 | PBR 200</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="tunnel-2">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 766 451 L 1048.65 451" fill="none" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(255, 140, 0);" />
+            <path d="M 1057.65 451 L 1048.65 455.5 L 1048.65 446.5 Z" fill="#ff8c00" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(255, 140, 0); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g fill="#ff8c00" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(255, 140, 0);">
+              <rect fill="#ffffff" stroke="none" x="771" y="441" width="288" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="914" y="459">6 | WireGuard delivery / UDP 51821</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="c-delivery">
+          <g>
+            <path d="M 1186 471 L 1186 525 Q 1186 531 1192 531 L 1335 531 Q 1341 531 1341 537 L 1341 622.5 Q 1341 628.5 1345.88 628.5 L 1350.76 628.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 1358.76 628.5 L 1350.76 632.5 L 1350.76 624.5 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="1256" y="521" width="74" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1292" y="539">PBR 200</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="destination">
+          <g>
+            <path d="M 1501 656 L 1501 740 Q 1501 746 1495 746 L 1457 746 Q 1451 746 1451 752 L 1451 952 Q 1451 958 1457 958 L 1542.76 958" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 1550.76 958 L 1542.76 962 L 1542.76 954 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="p-pre-owner">
+          <g>
+            <path d="M 86 471.5 L 86 476.25 Q 86 481 83.5 481 L 82.25 481 Q 81 481 81 487 L 81 605 Q 81 611 87 611 L 91.5 611 Q 96 611 96 610 L 96 609" fill="none" stroke="#64748b" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(100, 116, 139);" />
+          </g>
+        </g>
+        <g data-cell-id="p-post-owner">
+          <g>
+            <path d="M 836 471.5 L 836 476.25 Q 836 481 842 481 L 885 481 Q 891 481 891 487 L 891 603 Q 891 609 885 609 L 806 609" fill="none" stroke="#64748b" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(100, 116, 139);" />
+          </g>
+        </g>
+        <g data-cell-id="fw-pre-owner">
+          <g>
+            <path d="M 224 871 L 224 837 Q 224 831 230 831 L 233 831 Q 236 831 236 825 L 236 791" fill="none" stroke="#64748b" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(100, 116, 139);" />
+          </g>
+        </g>
+        <g data-cell-id="fw-post-owner">
+          <g>
+            <path d="M 698 871 L 698 837 Q 698 831 692 831 L 652 831 Q 646 831 646 825 L 646 791" fill="none" stroke="#64748b" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(100, 116, 139);" />
+          </g>
+        </g>
+        <g data-cell-id="legend">
+          <g>
+            <rect x="1" y="1301" width="940" height="130" rx="3.9" ry="3.9" fill="#ffffff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="1336" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                <tspan x="13" y="1336">LEGEND</tspan>
+                <tspan x="13" y="1358">Blue dashed = ordinary peering; purple dotted = UDR / policy steering.</tspan>
+                <tspan x="13" y="1380">Orange = encrypted transport; teal = post-inspection delivery.</tspan>
+                <tspan x="13" y="1402">Grey dashed, no arrows = NIC ownership, NOT packet flow.</tspan>
+                <tspan x="13" y="1424">NIC labels name their VM; router = 3 NICs, firewall = 2 NICs.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="reading">
+          <g>
+            <rect x="961" y="1301" width="980" height="130" rx="3.9" ry="3.9" fill="#ffffff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+          </g>
+          <g>
+            <g>
+              <text x="973" y="1336" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                <tspan x="973" y="1336">READ THIS AS A -&gt; B; B -&gt; A AND RESPONSES USE THE SAME PIPELINE.</tspan>
+                <tspan x="973" y="1358">4 VNets | 5 Ubuntu VMs | 9 NICs | 2 tunnels | original inner addresses.</tspan>
+                <tspan x="973" y="1380">No Azure VPN gateways, cross-side peering or firewall VPN termination.</tspan>
+                <tspan x="973" y="1402">ARM test management; manual SSH via routers, operator IPv4 /32 only.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="customer-lifecycle">
+          <g>
+            <rect x="1" y="1451" width="1940" height="150" rx="4.5" ry="4.5" fill="#fff9cc" stroke="#d6b656" stroke-width="2" pointer-events="all" style="fill: rgb(255, 249, 204); stroke: rgb(214, 182, 86);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="1486" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">
+                <tspan x="13" y="1486">CUSTOMER LIFECYCLE TEST | 192.168.77.0/24 + workload VM: CREATED, TESTED, THEN REMOVED.</tspan>
+                <tspan x="13" y="1508">Customer-only: peering + UDRs + delivery-table update; deleted prefix explicitly unreachable.</tspan>
+                <tspan x="13" y="1530">24 original-source deliveries + 6 selective denials; removal/no-loop checks passed.</tspan>
+                <tspan x="13" y="1552">CAVEAT: combined runs after DNS/shutdown interruption; audited redundant DHCP rule difference after reboot.</tspan>
+                <tspan x="13" y="1574">Not an uninterrupted lifecycle or production multi-customer qualification; service/tunnel overlaps excluded.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

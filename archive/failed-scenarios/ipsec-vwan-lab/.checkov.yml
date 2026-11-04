@@ -1,0 +1,8 @@
+framework:
+  - arm
+skip-download: true
+quiet: true
+skip-check:
+  - CKV_AZURE_50
+  - CKV_AZURE_97
+  - CKV_AZURE_151

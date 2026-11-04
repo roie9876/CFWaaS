@@ -1,0 +1,32 @@
+{
+  "region": "israelcentral",
+  "networkManagerApi": "2025-09-01",
+  "networkApi": "2025-05-01",
+  "computeApi": "2025-04-01",
+  "resourceApi": "2022-09-01",
+  "image": {
+    "publisher": "Canonical",
+    "offer": "ubuntu-24_04-lts",
+    "sku": "server",
+    "version": "24.04.202609040"
+  },
+  "firewallSize": "Standard_B2s",
+  "workloadSize": "Standard_B1ms",
+  "hostEncryption": false,
+  "testTimeoutSeconds": 7200,
+  "retention": "keep",
+  "groups": [
+    {
+      "name": "group1",
+      "firewallPrefix": "172.22.1.0/24",
+      "firewallIp": "172.22.1.4",
+      "workloadPrefixes": ["10.101.0.0/16", "10.102.0.0/16", "10.103.0.0/16"]
+    },
+    {
+      "name": "group2",
+      "firewallPrefix": "172.22.2.0/24",
+      "firewallIp": "172.22.2.4",
+      "workloadPrefixes": ["10.201.0.0/16", "10.202.0.0/16", "10.203.0.0/16"]
+    }
+  ]
+}

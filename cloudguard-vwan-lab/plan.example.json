@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "status": "draft",
+    "executionApproved": false,
+    "approvalScope": "Template only; no deployment is authorized"
+  },
+  "inputs": {
+    "providerAccount": "A",
+    "customerAccount": "B"
+  },
+  "plan": {
+    "nativeCloudGuard": true,
+    "customerWorkloadVnets": 2,
+    "approvalRequired": true
+  }
+}

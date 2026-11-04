@@ -1,0 +1,539 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" style="background: transparent; background-color: transparent; color-scheme: light;" version="1.1" width="2124px" height="1301px" viewBox="0 0 2124 1301">
+  <defs>
+    <symbol id="mx-image-1bgj0zf" viewBox="0 0 80 80">
+      <svg width="80" height="80" viewBox="0 0 16.658001 16.658001" version="1.1" id="icon-0-shape-0" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-0-shape-1">
+          <linearGradient id="icon-0-shape-2" x1="9" y1="17.329" x2="9" y2="0.671" gradientUnits="userSpaceOnUse" gradientTransform="translate(-0.67099953,-0.67099953)">
+            <stop offset="0" stop-color="#005ba1" id="icon-0-shape-3" />
+            <stop offset="0.15" stop-color="#0063af" id="icon-0-shape-4" />
+            <stop offset="0.439" stop-color="#006fc3" id="icon-0-shape-5" />
+            <stop offset="0.724" stop-color="#0076d0" id="icon-0-shape-6" />
+            <stop offset="1" stop-color="#0078d4" id="icon-0-shape-7" />
+          </linearGradient>
+        </defs>
+        <circle cx="8.3290005" cy="8.3290005" r="8.3290005" fill="url(#icon-0-shape-2)" id="icon-0-shape-8" style="fill:url(#icon-0-shape-2)" />
+        <path d="m 5.9290005,3.4670005 2.3,-2.3 a 0.273,0.273 0 0 1 0.387,0 l 2.2999995,2.3 a 0.122,0.122 0 0 1 -0.086,0.209 H 9.4150005 a 0.122,0.122 0 0 0 -0.122,0.123 v 2.873 a 0.1,0.1 0 0 1 -0.1,0.1 h -1.543 a 0.1,0.1 0 0 1 -0.1,-0.1 v -2.873 a 0.122,0.122 0 0 0 -0.121,-0.123 h -1.413 a 0.123,0.123 0 0 1 -0.087,-0.209 z" fill="#9cebff" id="icon-0-shape-9" />
+        <path d="m 10.915,13.191 -2.2999995,2.3 a 0.273,0.273 0 0 1 -0.387,0 l -2.3,-2.3 a 0.123,0.123 0 0 1 0.087,-0.209 h 1.414 a 0.122,0.122 0 0 0 0.122,-0.123 V 9.9860005 a 0.1,0.1 0 0 1 0.1,-0.1 h 1.544 a 0.1,0.1 0 0 1 0.1,0.1 V 12.859 a 0.122,0.122 0 0 0 0.122,0.123 H 10.829 a 0.122,0.122 0 0 1 0.086,0.209 z" fill="#9cebff" id="icon-0-shape-10" />
+        <path d="M 12.213,10.842 9.9130005,8.5420005 a 0.273,0.273 0 0 1 0,-0.387 l 2.2999995,-2.3 a 0.122,0.122 0 0 1 0.209,0.086 v 1.415 a 0.123,0.123 0 0 0 0.122,0.123 h 2.874 a 0.1,0.1 0 0 1 0.1,0.1 v 1.542 a 0.1,0.1 0 0 1 -0.1,0.1 h -2.874 a 0.122,0.122 0 0 0 -0.122,0.122 V 10.757 a 0.123,0.123 0 0 1 -0.209,0.085 z" fill="#f2f2f2" id="icon-0-shape-11" />
+        <path d="m 4.4450005,5.8560005 2.3,2.3 a 0.273,0.273 0 0 1 0,0.387 l -2.3,2.2999995 a 0.123,0.123 0 0 1 -0.209,-0.087 V 9.3410005 a 0.122,0.122 0 0 0 -0.122,-0.122 h -2.874 a 0.1,0.1 0 0 1 -0.1,-0.1 v -1.543 a 0.1,0.1 0 0 1 0.1,-0.1 h 2.874 a 0.123,0.123 0 0 0 0.122,-0.123 v -1.411 a 0.122,0.122 0 0 1 0.209,-0.086 z" fill="#f2f2f2" id="icon-0-shape-12" />
+      </svg>
+    </symbol>
+    <symbol id="mx-image-1j2vrc8" viewBox="0 0 80 80">
+      <svg id="icon-1-shape-0" width="80" height="80" viewBox="0 0 13.56 18.050442" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-1-shape-1">
+          <linearGradient id="icon-1-shape-2" x1="8.5900002" y1="-7.79" x2="9.1199999" y2="20.049999" gradientUnits="userSpaceOnUse">
+            <stop offset="0.22" stop-color="#32d4f5" id="icon-1-shape-3" />
+            <stop offset="0.47" stop-color="#31d1f3" id="icon-1-shape-4" />
+            <stop offset="0.63" stop-color="#2ec9eb" id="icon-1-shape-5" />
+            <stop offset="0.77" stop-color="#29bade" id="icon-1-shape-6" />
+            <stop offset="0.89" stop-color="#22a5cb" id="icon-1-shape-7" />
+            <stop offset="1" stop-color="#198ab3" id="icon-1-shape-8" />
+            <stop offset="1" stop-color="#198ab3" id="icon-1-shape-9" />
+          </linearGradient>
+        </defs>
+        <title id="icon-1-shape-10">Icon-networking-63</title>
+        <path d="m 12.84,8.6704425 h -1 v -3.08 a 5.81,5.81 0 0 0 -1.49,-3.92 A 4.79,4.79 0 0 0 6.69,4.4247096e-4 4.79,4.79 0 0 0 2.99,1.6704425 a 5.73,5.73 0 0 0 -1.49,3.92 v 3.08 H 0.69 a 0.7,0.7 0 0 0 -0.69,0.69 v 7.9999995 a 0.7,0.7 0 0 0 0.69,0.69 h 12.15 a 0.71,0.71 0 0 0 0.7,-0.69 V 9.3604425 a 0.71,0.71 0 0 0 -0.7,-0.69 z m -3.37,0 H 3.91 v -3.13 a 3.18,3.18 0 0 1 0.87,-2.15 2.51,2.51 0 0 1 1.88,-0.86 2.54,2.54 0 0 1 1.89,0.86 3.19,3.19 0 0 1 0.32,0.43 v 0 a 3,3 0 0 1 0.61,1.71 z" id="icon-1-shape-11" style="fill:url(#icon-1-shape-2)" />
+        <path d="M 12.87,8.6704425 H 0.7 a 0.66,0.66 0 0 0 -0.44,0.17 l 13.05,8.9999995 a 0.67,0.67 0 0 0 0.25,-0.52 V 9.3204425 a 0.71,0.71 0 0 0 -0.69,-0.65 z" id="icon-1-shape-12" style="fill:#50e6ff" />
+        <path d="m 0.72,8.6704425 h 12.16 a 0.7,0.7 0 0 1 0.45,0.17 L 0.27,17.840442 a 0.7,0.7 0 0 1 -0.25,-0.52 V 9.3204425 a 0.72,0.72 0 0 1 0.7,-0.65 z" id="icon-1-shape-13" style="opacity:0.2;fill:#ffffff" />
+        <path d="m 5.58,10.600442 1.2,-1.1999995 a 0.07,0.07 0 0 1 0.09,0 l 1.19,1.1999995 a 0.06,0.06 0 0 1 0,0.1 h -0.7 a 0.06,0.06 0 0 0 -0.06,0.06 v 1.54 a 0.06,0.06 0 0 1 -0.06,0.06 H 6.45 a 0.05,0.05 0 0 1 -0.06,-0.06 v -1.54 a 0.07,0.07 0 0 0 -0.07,-0.06 h -0.7 a 0.06,0.06 0 0 1 -0.04,-0.1 z m 2.47,5.48 -1.19,1.19 a 0.06,0.06 0 0 1 -0.09,0 l -1.19,-1.19 a 0.06,0.06 0 0 1 0,-0.1 h 0.7 a 0.07,0.07 0 0 0 0.07,-0.06 v -1.55 a 0.06,0.06 0 0 1 0.06,-0.06 h 0.74 a 0.06,0.06 0 0 1 0.06,0.06 v 1.55 a 0.06,0.06 0 0 0 0.06,0.06 h 0.7 a 0.06403124,0.06403124 0 0 1 0.08,0.1 z m -4.7,-1.55 v -0.7 a 0.06,0.06 0 0 0 -0.06,-0.06 H 1.78 a 0.06,0.06 0 0 1 -0.06,-0.06 v -0.71 a 0.06,0.06 0 0 1 0.06,-0.09 h 1.51 a 0.06,0.06 0 0 0 0.06,-0.06 v -0.7 a 0.07,0.07 0 0 1 0.11,-0.05 l 1.19,1.2 a 0.06,0.06 0 0 1 0,0.08 l -1.19,1.2 a 0.07,0.07 0 0 1 -0.11,-0.05 z m 6.93,-2.38 v 0.7 a 0.06,0.06 0 0 0 0.06,0.06 h 1.54 c 0,0 0.07,0 0.07,0.06 v 0.74 a 0.07,0.07 0 0 1 -0.07,0.06 h -1.54 a 0.06,0.06 0 0 0 -0.06,0.06 v 0.7 a 0.06,0.06 0 0 1 -0.1,0.05 l -1.19,-1.2 a 0,0 0 0 0 0,-0.08 l 1.19,-1.2 c 0,0 0.1,-0.01 0.1,0.05 z" id="icon-1-shape-14" style="fill:#ffffff" />
+      </svg>
+    </symbol>
+    <symbol id="mx-image-1hhu9j8" viewBox="0 0 80 80">
+      <svg id="icon-2-shape-0" width="80" height="80" viewBox="0 0 18 16.629999" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-2-shape-1">
+          <linearGradient id="icon-2-shape-2" x1="8.8800001" y1="12.21" x2="8.8800001" y2="0.20999999" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0078d4" id="icon-2-shape-3" />
+            <stop offset="0.82" stop-color="#5ea0ef" id="icon-2-shape-4" />
+          </linearGradient>
+          <linearGradient id="icon-2-shape-5" x1="8.8800001" y1="16.84" x2="8.8800001" y2="12.21" gradientUnits="userSpaceOnUse">
+            <stop offset="0.15" stop-color="#ccc" id="icon-2-shape-6" />
+            <stop offset="1" stop-color="#707070" id="icon-2-shape-7" />
+          </linearGradient>
+        </defs>
+        <title id="icon-2-shape-8">Icon-compute-21</title>
+        <rect x="0" y="0" width="18" height="12" rx="0.60000002" id="icon-2-shape-9" style="fill:url(#icon-2-shape-2)" />
+        <polygon points="8.88,9.71 8.88,6.21 11.88,4.46 11.88,7.95 " id="icon-2-shape-10" style="fill:#50e6ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,4.46 8.88,2.71 11.88,4.46 8.88,6.22 " id="icon-2-shape-11" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,7.95 5.88,4.46 8.88,6.22 8.88,9.71 " id="icon-2-shape-12" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 5.88,7.95 8.88,6.21 " id="icon-2-shape-13" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 11.88,7.95 8.88,6.21 " id="icon-2-shape-14" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <path d="M 12.61,15.63 C 10.83,15.35 10.76,14.07 10.76,12 H 7.23 c 0,2.07 -0.06,3.35 -1.84,3.63 a 1,1 0 0 0 -0.89,1 h 9 a 1,1 0 0 0 -0.89,-1 z" id="icon-2-shape-15" style="fill:url(#icon-2-shape-5)" />
+      </svg>
+    </symbol>
+    <style>@keyframes ge-flow-animation-U1iE4PcDAKczoOJurD88 {
+  to {
+    stroke-dashoffset: 0;
+  }
+}</style>
+  </defs>
+  <g>
+    <g data-cell-id="0">
+      <g data-cell-id="1">
+        <g data-cell-id="title">
+          <g>
+            <rect x="1" y="0" width="2100" height="55" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g fill="#243746" font-family="Arial" font-weight="bold" text-anchor="start" font-size="38px" style="fill: rgb(36, 55, 70);">
+              <text x="3" y="44">LAB-16 | Follow the route</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="summary">
+          <g>
+            <rect x="1" y="65" width="2100" height="45" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g fill="#243746" font-family="Arial" text-anchor="start" font-size="27px" style="fill: rgb(36, 55, 70);">
+              <text x="3" y="98">East-west: 10.211.0.4 -&gt; 10.212.0.4 | TCP/8080 or ICMP | original IPs, no NAT</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="provider">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1" y="140" width="1030" height="850" rx="17" ry="17" fill="#e6f2ff" stroke="#0078d4" stroke-width="3" pointer-events="all" style="fill: rgb(230, 242, 255); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#000000" font-family="Arial" font-weight="bold" text-anchor="start" font-size="30px" style="fill: rgb(0, 0, 0);">
+              <text x="23" y="190">PROVIDER | tenant A</text>
+            </g>
+          </g>
+          <g data-cell-id="rs-card">
+            <g>
+              <rect x="51" y="230" width="550" height="170" rx="25.5" ry="25.5" fill="#f3e5f5" stroke="#9575cd" stroke-width="2" pointer-events="all" style="fill: rgb(243, 229, 245); stroke: rgb(149, 117, 205);" />
+            </g>
+            <g data-cell-id="route-server">
+              <g>
+                <use href="#mx-image-1bgj0zf" ns1:href="#mx-image-1bgj0zf" x="76" y="275" width="80" height="80" />
+              </g>
+            </g>
+            <g data-cell-id="rs-routes">
+              <g>
+                <rect x="181" y="255" width="405" height="120" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#5c2d91" font-family="Arial" text-anchor="start" font-size="25px" style="fill: rgb(92, 45, 145);">
+                  <text x="183" y="296.5">Route Server | ASN 65515</text>
+                  <text x="183" y="326.5">172.20.254.4 / .5</text>
+                  <text x="183" y="356.5">Receives only /0 from Check Point</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="pi-card">
+            <g>
+              <rect x="691" y="240" width="310" height="280" rx="42" ry="42" fill="#ffffff" stroke="#7a9db7" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(122, 157, 183);" />
+            </g>
+            <g data-cell-id="provider-ingress-gw">
+              <g>
+                <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="806" y="260" width="80" height="80" />
+              </g>
+            </g>
+            <g data-cell-id="pi-routes">
+              <g>
+                <rect x="701" y="350" width="290" height="155" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(36, 55, 70);">
+                  <text x="846" y="394">Provider ingress VPN</text>
+                  <text x="846" y="424">172.20.255.4 / .5</text>
+                  <text x="846" y="454">BGP /0 -&gt; 172.22.10.4</text>
+                  <text x="846" y="484">UDR table: empty</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="fw-card">
+            <g transform="translate(0.5,0.5)">
+              <rect x="51" y="490" width="550" height="270" rx="40.5" ry="40.5" fill="#ffffff" stroke="#0078d4" stroke-width="3" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(0, 120, 212);" />
+            </g>
+            <g data-cell-id="checkpoint-gateway">
+              <g>
+                <svg id="icon-3-shape-0" width="90" height="90" viewBox="0 0 18 15.222359" version="1.1" x="76" y="570" preserveAspectRatio="xMidYMid meet">
+                  <defs id="icon-3-shape-1">
+                    <linearGradient id="icon-3-shape-2" x1="9" y1="14.14" x2="9" y2="1.38" gradientUnits="userSpaceOnUse">
+                      <stop offset="0" stop-color="#0078d4" id="icon-3-shape-3" />
+                      <stop offset="0.82" stop-color="#5ea0ef" id="icon-3-shape-4" />
+                    </linearGradient>
+                  </defs>
+                  <title id="icon-3-shape-5">Icon-networking-84</title>
+                  <path d="m 18,8.7623585 a 4.06,4.06 0 0 0 -3.51,-3.89 5.1,5.1 0 0 0 -5.25,-4.87000004 5.23,5.23 0 0 0 -5,3.41000004 4.82,4.82 0 0 0 -4.24,4.64 4.9,4.9 0 0 0 5.07,4.7099995 h 0.44 8.21 a 1.46,1.46 0 0 0 0.22,0 A 4.1,4.1 0 0 0 18,8.7623585 Z" id="icon-3-shape-6" style="fill:url(#icon-3-shape-2)" />
+                  <path d="m 14.29,9.8123585 a 0.42,0.42 0 0 0 -0.42,-0.41 H 4.13 a 0.42,0.42 0 0 0 -0.42,0.41 v 4.9999995 a 0.42,0.42 0 0 0 0.42,0.41 h 9.74 a 0.42,0.42 0 0 0 0.42,-0.41 z" id="icon-3-shape-7" style="fill:#821010" />
+                  <rect x="4.3000002" y="9.982358" width="2.8699999" height="1.27" id="icon-3-shape-8" style="fill:#e62323" />
+                  <rect x="7.5999999" y="9.982358" width="2.8699999" height="1.27" id="icon-3-shape-9" style="fill:#ff7381" />
+                  <rect x="10.9" y="9.982358" width="2.8699999" height="1.27" id="icon-3-shape-10" style="fill:#e62323" />
+                  <rect x="4.3000002" y="11.682359" width="1.1900001" height="1.27" id="icon-3-shape-11" style="fill:#e62323" />
+                  <rect x="12.58" y="11.682359" width="1.1900001" height="1.27" id="icon-3-shape-12" style="fill:#ff7381" />
+                  <rect x="5.9200001" y="11.682359" width="2.8699999" height="1.27" id="icon-3-shape-13" style="fill:#ff7381" />
+                  <rect x="9.2299995" y="11.682359" width="2.8699999" height="1.27" id="icon-3-shape-14" style="fill:#e62323" />
+                  <rect x="4.3000002" y="13.382359" width="2.8699999" height="1.27" id="icon-3-shape-15" style="fill:#e62323" />
+                  <rect x="7.5999999" y="13.382359" width="2.8699999" height="1.27" id="icon-3-shape-16" style="fill:#ff7381" />
+                  <rect x="10.9" y="13.382359" width="2.8699999" height="1.27" id="icon-3-shape-17" style="fill:#e62323" />
+                </svg>
+              </g>
+            </g>
+            <g data-cell-id="firewall-routes">
+              <g>
+                <rect x="191" y="515" width="400" height="215" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="start" font-size="25px" style="fill: rgb(36, 55, 70);">
+                  <text x="193" y="574">Check Point | ASN 65050</text>
+                  <text x="193" y="604">Frontend: 172.22.10.4</text>
+                  <text x="193" y="634">Backend: 172.22.20.4</text>
+                  <text x="193" y="664">UDR: /0 -&gt; Internet</text>
+                  <text x="193" y="694">Azure BGP: /16s -&gt; delivery</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="pd-card">
+            <g>
+              <rect x="691" y="740" width="310" height="220" rx="33" ry="33" fill="#ffffff" stroke="#7a9db7" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(122, 157, 183);" />
+            </g>
+            <g data-cell-id="provider-delivery-gw">
+              <g>
+                <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="811" y="755" width="70" height="70" />
+              </g>
+            </g>
+            <g data-cell-id="pd-routes">
+              <g>
+                <rect x="701" y="830" width="290" height="120" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="24px" style="fill: rgb(36, 55, 70);">
+                  <text x="846" y="857.5">Delivery VPN | AS 65031</text>
+                  <text x="846" y="886.5">172.21.255.30</text>
+                  <text x="846" y="915.5">BGP: customer /16s</text>
+                  <text x="846" y="944.5">-&gt; customer delivery VPN</text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="customer">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1091" y="140" width="1030" height="850" rx="17" ry="17" fill="#fff4e6" stroke="#e6821e" stroke-width="3" pointer-events="all" style="fill: rgb(255, 244, 230); stroke: rgb(230, 130, 30);" />
+          </g>
+          <g>
+            <g fill="#000000" font-family="Arial" font-weight="bold" text-anchor="start" font-size="30px" style="fill: rgb(0, 0, 0);">
+              <text x="1113" y="190">CUSTOMER | tenant B</text>
+            </g>
+          </g>
+          <g data-cell-id="ci-card">
+            <g>
+              <rect x="1121" y="240" width="300" height="280" rx="42" ry="42" fill="#ffffff" stroke="#c9a981" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(201, 169, 129);" />
+            </g>
+            <g data-cell-id="customer-ingress-gw">
+              <g>
+                <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="1231" y="260" width="80" height="80" />
+              </g>
+            </g>
+            <g data-cell-id="ci-routes">
+              <g>
+                <rect x="1131" y="350" width="280" height="155" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(36, 55, 70);">
+                  <text x="1271" y="394">Customer ingress VPN</text>
+                  <text x="1271" y="424">172.18.255.30</text>
+                  <text x="1271" y="454">Default site -&gt; provider</text>
+                  <text x="1271" y="484">Static IPsec, no BGP</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="ra-card">
+            <g>
+              <rect x="1461" y="240" width="300" height="280" rx="42" ry="42" fill="#ede7f6" stroke="#9575cd" stroke-width="2" pointer-events="all" style="fill: rgb(237, 231, 246); stroke: rgb(149, 117, 205);" />
+            </g>
+            <g data-cell-id="routing-appliance">
+              <g>
+                <use href="#mx-image-1bgj0zf" ns1:href="#mx-image-1bgj0zf" x="1571" y="260" width="80" height="80" />
+              </g>
+            </g>
+            <g data-cell-id="ra-routes">
+              <g>
+                <rect x="1471" y="350" width="280" height="155" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(36, 55, 70);">
+                  <text x="1611" y="394">Routing Appliance</text>
+                  <text x="1611" y="424">172.18.10.4</text>
+                  <text x="1611" y="454">UDR: /0 + customer /16s</text>
+                  <text x="1611" y="484">-&gt; ingress VPN gateway</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="a-card">
+            <g>
+              <rect x="1801" y="240" width="290" height="280" rx="42" ry="42" fill="#e8f5e9" stroke="#82b366" stroke-width="2" pointer-events="all" style="fill: rgb(232, 245, 233); stroke: rgb(130, 179, 102);" />
+            </g>
+            <g data-cell-id="workload-a">
+              <g>
+                <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="1906" y="260" width="80" height="80" />
+              </g>
+            </g>
+            <g data-cell-id="workload-a-routes">
+              <g>
+                <rect x="1806" y="350" width="280" height="155" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(36, 55, 70);">
+                  <text x="1946" y="394">Workload A</text>
+                  <text x="1946" y="424">10.211.0.4</text>
+                  <text x="1946" y="454">UDR: /0 + 10.212.0.0/16</text>
+                  <text x="1946" y="484">-&gt; 172.18.10.4</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="cd-card">
+            <g>
+              <rect x="1121" y="740" width="300" height="220" rx="33" ry="33" fill="#ffffff" stroke="#c9a981" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(201, 169, 129);" />
+            </g>
+            <g data-cell-id="customer-delivery-gw">
+              <g>
+                <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="1236" y="755" width="70" height="70" />
+              </g>
+            </g>
+            <g data-cell-id="cd-routes">
+              <g>
+                <rect x="1131" y="830" width="280" height="120" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="24px" style="fill: rgb(36, 55, 70);">
+                  <text x="1271" y="857.5">Delivery VPN | AS 65021</text>
+                  <text x="1271" y="886.5">172.19.255.30</text>
+                  <text x="1271" y="915.5">Advertises customer /16s</text>
+                  <text x="1271" y="944.5">Delivery -&gt; peered VNets</text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="b-card">
+            <g>
+              <rect x="1801" y="740" width="290" height="220" rx="33" ry="33" fill="#e8f5e9" stroke="#82b366" stroke-width="2" pointer-events="all" style="fill: rgb(232, 245, 233); stroke: rgb(130, 179, 102);" />
+            </g>
+            <g data-cell-id="workload-b">
+              <g>
+                <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="1911" y="755" width="70" height="70" />
+              </g>
+            </g>
+            <g data-cell-id="workload-b-routes">
+              <g>
+                <rect x="1806" y="830" width="280" height="120" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g fill="#243746" font-family="Arial" text-anchor="middle" font-size="24px" style="fill: rgb(36, 55, 70);">
+                  <text x="1946" y="872">Workload B | 10.212.0.4</text>
+                  <text x="1946" y="901">UDR: /0 + 10.211.0.0/16</text>
+                  <text x="1946" y="930">-&gt; 172.18.10.4</text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="a-to-ra">
+          <g>
+            <path d="M 1801 380 L 1775.47 380" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1765.47 380 L 1775.47 375 L 1775.47 385 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1801 380 L 1775.47 380" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+        </g>
+        <g data-cell-id="ra-to-ci">
+          <g>
+            <path d="M 1461 380 L 1435.47 380" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1425.47 380 L 1435.47 375 L 1435.47 385 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1461 380 L 1435.47 380" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+        </g>
+        <g data-cell-id="ingress-ipsec">
+          <g>
+            <path d="M 1121 380 L 1015.47 380" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1005.47 380 L 1015.47 375 L 1015.47 385 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1121 380 L 1015.47 380" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="23px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="1016" y="318" width="91" height="56" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1061" y="341.5">IPsec</text>
+              <text x="1061" y="369.5">NO BGP</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="pi-to-firewall">
+          <g>
+            <path d="M 846 520 L 846 575 Q 846 585 836 585 L 651 585 Q 641 585 631 584.88 L 615.47 584.68" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 605.47 584.56 L 615.53 579.68 L 615.41 589.68 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 846 520 L 846 575 Q 846 585 836 585 L 651 585 Q 641 585 631 584.88 L 615.47 584.68" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="716" y="551" width="82" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="756" y="576.5">BGP /0</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="bgp-default-advertisement">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 216 490 L 216 412.35" fill="none" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" stroke-dasharray="24 15" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 216 403.35 L 220.5 412.35 L 211.5 412.35 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+        </g>
+        <g data-cell-id="bgp-rs-to-pi">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 601 289.5 L 636 289.5 Q 646 289.5 646 292.75 L 646 294.38 Q 646 296 656 296 L 678.65 296" fill="none" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" stroke-dasharray="24 15" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 687.65 296 L 678.65 300.5 L 678.65 291.5 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="615" y="278" width="23" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="626" y="304">/0</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="firewall-to-pd">
+          <g>
+            <path d="M 601 706 L 631 706 Q 641 706 641 716 L 641 807 Q 641 817 651 817 L 676.53 817" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 686.53 817 L 676.53 822 L 676.53 812 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 601 706 L 631 706 Q 641 706 641 716 L 641 807 Q 641 817 651 817 L 676.53 817" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="584" y="753" width="165" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="666" y="778.5">Customer /16s</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="delivery-ipsec">
+          <g>
+            <path d="M 1001 817 L 1106.53 817" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1116.53 817 L 1106.53 822 L 1106.53 812 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1001 817 L 1106.53 817" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="23px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="1027" y="825" width="70" height="56" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1061" y="848.5">IPsec</text>
+              <text x="1061" y="876.5">+ BGP</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="delivery-bgp">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 1211 960 L 1211 1020 Q 1211 1030 1201 1030 L 918 1030 Q 908 1030 908 1020 L 908 972.35" fill="none" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" stroke-dasharray="24 15" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 908 963.35 L 912.5 972.35 L 903.5 972.35 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="24px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="951" y="1041" width="217" height="30" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1059" y="1066">BGP: customer /16s</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="cd-to-b">
+          <g>
+            <path d="M 1421 817 L 1786.53 817" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1796.53 817 L 1786.53 822 L 1786.53 812 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1421 817 L 1786.53 817" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="1511" y="828" width="201" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1611" y="853.5">Customer peering</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="b-to-ra">
+          <g>
+            <path d="M 1946 740 L 1946 640 Q 1946 630 1936 630 L 1621 630 Q 1611 630 1611 620 L 1611 534.47" fill="none" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123)" />
+            <path d="M 1611 524.47 L 1616 534.47 L 1606 534.47 Z" fill="#00897b" stroke="#00897b" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+            <circle r="6" fill="#ffffff" stroke="#00897b" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 1946 740 L 1946 640 Q 1946 630 1936 630 L 1621 630 Q 1611 630 1611 620 L 1611 534.47" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="1612" y="596" width="334" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1778" y="621.5">Replies: same inspection loop</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="internet">
+          <g>
+            <rect x="51" y="1080" width="760" height="110" rx="16.5" ry="16.5" fill="#ffe6cc" stroke="#e6821e" stroke-width="2" pointer-events="all" style="fill: rgb(255, 230, 204); stroke: rgb(230, 130, 30);" />
+          </g>
+          <g>
+            <g fill="#000000" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 0, 0);">
+              <text x="431" y="1131.5">INTERNET | HTTPS/443</text>
+              <text x="431" y="1161.5">Hide NAT after policy; replies return via delivery VPN</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="internet-egress">
+          <g>
+            <path d="M 326 760 L 326 910 Q 326 920 325.3 920 L 324.95 920 Q 324.6 920 324.6 930 L 324.6 1065.53" fill="none" stroke="#0078d4" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212)" />
+            <path d="M 324.6 1075.53 L 319.6 1065.53 L 329.6 1065.53 Z" fill="#0078d4" stroke="#0078d4" stroke-width="4" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+            <circle r="6" fill="#ffffff" stroke="#0078d4" stroke-width="2" visibility="hidden" pointer-events="none">
+              <set attributeName="visibility" to="visible" begin="0s" />
+              <animateMotion path="M 326 760 L 326 910 Q 326 920 325.3 920 L 324.95 920 Q 324.6 920 324.6 930 L 324.6 1065.53" dur="4s" repeatCount="indefinite" />
+            </circle>
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="25px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="210" y="905" width="190" height="31" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="304.6" y="931.1">Internet /0 [UDR]</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="legend">
+          <g>
+            <rect x="901" y="1090" width="1210" height="110" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g fill="#243746" font-family="Arial" text-anchor="start" font-size="25px" style="fill: rgb(36, 55, 70);">
+              <text x="903" y="1126.5">Teal = packets | Blue = Internet | Purple dashed = BGP TCP/179</text>
+              <text x="903" y="1156.5">/0 = 0.0.0.0/0 | /16s = 10.211.0.0/16 and 10.212.0.0/16</text>
+              <text x="903" y="1186.5">Ownership groups only; VNet/subnet detail is in the topology above.</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="evidence">
+          <g>
+            <rect x="1" y="1250" width="2120" height="50" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g fill="#64748b" font-family="Arial" text-anchor="start" font-size="22px" style="fill: rgb(100, 116, 139);">
+              <text x="3" y="1285">2026-11-04 snapshot | Selected routes, not full tables. Provider effective-route queries denied; forwarding shown from configuration. Evidence and limits: README / EW-44.</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

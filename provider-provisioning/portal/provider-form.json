@@ -1,0 +1,118 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+  "view": {
+    "kind": "Form",
+    "properties": {
+      "title": "Check Point FaaS provider installation",
+      "steps": [
+        {
+          "name": "basics",
+          "label": "Provider installation",
+          "elements": [
+            {
+              "name": "subscription",
+              "type": "Microsoft.Common.SubscriptionSelector",
+              "resourceProviders": ["Microsoft.Resources", "Microsoft.Network", "Microsoft.Storage", "Microsoft.Web", "Microsoft.KeyVault"]
+            },
+            {
+              "name": "controlGroup",
+              "type": "Microsoft.Common.TextBox",
+              "label": "New provider control resource group",
+              "defaultValue": "rg-faas-admin-control",
+              "toolTip": "Contains the API, worker, management portal and private state. Use a new dedicated group.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "dataGroup",
+              "type": "Microsoft.Common.TextBox",
+              "label": "New provider dataplane resource group",
+              "defaultValue": "rg-faas-admin-data",
+              "toolTip": "Provider networking for customer environments is created here later. Lab NSGs allow all traffic; public VM IPs can expose listening services.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "apiId",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Provider API application (client) ID",
+              "toolTip": "From the provider Entra API app registration, not a customer identity.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "apiRole",
+              "type": "Microsoft.Common.TextBox",
+              "label": "FirewallDeployment.Request application role ID",
+              "toolTip": "The ID of the Applications role defined on the provider API.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "managementId",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Provider management application (client) ID",
+              "toolTip": "The separate provider Entra app with explicitly granted Graph permissions.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "managementSecret",
+              "type": "Microsoft.Common.PasswordBox",
+              "label": {"password": "Provider management application credential", "confirmPassword": "Confirm credential"},
+              "toolTip": "The one-time provider setup credential, not a customer's API credential.",
+              "constraints": {"required": true},
+              "options": {"hideConfirmation": true}
+            },
+            {
+              "name": "managementExpiry",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Management credential expiry (UTC)",
+              "toolTip": "Use the expiration shown in Entra, for example 2027-01-01T00:00:00Z.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "administrator",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Provider administrator user object ID",
+              "toolTip": "The provider-tenant user's Object ID, not application ID or email.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "sshKey",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Provider NVA SSH public key",
+              "toolTip": "OpenSSH PUBLIC key only. Never enter a private key.",
+              "constraints": {
+                "required": true,
+                "regex": "^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp256) [A-Za-z0-9+/]+={0,3}( .*)?$",
+                "validationMessage": "Enter a valid OpenSSH public key."
+              }
+            },
+            {
+              "name": "approveBacking",
+              "type": "Microsoft.Common.CheckBox",
+              "label": "I approve the deployment-script backing storage exception and provider infrastructure charges",
+              "constraints": {
+                "required": true,
+                "validationMessage": "Approval is required for the provider installation."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "kind": "Subscription",
+      "subscriptionId": "[steps('basics').subscription.subscriptionId]",
+      "location": "centralus",
+      "parameters": {
+        "controlResourceGroupName": "[steps('basics').controlGroup]",
+        "dataResourceGroupName": "[steps('basics').dataGroup]",
+        "apiApplicationId": "[steps('basics').apiId]",
+        "apiRoleId": "[steps('basics').apiRole]",
+        "managementApplicationId": "[steps('basics').managementId]",
+        "managementApplicationSecret": "[steps('basics').managementSecret]",
+        "managementCredentialExpiresOn": "[steps('basics').managementExpiry]",
+        "administratorObjectIds": "[split(steps('basics').administrator, ',')]",
+        "nvaSshPublicKey": "[steps('basics').sshKey]",
+        "approveDeploymentScriptBackingException": "[steps('basics').approveBacking]"
+      }
+    }
+  }
+}

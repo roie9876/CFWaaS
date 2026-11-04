@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+  "view": {
+    "kind": "Form",
+    "properties": {
+      "title": "Check Point FaaS provider setup: select or create a dedicated control resource group",
+      "steps": [
+        {
+          "name": "basics",
+          "label": "Provider setup",
+          "elements": [
+            {
+              "name": "resourceScope",
+              "type": "Microsoft.Common.ResourceScope",
+              "location": { "resourceTypes": ["Microsoft.Resources/resourceGroups"] }
+            },
+            {
+              "name": "dataGroup",
+              "type": "Microsoft.Common.TextBox",
+              "label": "New provider dataplane resource group",
+              "defaultValue": "rg-faas-admin-data",
+              "toolTip": "Customer-requested provider networking is created here later. Lab NSGs allow all traffic; public VM IPs can expose listening services.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "approveBacking",
+              "type": "Microsoft.Common.CheckBox",
+              "label": "I approve the deployment-script backing storage exception and provider infrastructure charges",
+              "constraints": {
+                "required": true,
+                "validationMessage": "Approval is required for the provider installation."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "kind": "ResourceGroup",
+      "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+      "location": "[steps('basics').resourceScope.location.name]",
+      "parameters": {
+        "dataResourceGroupName": "[steps('basics').dataGroup]",
+        "approveDeploymentScriptBackingException": "[steps('basics').approveBacking]"
+      }
+    }
+  }
+}

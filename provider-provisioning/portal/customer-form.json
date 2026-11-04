@@ -1,0 +1,223 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+  "view": {
+    "kind": "Form",
+    "properties": {
+      "title": "FaaS customer deployment - recovery-enabled release",
+      "steps": [
+        {
+          "name": "basics",
+          "label": "Customer deployment",
+          "elements": [
+            {
+              "name": "resourceScope",
+              "type": "Microsoft.Common.ResourceScope",
+              "location": {
+                "resourceTypes": ["Microsoft.Resources/resourceGroups"]
+              }
+            },
+            {
+              "name": "customerLocation",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Customer resource region",
+              "defaultValue": "East US 2",
+              "toolTip": "Region for the customer Routing Appliance, VPN gateways and VMs. The resource-scope Region field controls RG metadata only. Provider placement stays provider-controlled. Availability, quota and policy are checked by Azure.",
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "East US 2", "value": "eastus2"},
+                  {"label": "East US", "value": "eastus"},
+                  {"label": "North Europe", "value": "northeurope"},
+                  {"label": "West Europe", "value": "westeurope"},
+                  {"label": "Israel Central", "value": "israelcentral"}
+                ]
+              }
+            },
+            {
+              "name": "firewallType",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Provider firewall",
+              "defaultValue": "Ubuntu simulator",
+              "toolTip": "Ubuntu remains the default lab path. Check Point BYOL is a lab preview that the provider must enable.",
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "Ubuntu simulator", "value": "ubuntu"},
+                  {"label": "Check Point CloudGuard BYOL (lab preview)", "value": "checkpoint-byol"}
+                ]
+              }
+            },
+            {
+              "name": "adminAllowedSources",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Public admin IPv4 hosts or CIDRs (comma separated)",
+              "defaultValue": "",
+              "visible": "[equals(steps('basics').firewallType, 'checkpoint-byol')]",
+              "toolTip": "Optional: up to 16 public unicast IPv4 sources for management HTTPS/SSH/SmartConsole, gateway HTTPS/SSH, and customer test VM SSH. Bare IPs become /32. No private, reserved, IPv6 or /0 ranges. Provider may preset office/home; edit or clear them. Validated before customer network deployment.",
+              "constraints": {
+                "required": false,
+                "regex": "^$|^[0-9./ ]+(,[0-9./ ]+){0,15}$",
+                "validationMessage": "Enter at most 16 comma-separated public IPv4 hosts/CIDRs, or leave empty."
+              }
+            },
+            {
+              "name": "checkpointUnavailable",
+              "type": "Microsoft.Common.TextBlock",
+              "visible": "[equals(steps('basics').firewallType, 'checkpoint-byol')]",
+              "options": {
+                "text": "Check Point lab preview: the provider deploys a real CloudGuard gateway and management server, which takes about 90 minutes. The deployment stops before any change if Check Point is not available from the provider."
+              }
+            },
+            {
+              "name": "runId",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Approved lab run ID",
+              "defaultValue": "",
+              "toolTip": "Provider preparation presets this enrollment ID. Select or create a dedicated RG in the enrolled customer subscription. A stable per-RG deployment identifier is derived automatically.",
+              "constraints": {
+                "required": true,
+                "regex": "^[A-Za-z0-9][A-Za-z0-9-]{2,31}$",
+                "validationMessage": "Enter the approved 3-32 character run ID."
+              }
+            },
+            {
+              "name": "apiClientId",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Customer API client ID",
+              "defaultValue": "",
+              "toolTip": "Customer-specific API-only identity supplied by Check Point. It has no Azure RBAC.",
+              "constraints": {"required": true}
+            },
+            {
+              "name": "apiClientSecret",
+              "type": "Microsoft.Common.PasswordBox",
+              "label": {"password": "Customer API credential", "confirmPassword": "Confirm API credential"},
+              "toolTip": "API-only credential supplied through approved onboarding. Never enter an Azure administrator password.",
+              "constraints": {"required": true},
+              "options": {"hideConfirmation": true}
+            },
+            {
+              "name": "approveDeploymentScriptBackingException",
+              "type": "Microsoft.Common.CheckBox",
+              "label": "I approve this billable lab deployment, temporary execution/storage, and unrestricted lab NSG traffic when no admin list is set",
+              "constraints": {
+                "required": true,
+                "validationMessage": "Approve the billable lab deployment and temporary execution/backing storage. Empty admin lists retain legacy unrestricted lab NSGs."
+              }
+            },
+            {
+              "name": "manualSshKey",
+              "type": "Microsoft.Common.CheckBox",
+              "label": "Paste an existing OpenSSH public key instead (including ECDSA)",
+              "constraints": {"required": false}
+            },
+            {
+              "name": "sshCredentials",
+              "type": "Microsoft.Compute.CredentialsCombo",
+              "label": {
+                "authenticationType": "Authentication type",
+                "password": "Password",
+                "confirmPassword": "Confirm password",
+                "sshPublicKey": "Customer workload SSH public key"
+              },
+              "toolTip": {
+                "sshPublicKey": "Choose or generate an SSH key. An admin list restricts public test VM SSH; an empty list retains legacy lab NSGs and private test VMs."
+              },
+              "constraints": {"required": "[not(steps('basics').manualSshKey)]"},
+              "options": {"hidePassword": true},
+              "osPlatform": "Linux",
+              "visible": "[not(steps('basics').manualSshKey)]"
+            },
+            {
+              "name": "sshPublicKey",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Customer workload SSH public key",
+              "defaultValue": "",
+              "toolTip": "Public key only. Never paste a private key. An admin list restricts public test VM SSH; an empty list retains legacy lab NSGs and private test VMs.",
+              "visible": "[steps('basics').manualSshKey]",
+              "constraints": {
+                "required": "[steps('basics').manualSshKey]",
+                "regex": "^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp256) [A-Za-z0-9+/]+={0,3}( .*)?$",
+                "validationMessage": "Enter an OpenSSH public key, not a private key."
+              }
+            }
+          ]
+        },
+        {
+          "name": "sizing",
+          "label": "Customer sizing",
+          "elements": [
+            {
+              "name": "routingApplianceBandwidthGbps",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Routing Appliance bandwidth",
+              "defaultValue": "10 Gbps (verified option)",
+              "toolTip": "Only the verified 10-Gbps size is available initially. No claim is made about an unverified Routing Appliance price or cheaper size.",
+              "multiselect": false,
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "10 Gbps (verified option)", "value": 10}
+                ]
+              }
+            },
+            {
+              "name": "customerIngressVpnGatewaySku",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Customer ingress VPN gateway SKU",
+              "defaultValue": "VpnGw1AZ (lowest-cost compatible)",
+              "toolTip": "Customer resources only. Provider gateway sizing is unchanged. Larger customer gateways do not guarantee higher end-to-end throughput.",
+              "multiselect": false,
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "VpnGw1AZ (lowest-cost compatible)", "value": "VpnGw1AZ"},
+                  {"label": "VpnGw2AZ", "value": "VpnGw2AZ"},
+                  {"label": "VpnGw3AZ", "value": "VpnGw3AZ"},
+                  {"label": "VpnGw4AZ", "value": "VpnGw4AZ"},
+                  {"label": "VpnGw5AZ", "value": "VpnGw5AZ"}
+                ]
+              }
+            },
+            {
+              "name": "customerDeliveryVpnGatewaySku",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Customer delivery VPN gateway SKU",
+              "defaultValue": "VpnGw1AZ (lowest-cost compatible)",
+              "toolTip": "Delivery requires BGP, so Basic is not offered. Review Azure costs before choosing a larger size.",
+              "multiselect": false,
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "VpnGw1AZ (lowest-cost compatible)", "value": "VpnGw1AZ"},
+                  {"label": "VpnGw2AZ", "value": "VpnGw2AZ"},
+                  {"label": "VpnGw3AZ", "value": "VpnGw3AZ"},
+                  {"label": "VpnGw4AZ", "value": "VpnGw4AZ"},
+                  {"label": "VpnGw5AZ", "value": "VpnGw5AZ"}
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "parameters": {
+        "location": "[steps('basics').customerLocation]",
+        "firewallType": "[steps('basics').firewallType]",
+        "adminAllowedSources": "[if(and(equals(steps('basics').firewallType, 'checkpoint-byol'), not(empty(trim(steps('basics').adminAllowedSources)))), split(replace(steps('basics').adminAllowedSources, ' ', ''), ','), json('[]'))]",
+        "runId": "[steps('basics').runId]",
+        "sshPublicKey": "[if(steps('basics').manualSshKey, steps('basics').sshPublicKey, steps('basics').sshCredentials.sshPublicKey)]",
+        "apiClientId": "[steps('basics').apiClientId]",
+        "apiClientSecret": "[steps('basics').apiClientSecret]",
+        "routingApplianceBandwidthGbps": "[steps('sizing').routingApplianceBandwidthGbps]",
+        "customerIngressVpnGatewaySku": "[steps('sizing').customerIngressVpnGatewaySku]",
+        "customerDeliveryVpnGatewaySku": "[steps('sizing').customerDeliveryVpnGatewaySku]",
+        "approveDeploymentScriptBackingException": "[steps('basics').approveDeploymentScriptBackingException]"
+      },
+      "kind": "ResourceGroup",
+      "location": "[steps('basics').resourceScope.location.name]",
+      "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+    }
+  }
+}

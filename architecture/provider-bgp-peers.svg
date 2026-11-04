@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent; color-scheme: light;" version="1.1" width="1805px" height="1116px" viewBox="0 0 1805 1116">
+  <defs />
+  <g>
+    <g data-cell-id="0">
+      <g data-cell-id="1">
+        <g data-cell-id="title">
+          <g>
+            <rect x="1" y="0" width="1800" height="50" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="3" y="33" fill="#000000" font-family="Helvetica" font-size="28px" font-weight="bold" style="fill: rgb(0, 0, 0);">Provider BGP peers | verified customer-1 lab</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="note">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1" y="65" width="1800" height="55" fill="#fff9cc" stroke="#d6b656" pointer-events="all" style="fill: rgb(255, 249, 204); stroke: rgb(214, 182, 86);" />
+          </g>
+          <g>
+            <g>
+              <text x="901" y="98" fill="#000000" font-family="Helvetica" font-size="17px" text-anchor="middle" style="fill: rgb(0, 0, 0);">Control plane only: lines are TCP/179 sessions, not packet paths. Route Server branch-to-branch enabled. Azure assigns Route Server addresses.</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="nva">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1" y="460" width="310" height="125" fill="#e8f5f2" stroke="#00897b" stroke-width="3" pointer-events="all" style="fill: rgb(232, 245, 242); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g>
+              <text x="156" y="505" fill="#000000" font-family="Helvetica" font-size="19px" text-anchor="middle" font-weight="bold" style="fill: rgb(0, 0, 0);">
+                <tspan x="156" y="505">Primary Ubuntu NVA 0</tspan>
+                <tspan x="156" y="528">172.22.10.4 | ASN 65050</tspan>
+                <tspan x="156" y="551">Default to both Route Servers</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="ilane">
+          <g>
+            <rect x="431" y="155" width="1370" height="350" fill="#e6f2ff" stroke="#0078d4" stroke-width="4" pointer-events="all" style="fill: rgb(230, 242, 255); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g>
+              <text x="1116" y="182" fill="#000000" font-family="Helvetica" font-size="20px" text-anchor="middle" font-weight="bold" style="fill: rgb(0, 0, 0);">Provider ingress VNet | 172.20.0.0/16</text>
+            </g>
+          </g>
+          <g data-cell-id="irsbox">
+            <g>
+              <rect x="466" y="210" width="500" height="260" fill="#ffffff" stroke="#6c8ebf" stroke-width="2" stroke-dasharray="6 6" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(108, 142, 191);" />
+            </g>
+            <g>
+              <g>
+                <text x="716" y="234" fill="#000000" font-family="Helvetica" font-size="17px" text-anchor="middle" style="fill: rgb(0, 0, 0);">RouteServerSubnet | ASN 65515</text>
+              </g>
+            </g>
+            <g data-cell-id="irs1">
+              <g transform="translate(0.5,0.5)">
+                <rect x="501" y="265" width="250" height="65" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: rgb(218, 232, 252); stroke: rgb(108, 142, 191);" />
+              </g>
+              <g>
+                <g>
+                  <text x="626" y="293" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="626" y="293">RS instance 1</tspan>
+                    <tspan x="626" y="312">172.20.254.4</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="irs2">
+              <g transform="translate(0.5,0.5)">
+                <rect x="501" y="370" width="250" height="65" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: rgb(218, 232, 252); stroke: rgb(108, 142, 191);" />
+              </g>
+              <g>
+                <g>
+                  <text x="626" y="398" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="626" y="398">RS instance 2</tspan>
+                    <tspan x="626" y="417">172.20.254.5</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="igbox">
+            <g>
+              <rect x="1251" y="210" width="500" height="260" fill="#ffffff" stroke="#6c8ebf" stroke-width="2" stroke-dasharray="6 6" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(108, 142, 191);" />
+            </g>
+            <g>
+              <g>
+                <text x="1501" y="234" fill="#000000" font-family="Helvetica" font-size="17px" text-anchor="middle" style="fill: rgb(0, 0, 0);">GatewaySubnet | active-active | ASN 65515</text>
+              </g>
+            </g>
+            <g data-cell-id="ig1">
+              <g transform="translate(0.5,0.5)">
+                <rect x="1441" y="265" width="250" height="65" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: rgb(213, 232, 212); stroke: rgb(130, 179, 102);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1566" y="293" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="1566" y="293">Gateway instance 1</tspan>
+                    <tspan x="1566" y="312">172.20.255.4</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="ig2">
+              <g transform="translate(0.5,0.5)">
+                <rect x="1441" y="370" width="250" height="65" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: rgb(213, 232, 212); stroke: rgb(130, 179, 102);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1566" y="398" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="1566" y="398">Gateway instance 2</tspan>
+                    <tspan x="1566" y="417">172.20.255.5</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="dlane">
+          <g>
+            <rect x="431" y="535" width="1370" height="350" fill="#e6f2ff" stroke="#0078d4" stroke-width="4" pointer-events="all" style="fill: rgb(230, 242, 255); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g>
+              <text x="1116" y="562" fill="#000000" font-family="Helvetica" font-size="20px" text-anchor="middle" font-weight="bold" style="fill: rgb(0, 0, 0);">Provider test delivery VNet | 172.25.0.0/16</text>
+            </g>
+          </g>
+          <g data-cell-id="drsbox">
+            <g>
+              <rect x="466" y="590" width="500" height="260" fill="#ffffff" stroke="#6c8ebf" stroke-width="2" stroke-dasharray="6 6" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(108, 142, 191);" />
+            </g>
+            <g>
+              <g>
+                <text x="716" y="614" fill="#000000" font-family="Helvetica" font-size="17px" text-anchor="middle" style="fill: rgb(0, 0, 0);">RouteServerSubnet | ASN 65515</text>
+              </g>
+            </g>
+            <g data-cell-id="drs1">
+              <g transform="translate(0.5,0.5)">
+                <rect x="501" y="645" width="250" height="65" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: rgb(218, 232, 252); stroke: rgb(108, 142, 191);" />
+              </g>
+              <g>
+                <g>
+                  <text x="626" y="673" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="626" y="673">RS instance 1</tspan>
+                    <tspan x="626" y="692">172.25.254.4</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="drs2">
+              <g transform="translate(0.5,0.5)">
+                <rect x="501" y="750" width="250" height="65" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all" style="fill: rgb(218, 232, 252); stroke: rgb(108, 142, 191);" />
+              </g>
+              <g>
+                <g>
+                  <text x="626" y="778" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="626" y="778">RS instance 2</tspan>
+                    <tspan x="626" y="797">172.25.254.5</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="dgbox">
+            <g>
+              <rect x="1251" y="590" width="500" height="260" fill="#ffffff" stroke="#6c8ebf" stroke-width="2" stroke-dasharray="6 6" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(108, 142, 191);" />
+            </g>
+            <g>
+              <g>
+                <text x="1501" y="614" fill="#000000" font-family="Helvetica" font-size="17px" text-anchor="middle" style="fill: rgb(0, 0, 0);">GatewaySubnet | active-active | ASN 65515</text>
+              </g>
+            </g>
+            <g data-cell-id="dg1">
+              <g transform="translate(0.5,0.5)">
+                <rect x="1441" y="645" width="250" height="65" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: rgb(213, 232, 212); stroke: rgb(130, 179, 102);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1566" y="673" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="1566" y="673">Gateway instance 1</tspan>
+                    <tspan x="1566" y="692">172.25.255.4</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="dg2">
+              <g transform="translate(0.5,0.5)">
+                <rect x="1441" y="750" width="250" height="65" fill="#d5e8d4" stroke="#82b366" pointer-events="all" style="fill: rgb(213, 232, 212); stroke: rgb(130, 179, 102);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1566" y="778" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                    <tspan x="1566" y="778">Gateway instance 2</tspan>
+                    <tspan x="1566" y="797">172.25.255.5</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="legacy-p">
+          <g transform="translate(0.5,0.5)">
+            <rect x="431" y="950" width="420" height="90" fill="#f5f5f5" stroke="#777777" pointer-events="all" style="fill: rgb(245, 245, 245); stroke: rgb(119, 119, 119);" />
+          </g>
+          <g>
+            <g>
+              <text x="641" y="990" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                <tspan x="641" y="990">Original provider delivery gateway</tspan>
+                <tspan x="641" y="1009">172.21.255.30 | ASN 65031</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="legacy-c">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1311" y="950" width="420" height="90" fill="#fff4e6" stroke="#e6821e" pointer-events="all" style="fill: rgb(255, 244, 230); stroke: rgb(230, 130, 30);" />
+          </g>
+          <g>
+            <g>
+              <text x="1521" y="990" fill="#000000" font-family="Helvetica" font-size="16px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                <tspan x="1521" y="990">Customer delivery gateway</tspan>
+                <tspan x="1521" y="1009">172.19.255.30 | ASN 65021</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="legacy-label">
+          <g>
+            <rect x="876" y="1050" width="405" height="65" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="1079" y="1072" fill="#000000" font-family="Helvetica" font-size="15px" text-anchor="middle" style="fill: rgb(0, 0, 0);">
+                <tspan x="1079" y="1072">Legacy IPsec BGP session remains connected; not the NVA</tspan>
+                <tspan x="1079" y="1090">remote gateway used for the validated path.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="e-ni1">
+          <g>
+            <path d="M 311 478.75 L 331 478.78 Q 341 478.8 341 468.8 L 341 307.5 Q 341 297.5 351 297.5 L 501 297.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="e-ni2">
+          <g>
+            <path d="M 311 507.5 L 361 507.5 Q 371 507.5 371 497.5 L 371 412.5 Q 371 402.5 381 402.5 L 501 402.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="e-nd1">
+          <g>
+            <path d="M 311 537.5 L 361 537.5 Q 371 537.5 371 547.5 L 371 667.5 Q 371 677.5 381 677.5 L 501 677.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="e-nd2">
+          <g>
+            <path d="M 311 566.25 L 331 566.28 Q 341 566.3 341 576.3 L 341 772.5 Q 341 782.5 351 782.5 L 501 782.5" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="e-i11">
+          <g>
+            <path d="M 751 297.5 L 1441 297.5" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-i12">
+          <g>
+            <path d="M 751 311.46 L 1441 388.54" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-i21">
+          <g>
+            <path d="M 751 388.54 L 1441 311.46" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-i22">
+          <g>
+            <path d="M 751 402.5 L 1441 402.5" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-ig">
+          <g>
+            <path d="M 1566 330 L 1566 370" fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(119, 119, 119);" />
+          </g>
+        </g>
+        <g data-cell-id="e-d11">
+          <g>
+            <path d="M 751 677.5 L 1441 677.5" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-d12">
+          <g>
+            <path d="M 751 691.46 L 1441 768.54" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-d21">
+          <g>
+            <path d="M 751 768.54 L 1441 691.46" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-d22">
+          <g>
+            <path d="M 751 782.5 L 1441 782.5" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+          </g>
+        </g>
+        <g data-cell-id="e-dg">
+          <g>
+            <path d="M 1566 710 L 1566 750" fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(119, 119, 119);" />
+          </g>
+        </g>
+        <g data-cell-id="e-legacy">
+          <g>
+            <path d="M 851 995 L 1311 995" fill="none" stroke="#777777" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="6 6" pointer-events="stroke" style="stroke: rgb(119, 119, 119);" />
+          </g>
+          <g>
+            <g fill="#000000" font-family="Helvetica" text-anchor="middle" font-size="16px" style="fill: rgb(0, 0, 0);">
+              <rect fill="#ffffff" stroke="none" x="999" y="986" width="166" height="20" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1081" y="1002">BGP over legacy IPsec</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

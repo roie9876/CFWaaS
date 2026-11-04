@@ -1,0 +1,24 @@
+{
+  "runId": "replace-with-approved-run",
+  "namePrefix": "faas-lab",
+  "provider": {
+    "tenantId": "00000000-0000-0000-0000-000000000001",
+    "subscriptionId": "00000000-0000-0000-0000-000000000002",
+    "controlPlaneResourceGroup": "rg-faas-control-replace",
+    "dataPlaneResourceGroup": "rg-faas-provider-replace"
+  },
+  "customer": {
+    "tenantId": "00000000-0000-0000-0000-000000000003",
+    "subscriptionId": "00000000-0000-0000-0000-000000000004",
+    "bootstrapResourceGroup": "rg-faas-customer-auth-replace",
+    "dataPlaneResourceGroup": "rg-faas-customer-replace"
+  },
+  "customerIdentityName": "id-faas-customer-replace",
+  "routingApplianceBandwidthGbps": 10,
+  "customerIngressVpnGatewaySku": "VpnGw1AZ",
+  "customerDeliveryVpnGatewaySku": "VpnGw1AZ",
+  "deploymentOperatorCidr": "192.0.2.10/32",
+  "adminAllowedSources": [],
+  "nvaSshPublicKey": "REPLACE_WITH_OPENSSH_PUBLIC_KEY_ONLY",
+  "workloadSshPublicKey": "REPLACE_WITH_OPENSSH_PUBLIC_KEY_ONLY"
+}

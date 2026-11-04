@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+  "view": {
+    "kind": "Form",
+    "properties": {
+      "title": "Start Check Point FaaS provider setup",
+      "steps": [
+        {
+          "name": "basics",
+          "label": "Start setup",
+          "elements": [
+            {
+              "name": "resourceScope",
+              "type": "Microsoft.Common.ResourceScope",
+              "location": { "resourceTypes": ["Microsoft.Resources/resourceGroups"] }
+            },
+            {
+              "name": "approveBacking",
+              "type": "Microsoft.Common.CheckBox",
+              "label": "I approve the setup service charges and Azure deployment-script backing storage exception",
+              "constraints": {
+                "required": true,
+                "validationMessage": "Approval is required for the provider setup."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "outputs": {
+      "kind": "ResourceGroup",
+      "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+      "location": "[steps('basics').resourceScope.location.name]",
+      "parameters": {
+        "approveDeploymentScriptBackingException": "[steps('basics').approveBacking]"
+      }
+    }
+  }
+}

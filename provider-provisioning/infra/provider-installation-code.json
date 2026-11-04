@@ -1,0 +1,143 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.44.1.10279",
+      "templateHash": "16606283207143429807"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "runId": {
+      "type": "string"
+    },
+    "appNames": {
+      "type": "array",
+      "minLength": 1,
+      "maxLength": 3
+    },
+    "codePackageUri": {
+      "type": "securestring"
+    },
+    "codePackageSha256": {
+      "type": "string"
+    },
+    "publisherIdentityId": {
+      "type": "string"
+    },
+    "releaseStorageAccountName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "publicationAttempt": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "An explicit retry identifier for a previously failed publication; leave empty for normal installation."
+      }
+    },
+    "approveDeploymentScriptBackingException": {
+      "type": "bool",
+      "allowedValues": [
+        true
+      ]
+    }
+  },
+  "variables": {
+    "$fxv#0": "\"\"\"Runs inside the provider-owned Azure deployment script, never on an admin laptop.\"\"\"\nimport hashlib\nimport json\nimport os\nimport re\nimport subprocess\nimport tempfile\nimport time\nimport urllib.error\nimport urllib.request\nfrom datetime import datetime, timedelta, timezone\nfrom pathlib import Path\nfrom urllib.parse import parse_qs, unquote, urlsplit\n\n\nclass ProviderPublishRequestError(RuntimeError):\n    pass\n\n\ndef request_error(stderr):\n    codes = (\"AuthorizationFailed\", \"AuthorizationPermissionMismatch\", \"Forbidden\",\n             \"ResourceNotFound\", \"TooManyRequests\", \"ServiceUnavailable\", \"GatewayTimeout\",\n             \"InternalServerError\", \"Conflict\", \"BadRequest\")\n    found = [code for code in codes if re.search(r\"\\b\" + code + r\"\\b\", stderr)]\n    status = re.search(r\"\\b(?:403|404|409|429|500|502|503|504)\\b\", stderr)\n    return \"Azure request failed (code: {}, HTTP: {}).\".format(\n        \",\".join(found) if found else \"unclassified\", status.group() if status else \"unknown\")\n\n\ndef cli(*args):\n    deadline = time.monotonic() + 180\n    while True:\n        remaining = deadline - time.monotonic()\n        if remaining <= 0:\n            raise TimeoutError(\"ProviderPublishingRolePropagationTimedOut\")\n        result = subprocess.run([\"az\", *args, \"--output\", \"json\", \"--only-show-errors\"],\n                                capture_output=True, text=True, timeout=min(90, remaining))\n        if not result.returncode:\n            return json.loads(result.stdout) if result.stdout.strip() else {}\n        if (re.search(r\"\\b(?:AuthorizationFailed|AuthorizationPermissionMismatch)\\b\", result.stderr)\n                and \"403\" in result.stderr and remaining > 5):\n            time.sleep(5)\n            continue\n        raise ProviderPublishRequestError(request_error(result.stderr))\n\n\ndef main():\n    uri = os.environ[\"FAAS_PACKAGE_URI\"]\n    parsed = urlsplit(uri)\n    query = parse_qs(parsed.query)\n    if (parsed.scheme != \"https\" or not parsed.hostname or parsed.username or parsed.password\n            or parsed.fragment or parsed.port not in (None, 443)\n            or not parsed.hostname.endswith(\".blob.core.windows.net\")):\n        raise ValueError(\"AzureBlobPackageRequired\")\n    release_account = os.environ.get(\"FAAS_RELEASE_STORAGE_ACCOUNT\", \"\")\n    if not query:\n        if (not re.fullmatch(r\"[a-z0-9]{3,24}\", release_account)\n                or parsed.hostname != release_account + \".blob.core.windows.net\"):\n            raise ValueError(\"ApprovedReleaseAccountRequired\")\n        path = parsed.path.lstrip(\"/\").split(\"/\", 1)\n        if len(path) != 2 or not all(path):\n            raise ValueError(\"ReleaseBlobPathRequired\")\n        expiry = (datetime.now(timezone.utc) + timedelta(hours=2)).strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n        print(\"Provider publish stage: generate package access\", flush=True)\n        uri = cli(\"storage\", \"blob\", \"generate-sas\", \"--account-name\", release_account,\n                  \"--container-name\", unquote(path[0]), \"--name\", unquote(path[1]),\n                  \"--permissions\", \"r\", \"--https-only\", \"--as-user\", \"--auth-mode\", \"login\",\n                  \"--expiry\", expiry, \"--full-uri\")\n        parsed, query = urlsplit(uri), parse_qs(urlsplit(uri).query)\n        if parsed.hostname != release_account + \".blob.core.windows.net\":\n            raise ValueError(\"UnexpectedReleaseBlobHost\")\n    if (query.get(\"sp\") != [\"r\"] or query.get(\"sr\") != [\"b\"] or query.get(\"spr\") != [\"https\"]\n            or not query.get(\"skoid\") or not query.get(\"sig\")):\n        raise ValueError(\"ReadOnlyAzureBlobPackageRequired\")\n    expected = os.environ[\"FAAS_PACKAGE_SHA256\"]\n    if len(expected) != 64 or any(char not in \"0123456789abcdef\" for char in expected):\n        raise ValueError(\"InvalidPackagePin\")\n    digest, size = hashlib.sha256(), 0\n    print(\"Provider publish stage: verify package\", flush=True)\n    try:\n        with urllib.request.urlopen(uri, timeout=60) as response:\n            while chunk := response.read(65536):\n                size += len(chunk)\n                if size > 20_000_000:\n                    raise ValueError(\"PackageTooLarge\")\n                digest.update(chunk)\n    except urllib.error.HTTPError as error:\n        raise ProviderPublishRequestError(\"Provider package download failed (HTTP {}).\".format(error.code)) from None\n    except urllib.error.URLError:\n        raise ProviderPublishRequestError(\"Provider package download unavailable.\") from None\n    if digest.hexdigest() != expected:\n        raise ValueError(\"PackagePinMismatch\")\n    print(\"Provider publish stage: verify subscription\", flush=True)\n    account = cli(\"account\", \"show\")\n    if account[\"id\"] != os.environ[\"FAAS_PROVIDER_SUBSCRIPTION\"]:\n        raise ValueError(\"ProviderSubscriptionMismatch\")\n    group = os.environ[\"FAAS_PROVIDER_CONTROL_GROUP\"]\n    apps = json.loads(os.environ[\"FAAS_PROVIDER_APPS\"])\n    if not isinstance(apps, list) or not 1 <= len(apps) <= 3 or len(set(apps)) != len(apps):\n        raise ValueError(\"OneToThreeDistinctProviderAppsRequired\")\n    for app in apps:\n        if not isinstance(app, str) or not app or any(char not in \"abcdefghijklmnopqrstuvwxyz0123456789-\" for char in app):\n            raise ValueError(\"InvalidProviderApp\")\n        prefix = (\"https://management.azure.com/subscriptions/\" + account[\"id\"]\n                  + \"/resourceGroups/\" + group + \"/providers/Microsoft.Web/sites/\" + app)\n        started = datetime.now(timezone.utc) - timedelta(seconds=2)\n        descriptor, name = tempfile.mkstemp(prefix=\"provider-publish-\", suffix=\".json\")\n        try:\n            with os.fdopen(descriptor, \"w\") as stream:\n                os.fchmod(stream.fileno(), 0o600)\n                json.dump({\"properties\": {\"packageUri\": uri, \"type\": \"zip\",\n                                          \"clean\": True, \"restart\": True}}, stream)\n            print(\"Provider publish stage: submit app build \" + app, flush=True)\n            cli(\"rest\", \"--method\", \"put\", \"--url\",\n                prefix + \"/extensions/onedeploy?api-version=2024-11-01\", \"--body\", \"@\" + name)\n        finally:\n            Path(name).unlink(missing_ok=True)\n        deadline = time.monotonic() + 1200\n        print(\"Provider publish stage: verify app build \" + app, flush=True)\n        while time.monotonic() < deadline:\n            deployments = cli(\"rest\", \"--method\", \"get\", \"--url\",\n                              prefix + \"/deployments?api-version=2023-12-01\")\n            recent = []\n            for entry in deployments.get(\"value\", []):\n                properties = entry.get(\"properties\", {})\n                timestamp = properties.get(\"start_time\") or properties.get(\"startTime\")\n                if timestamp and datetime.fromisoformat(timestamp.replace(\"Z\", \"+00:00\")) >= started:\n                    recent.append((timestamp, properties))\n            if recent:\n                deployment = max(recent, key=lambda value: value[0])[1]\n                if deployment.get(\"status\") == 3:\n                    raise RuntimeError(\"ProviderRemoteBuildFailed\")\n                if deployment.get(\"status\") == 4 and deployment.get(\"active\") is True:\n                    print(\"Provider app build verified: \" + app, flush=True)\n                    break\n            time.sleep(10)\n        else:\n            raise TimeoutError(\"ProviderRemoteBuildTimedOut\")\n    Path(os.environ[\"AZ_SCRIPTS_OUTPUT_PATH\"]).write_text(json.dumps({\"status\": \"Published\"}))\n\n\nif __name__ == \"__main__\":\n    try:\n        main()\n    except ProviderPublishRequestError as error:\n        raise SystemExit(\"Provider installation stopped: \" + str(error)) from None\n    except Exception as error:\n        raise SystemExit(\"Provider installation stopped: \" + type(error).__name__) from None\n",
+    "suffix": "[uniqueString(resourceGroup().id)]",
+    "tags": {
+      "purpose": "provider-provisioning",
+      "labRun": "[parameters('runId')]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[format('stfaasboot{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[union(variables('tags'), createObject('SecurityControl', 'Ignore'))]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "properties": {
+        "allowSharedKeyAccess": "[parameters('approveDeploymentScriptBackingException')]",
+        "allowBlobPublicAccess": false,
+        "supportsHttpsTrafficOnly": true,
+        "minimumTlsVersion": "TLS1_2",
+        "publicNetworkAccess": "Enabled",
+        "networkAcls": {
+          "defaultAction": "Allow",
+          "bypass": "None"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2023-08-01",
+      "name": "provider-publish-apps",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "kind": "AzureCLI",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', parameters('publisherIdentityId'))]": {}
+        }
+      },
+      "properties": {
+        "azCliVersion": "2.77.0",
+        "timeout": "PT2H",
+        "cleanupPreference": "Always",
+        "retentionInterval": "P1D",
+        "forceUpdateTag": "[format('{0}-{1}', parameters('codePackageSha256'), parameters('publicationAttempt'))]",
+        "storageAccountSettings": {
+          "storageAccountName": "[format('stfaasboot{0}', variables('suffix'))]",
+          "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', format('stfaasboot{0}', variables('suffix'))), '2023-05-01').keys[0].value]"
+        },
+        "environmentVariables": [
+          {
+            "name": "FAAS_PACKAGE_URI",
+            "secureValue": "[parameters('codePackageUri')]"
+          },
+          {
+            "name": "FAAS_PACKAGE_SHA256",
+            "value": "[parameters('codePackageSha256')]"
+          },
+          {
+            "name": "FAAS_RELEASE_STORAGE_ACCOUNT",
+            "value": "[parameters('releaseStorageAccountName')]"
+          },
+          {
+            "name": "FAAS_PROVIDER_SUBSCRIPTION",
+            "value": "[subscription().subscriptionId]"
+          },
+          {
+            "name": "FAAS_PROVIDER_CONTROL_GROUP",
+            "value": "[resourceGroup().name]"
+          },
+          {
+            "name": "FAAS_PROVIDER_APPS",
+            "value": "[string(parameters('appNames'))]"
+          }
+        ],
+        "scriptContent": "[format('set -eu\ncd \"$HOME\"\npython3 - <<''FAAS_PUBLISH_PY''\n{0}\nFAAS_PUBLISH_PY\n', variables('$fxv#0'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', format('stfaasboot{0}', variables('suffix')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "status": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'provider-publish-apps'), '2023-08-01').outputs.status]"
+    }
+  }
+}

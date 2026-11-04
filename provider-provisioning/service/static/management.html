@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FaaS Provider Administration</title>
+<script>
+(() => {
+ if (/^(?:#|.*&)(?:token|access_token|id_token|code)=/i.test(window.location.hash)) {
+   window.history.replaceState(null, "", window.location.pathname + window.location.search);
+ }
+ const param = new URLSearchParams(window.location.search).get("scoutTheme");
+  const theme =
+    param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+header { border-bottom: 1px solid var(--cp-border); background: var(--cp-surface); padding: 24px max(24px, calc((100vw - 1200px)/2)); }
+h1 { margin: 4px 0; font-size: 28px; } h2 { margin: 0 0 16px; font-size: 19px; }
+p { margin: 8px 0; } .muted, small { color: var(--cp-text-muted); }
+main { max-width: 1248px; margin: auto; padding: 24px; }
+.grid { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+.toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.brand { color: var(--cp-accent); font-weight: 700; font-size: 12px; letter-spacing: 1px; }
+label { display: block; font-weight: 600; margin-bottom: 16px; }
+input, button, select { font: inherit; border-radius: 0.625rem; }
+input, select { display: block; width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--cp-border-strong); background: var(--cp-bg-elevated); color: var(--cp-text); }
+input:focus, button:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 3px; }
+button { padding: 9px 14px; border: 1px solid var(--cp-border-strong); background: var(--cp-surface-soft); color: var(--cp-text); cursor: pointer; }
+button:hover { border-color: var(--cp-accent); } button:disabled { opacity: .55; cursor: wait; }
+button.primary { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+button.primary:hover { background: var(--cp-accent-hover); }
+button.danger { color: var(--cp-danger); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+#notice { min-height: 28px; margin-bottom: 16px; color: var(--cp-text-muted); }
+#notice.error { color: var(--cp-danger); } #notice.success { color: var(--cp-success); }
+.customer { border-top: 1px solid var(--cp-border); padding: 20px 0; }
+.customer:first-child { border-top: 0; } .customer h3 { margin: 0; font-size: 17px; }
+.status { display: inline-block; padding: 3px 9px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-accent-soft); color: var(--cp-text); font-size: 12px; }
+.details { color: var(--cp-text-muted); font: 12px/1.7 Consolas, "Courier New", Courier, monospace; overflow-wrap: anywhere; margin: 8px 0; }
+#secret-panel { border-color: var(--cp-warning); }
+#secret { font-family: Consolas, "Courier New", Courier, monospace; }
+a { color: var(--cp-link); }
+@media (max-width: 850px) { .grid { grid-template-columns: 1fr; } header { padding: 20px 24px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">CHECK POINT / FAAS LAB</div>
+  <div class="toolbar"><h1>Provider administration</h1><span id="identity" class="muted">Checking administrator access...</span><a href="/.auth/login/aad?post_login_redirect_uri=%2F">Sign in again</a><a href="/.auth/logout?post_logout_redirect_uri=/">Sign out</a></div>
+  <p class="muted">Customer onboarding and credential lifecycle. Provider tenant only.</p>
+</header>
+<main>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <div class="grid">
+    <aside>
+      <section class="card">
+        <h2>Onboard a customer</h2>
+        <form id="onboard">
+          <label>Customer name<input name="name" required maxlength="80" autocomplete="organization"></label>
+          <label>Customer tenant ID<input name="tenantId" required placeholder="Entra tenant UUID" spellcheck="false"></label>
+          <label>Customer subscription ID<input name="subscriptionId" required placeholder="Approved subscription UUID" spellcheck="false"></label>
+          <label>Credential lifetime in hours<input name="credentialHours" type="number" min="1" max="8760" step="1" value="24" required></label>
+          <p><small>1 to 8,760 hours (365 days); subject to provider tenant policy.</small></p>
+          <button class="primary" type="submit">Create onboarding</button>
+        </form>
+        <p><small>No customer Azure or Graph access is requested. Tenant and subscription IDs are approved enrollment metadata, not proof of ownership.</small></p>
+      </section>
+      <section class="card">
+        <h2>Before first use</h2>
+        <p>Provider Entra setup and Graph consent must be completed by an authorized directory administrator. Azure subscription Owner alone is not sufficient.</p>
+        <p>Enable MFA through your organization's access policy. Credentials stay in the private management Key Vault.</p>
+        <button id="readiness" type="button">Check setup readiness</button>
+        <p id="setup" class="muted"></p>
+      </section>
+    </aside>
+    <section>
+      <section id="deployment-panel" class="card" hidden>
+        <h2>Customer deployment link</h2>
+        <p>Recovery-enabled release. Confirm the Azure Portal wizard shows
+          <strong>FaaS customer deployment - recovery-enabled release</strong> before deploying.</p>
+        <p><a id="deployment-link" target="_blank" rel="noopener noreferrer">Open customer Azure Portal wizard</a></p>
+        <p id="deployment-expiry" class="muted"></p>
+        <button id="copy-deployment" type="button">Copy deployment link</button>
+      </section>
+      <section id="secret-panel" class="card" hidden>
+        <h2>Credentials and connection details</h2>
+        <p id="secret-caption"></p>
+        <label for="secret">Customer API credential (customer deployment authentication only)</label>
+        <input id="secret" type="password" readonly autocomplete="off" aria-label="Customer API credential">
+        <div class="actions"><button id="copy-secret" type="button">Copy credential</button><button id="hide-secret" type="button">Clear now</button></div>
+        <div id="connection-details"></div>
+        <p><small>Use an approved secure delivery channel. The value clears from this page after 30 seconds. Do not paste it in chat, email it in plain text, or put it in a deployment URL.</small></p>
+      </section>
+      <section class="card">
+        <div class="toolbar"><h2>Customer enrollments</h2><button id="refresh" type="button">Refresh</button></div>
+        <p class="muted">Each client is bound to one customer. Reveal, rotate, revoke and link issuance are audited.</p>
+        <div id="customers"><p class="muted">Loading...</p></div>
+      </section>
+    </section>
+  </div>
+</main>
+<script>
+"use strict";
+const notice = document.getElementById("notice");
+let secretTimer;
+let revealGeneration = 0;
+function message(text, kind = "") { notice.textContent = text; notice.className = kind; }
+function clearSecret() {
+  revealGeneration += 1;
+  document.getElementById("secret").value = "";
+  const details = document.getElementById("connection-details");
+  for (const input of details.querySelectorAll("input")) input.value = "";
+  details.replaceChildren();
+  document.getElementById("secret-panel").hidden = true;
+  clearTimeout(secretTimer);
+}
+function renderConnectionDetails(records) {
+  if (!Array.isArray(records)) throw new Error("InvalidConnectionDetailsResponse");
+  const container = document.getElementById("connection-details");
+  container.replaceChildren();
+  for (const record of records) {
+    const section = document.createElement("section"); section.className = "customer";
+    const title = document.createElement("h3");
+    title.textContent = "Check Point environment " + record.environmentId;
+    const routing = document.createElement("p"); routing.className = "details";
+    routing.textContent = "CUSTOMER UDR NEXT HOP\nType: VirtualAppliance\nIP: " +
+      (record.routing.nextHopIp || "Not registered - check the customer-foundation output routingAppliancePrivateIp.");
+    routing.style.whiteSpace = "pre-line";
+    const guidance = document.createElement("p"); guidance.className = "muted";
+    guidance.textContent = record.routing.instructions;
+    section.append(title, routing, guidance);
+    if (record.credentialStatus !== "available") {
+      const missing = document.createElement("p"); missing.className = "muted";
+      missing.textContent = "Connection credentials unavailable: " + record.credentialStatus +
+        ". No password has been reset or substituted.";
+      section.append(missing); container.append(section); continue;
+    }
+    for (const [label, connection] of [["Management", record.management], ["Gateway", record.gateway]]) {
+      if (!connection || !/^(?:\d{1,3}\.){3}\d{1,3}$/.test(connection.publicIp)) {
+        throw new Error("InvalidConnectionDetailsResponse");
+      }
+      const heading = document.createElement("h4"); heading.textContent = label;
+      const details = document.createElement("p"); details.className = "details";
+      details.style.whiteSpace = "pre-line";
+      details.textContent = "Username: " + connection.username + "\nPublic IP: " + connection.publicIp +
+        (connection.privateIp ? "\nPrivate IP: " + connection.privateIp : "") +
+        (connection.frontendPrivateIp ? "\nProvider frontend IP: " + connection.frontendPrivateIp +
+          "\nProvider backend IP (NOT the customer UDR next hop): " + connection.backendPrivateIp : "") +
+        "\nSSH: " + connection.ssh +
+        (connection.authentication ? "\nAuthentication: " + connection.authentication : "");
+      const link = document.createElement("a");
+      link.href = "https://" + connection.publicIp;
+      link.textContent = "Open " + label.toLowerCase() + " HTTPS";
+      link.target = "_blank"; link.rel = "noopener noreferrer";
+      section.append(heading, details, link);
+      if (label === "Management") {
+        if (typeof connection.password !== "string" || connection.password.length < 16) {
+          throw new Error("InvalidConnectionDetailsResponse");
+        }
+        const password = document.createElement("input");
+        password.type = "password"; password.readOnly = true; password.autocomplete = "off";
+        password.setAttribute("aria-label", "Management administrator password");
+        password.value = connection.password;
+        const actions = document.createElement("div"); actions.className = "actions";
+        const show = document.createElement("button"); show.type = "button";
+        show.textContent = "Show password";
+        show.addEventListener("click", () => {
+          password.type = password.type === "password" ? "text" : "password";
+          show.textContent = password.type === "password" ? "Show password" : "Hide password";
+        });
+        const copy = document.createElement("button"); copy.type = "button";
+        copy.textContent = "Copy management password";
+        copy.addEventListener("click", async () => {
+          try { await navigator.clipboard.writeText(password.value); message("Management password copied. Clear your clipboard after use.", "success"); }
+          catch (error) { message("Clipboard access failed. The password remains temporary on this page.", "error"); }
+        });
+        actions.append(show, copy); section.append(password, actions);
+      }
+    }
+    container.append(section);
+  }
+}
+async function request(path, method = "GET", body) {
+  const options = { method, credentials: "same-origin", cache: "no-store", headers: {} };
+  if (method !== "GET") {
+    options.headers["Content-Type"] = "application/json";
+    options.headers["Idempotency-Key"] = crypto.randomUUID();
+    options.body = JSON.stringify(body || {});
+  }
+  const response = await fetch(path, options);
+  const text = await response.text();
+  const contentType = response.headers.get("content-type") || "";
+  let result;
+  if (text && contentType.toLowerCase().includes("application/json")) {
+    try { result = JSON.parse(text); }
+    catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      throw new Error("Invalid JSON response (HTTP " + response.status + ").");
+    }
+  }
+  if (!response.ok) {
+    const code = result && typeof result.detail === "string" ? result.detail : "";
+    const detail = code === "CustomerNameAlreadyEnrolled" ?
+      "A customer with this name already exists in this tenant." :
+      code === "AdministratorSignInRequired" || (response.status === 401 && !code) ?
+        "Your administrator session expired. Select Sign in again." :
+        (code || "Request rejected (HTTP " + response.status + ").");
+    throw new Error(detail);
+  }
+  if (result === undefined) throw new Error("Expected a JSON response (HTTP " + response.status + ").");
+  return result;
+}
+function button(text, action, danger = false) {
+  const element = document.createElement("button");
+  element.type = "button"; element.textContent = text;
+  if (danger) element.className = "danger";
+  element.addEventListener("click", async () => {
+    element.disabled = true; clearSecret();
+    try { await action(); } catch (error) {
+      message(error.message, "error");
+      try { await refresh(); } catch (refreshError) {
+        message(error.message + " (customer list refresh failed).", "error");
+      }
+    }
+    finally { element.disabled = false; }
+  });
+  return element;
+}
+function field(record, ...keys) {
+  for (const key of keys) if (record[key] !== undefined) return record[key];
+  return "";
+}
+async function refresh() {
+  const response = await request("/admin/customers");
+  const records = Array.isArray(response) ? response : response.customers;
+  if (!Array.isArray(records)) throw new Error("InvalidCustomerResponse");
+  const container = document.getElementById("customers");
+  container.replaceChildren();
+  if (!records.length) { container.textContent = "No customers enrolled. Create the first onboarding."; return; }
+  for (const customer of records) {
+    const id = field(customer, "customerId", "customer_id");
+    const card = document.createElement("article"); card.className = "customer";
+    const heading = document.createElement("div"); heading.className = "toolbar";
+    const name = document.createElement("h3"); name.textContent = customer.name;
+    const status = document.createElement("span"); status.className = "status"; status.textContent = customer.status;
+    heading.append(name, status);
+    const details = document.createElement("p"); details.className = "details";
+    details.textContent = "Tenant: " + field(customer, "tenantId", "tenant") + "\nSubscription: " +
+      field(customer, "subscriptionId", "subscription") + "\nClient: " + field(customer, "clientId", "client") +
+      "\nExpires: " + field(customer, "credentialExpiresAt", "expiresAt", "expires_at") +
+      (customer.errorCode ? "\nAction required: " + customer.errorCode : "") +
+      (customer.failureStage ? "\nStep: " + customer.failureStage : "") +
+      (customer.dependencyOperation ? "\nOperation: " + customer.dependencyOperation : "") +
+      (customer.dependencyReason ? "\nDirectory response: " + customer.dependencyReason : "") +
+      (customer.recoveryGuidance ? "\n" + customer.recoveryGuidance : "");
+    details.style.whiteSpace = "pre-line";
+    const actions = document.createElement("div"); actions.className = "actions";
+    const lifetimeLabel = document.createElement("label");
+    lifetimeLabel.textContent = "Rotation lifetime in hours";
+    const lifetime = document.createElement("input");
+    lifetime.type = "number"; lifetime.min = "1"; lifetime.max = "8760";
+    lifetime.step = "1"; lifetime.value = String(customer.credentialHours || 24);
+    lifetime.required = true; lifetimeLabel.append(lifetime);
+    actions.append(
+      button("Deployment link", async () => {
+        const result = await request("/admin/customers/" + id + "/deployment", "POST");
+        const parsed = new URL(result.portalUrl);
+        if (parsed.origin !== "https://portal.azure.com") throw new Error("InvalidDeploymentOrigin");
+        document.getElementById("deployment-link").href = parsed.href;
+        document.getElementById("deployment-expiry").textContent = "Expires " + result.expiresAt;
+        document.getElementById("deployment-panel").hidden = false;
+        message("Read-only deployment link issued; expires " + result.expiresAt, "success");
+      }),
+      button("Reveal credential", async () => {
+        const generation = revealGeneration;
+        const result = await request("/admin/customers/" + id + "/reveal", "POST");
+        if (generation !== revealGeneration || document.hidden) return;
+        renderConnectionDetails(result.connectionDetails || []);
+        document.getElementById("secret").value = result.secret;
+        document.getElementById("secret-caption").textContent = customer.name + " - expires " + result.expiresAt;
+        document.getElementById("secret-panel").hidden = false;
+        secretTimer = setTimeout(clearSecret, 30000);
+        message("Credentials and connection details revealed for 30 seconds. Access is audited.", "success");
+      }),
+      lifetimeLabel,
+      button("Rotate", async () => {
+        const hours = lifetime.valueAsNumber;
+        if (!Number.isInteger(hours) || hours < 1 || hours > 8760) {
+          throw new Error("Enter a whole number of hours between 1 and 8760.");
+        }
+        if (!window.confirm("Rotate this client's real Entra credential? Existing deployment access may be interrupted.")) return;
+        await request("/admin/customers/" + id + "/rotate", "POST", {credentialHours: hours});
+        message("Rotation completed. Reveal the new credential for secure delivery.", "success"); await refresh();
+      }),
+      button("Revoke", async () => {
+        if (!window.confirm("Revoke API access for this customer? Existing Azure infrastructure will NOT be deleted.")) return;
+        await request("/admin/customers/" + id + "/revoke", "POST");
+        message("Revocation completed. Existing infrastructure is unchanged.", "success"); await refresh();
+      }, true),
+      button("Recover / reactivate", async () => {
+        if (!window.confirm("Verify this client's stored identity and recover it using a fresh credential? Uncertain identities will not be adopted automatically.")) return;
+        await request("/admin/customers/" + id + "/recover", "POST");
+        message("Recovery completed. Reveal the fresh credential for secure delivery.", "success"); await refresh();
+      })
+    );
+    if (customer.status === "Revoked") actions.append(button("Archive", async () => {
+      if (!window.confirm("Archive this revoked customer? Its audit and allocation records remain; Azure resources are not deleted.")) return;
+      await request("/admin/customers/" + id + "/archive", "POST");
+      message("Customer archived. Audit and allocation records are retained.", "success"); await refresh();
+    }, true));
+    const environments = document.createElement("div"); environments.className = "environments";
+    environments.hidden = true;
+    actions.append(button("Decommission provider resource groups", async () => {
+      await showEnvironments(id, environments);
+    }));
+    card.append(heading, details, actions, environments); container.append(card);
+  }
+}
+async function showEnvironments(id, container) {
+  const response = await request("/admin/customers/" + id + "/environments");
+  if (!Array.isArray(response.environments)) throw new Error("InvalidEnvironmentResponse");
+  container.replaceChildren(); container.hidden = false;
+  const title = document.createElement("h4"); title.textContent = "Provider resource groups";
+  container.append(title);
+  if (!response.environments.length) {
+    const empty = document.createElement("p"); empty.className = "muted";
+    empty.textContent = "No provider resource groups for this customer.";
+    container.append(empty); return;
+  }
+  for (const environment of response.environments) {
+    const row = document.createElement("div"); row.className = "environment";
+    const state = environment.decommissionState;
+    const text = document.createElement("p"); text.className = "details";
+    text.textContent = environment.providerGroupName + "\nEnvironment: " + environment.environmentId +
+      "\nStatus: " + environment.status + (state ? "\nDecommission: " + state : "") +
+      (environment.decommissionError ? "\nError: " + environment.decommissionError : "");
+    text.style.whiteSpace = "pre-line";
+    row.append(text);
+    if (state !== "Decommissioned" && state !== "Deleting" && state !== "Requested") {
+      row.append(button("Decommission", async () => {
+        if (!window.confirm("Decommission " + environment.providerGroupName + "? The provider-side managed application and resource group, including its gateways and firewall, will be permanently deleted. Customer-side resources are not touched.")) return;
+        await request("/admin/customers/" + id + "/environments/" + environment.environmentId + "/decommission", "POST");
+        message("Decommission requested. The worker deletes the provider resource group; this can take 30 minutes or more.", "success");
+        await showEnvironments(id, container);
+      }, true));
+    }
+    container.append(row);
+  }
+}
+document.getElementById("onboard").addEventListener("submit", async event => {
+  event.preventDefault(); clearSecret();
+  const submit = event.target.querySelector("button");
+  submit.disabled = true; message("Creating Entra client, securing its credential and publishing customer artifacts...");
+  const values = Object.fromEntries(new FormData(event.target));
+  values.credentialHours = Number(values.credentialHours);
+  try {
+    await request("/admin/customers", "POST", values);
+    event.target.reset(); message("Customer onboarding completed.", "success"); await refresh();
+  } catch (error) {
+    message(error.message, "error");
+    try { await refresh(); } catch (refreshError) {
+      message(error.message + " (customer list refresh failed).", "error");
+    }
+  }
+  finally { submit.disabled = false; }
+});
+document.getElementById("refresh").addEventListener("click", () => refresh().catch(error => message(error.message, "error")));
+document.getElementById("hide-secret").addEventListener("click", clearSecret);
+document.getElementById("copy-deployment").addEventListener("click", async () => {
+  try {
+    const url = document.getElementById("deployment-link").getAttribute("href");
+    if (!url) throw new Error("NoDeploymentLink");
+    await navigator.clipboard.writeText(url);
+    message("Deployment link copied. The API credential is not included.", "success");
+  } catch (error) { message(error.message, "error"); }
+});
+document.getElementById("copy-secret").addEventListener("click", async () => {
+  try {
+    const value = document.getElementById("secret").value;
+    if (!value) throw new Error("CredentialAlreadyCleared");
+    await navigator.clipboard.writeText(value); message("Copied. Use your approved delivery channel.", "success");
+  } catch (error) { message(error.message, "error"); }
+});
+document.getElementById("readiness").addEventListener("click", async () => {
+  try {
+    const result = await request("/admin/readiness");
+    document.getElementById("setup").textContent = result.status;
+  } catch (error) { message(error.message, "error"); }
+});
+window.addEventListener("pagehide", clearSecret);
+document.addEventListener("visibilitychange", () => { if (document.hidden) clearSecret(); });
+(async () => {
+  try {
+    const session = await request("/admin/session");
+    document.getElementById("identity").textContent = session.name;
+    await refresh();
+  } catch (error) {
+    message(error.message + ". Sign in using the provider administrator account.", "error");
+    document.getElementById("identity").textContent = "Access not established";
+  }
+})();
+</script>
+</body>
+</html>

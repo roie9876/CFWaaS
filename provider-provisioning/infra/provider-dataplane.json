@@ -1,0 +1,1484 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.44.1.10279",
+      "templateHash": "17157035192770208922"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "allowedValues": [
+        "eastus2"
+      ]
+    },
+    "environmentId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "customerIngressPublicIp": {
+      "type": "string"
+    },
+    "customerIngressBgpAddress": {
+      "type": "string"
+    },
+    "customerIngressAsn": {
+      "type": "int",
+      "minValue": 64512,
+      "maxValue": 65534
+    },
+    "customerDeliveryPublicIp": {
+      "type": "string"
+    },
+    "customerDeliveryBgpAddress": {
+      "type": "string"
+    },
+    "customerDeliveryAsn": {
+      "type": "int",
+      "minValue": 64512,
+      "maxValue": 65534
+    },
+    "ingressSharedKey": {
+      "type": "securestring"
+    },
+    "deliverySharedKey": {
+      "type": "securestring"
+    },
+    "sshPublicKey": {
+      "type": "string"
+    },
+    "parallelProviderNetworking": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Experimental: provision the ingress Route Server concurrently with provider gateways."
+      }
+    }
+  },
+  "variables": {
+    "tags": {
+      "purpose": "provider-provisioning-dataplane",
+      "environmentId": "[parameters('environmentId')]"
+    },
+    "suffix": "[take(parameters('environmentId'), 8)]",
+    "vip": "172.22.10.10",
+    "privatePrefixes": [
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16"
+    ],
+    "definitions": [
+      {
+        "name": "pi",
+        "prefix": "172.20.0.0/16",
+        "subnet": "172.20.255.0/27",
+        "subnetName": "GatewaySubnet",
+        "routes": "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]"
+      },
+      {
+        "name": "pd",
+        "prefix": "172.21.0.0/16",
+        "subnet": "172.21.255.0/27",
+        "subnetName": "GatewaySubnet",
+        "routes": ""
+      },
+      {
+        "name": "security",
+        "prefix": "172.22.0.0/16",
+        "subnet": "172.22.10.0/24",
+        "subnetName": "firewall",
+        "routes": "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2025-05-01",
+      "name": "[format('rt-pi-{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": []
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2025-05-01",
+      "name": "[format('rt-security-{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "nva-internet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "Internet"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2025-05-01",
+      "name": "[format('nsg-security-{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-all-inbound",
+            "properties": {
+              "priority": 100,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*"
+            }
+          },
+          {
+            "name": "allow-all-outbound",
+            "properties": {
+              "priority": 100,
+              "direction": "Outbound",
+              "access": "Allow",
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*"
+            }
+          },
+          {
+            "name": "allow-rfc1918-internet-tcp",
+            "properties": {
+              "priority": 106,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Tcp",
+              "sourceAddressPrefixes": "[variables('privatePrefixes')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRanges": [
+                "22",
+                "53",
+                "80",
+                "443"
+              ]
+            }
+          },
+          {
+            "name": "allow-rfc1918-internet-udp",
+            "properties": {
+              "priority": 107,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Udp",
+              "sourceAddressPrefixes": "[variables('privatePrefixes')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRanges": [
+                "53",
+                "123",
+                "443"
+              ]
+            }
+          },
+          {
+            "name": "allow-rfc1918-internet-icmp",
+            "properties": {
+              "priority": 108,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Icmp",
+              "sourceAddressPrefixes": "[variables('privatePrefixes')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRange": "*"
+            }
+          },
+          {
+            "name": "allow-rfc1918-east-west",
+            "properties": {
+              "priority": 109,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "*",
+              "sourceAddressPrefixes": "[variables('privatePrefixes')]",
+              "sourcePortRange": "*",
+              "destinationAddressPrefixes": "[variables('privatePrefixes')]",
+              "destinationPortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "copy": {
+        "name": "networks",
+        "count": "[length(variables('definitions'))]"
+      },
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2025-05-01",
+      "name": "[format('vnet-{0}-{1}', variables('definitions')[copyIndex()].name, variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('definitions')[copyIndex()].prefix]"
+          ]
+        },
+        "subnets": "[concat(createArray(createObject('name', variables('definitions')[copyIndex()].subnetName, 'properties', union(createObject('addressPrefix', variables('definitions')[copyIndex()].subnet), if(empty(variables('definitions')[copyIndex()].routes), createObject(), createObject('routeTable', createObject('id', variables('definitions')[copyIndex()].routes))), if(equals(copyIndex(), 2), createObject('networkSecurityGroup', createObject('id', resourceId('Microsoft.Network/networkSecurityGroups', format('nsg-security-{0}', variables('suffix')))), 'defaultOutboundAccess', true()), createObject())))), if(equals(copyIndex(), 0), createArray(createObject('name', 'RouteServerSubnet', 'properties', createObject('addressPrefix', '172.20.254.0/26'))), createArray()))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('nsg-security-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/localNetworkGateways",
+      "apiVersion": "2025-05-01",
+      "name": "[format('lng-pd-{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "gatewayIpAddress": "[parameters('customerDeliveryPublicIp')]",
+        "localNetworkAddressSpace": {
+          "addressPrefixes": [
+            "[format('{0}/32', parameters('customerDeliveryBgpAddress'))]"
+          ]
+        },
+        "bgpSettings": {
+          "asn": "[parameters('customerDeliveryAsn')]",
+          "bgpPeeringAddress": "[parameters('customerDeliveryBgpAddress')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2025-05-01",
+      "name": "[format('lb-security-{0}', variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "internal",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('vip')]",
+              "privateIPAddressVersion": "IPv4",
+              "subnet": {
+                "id": "[format('{0}/subnets/firewall', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix'))))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "nvas"
+          }
+        ],
+        "probes": [
+          {
+            "name": "health",
+            "properties": {
+              "protocol": "Http",
+              "port": 9999,
+              "requestPath": "/",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "ha-ports",
+            "properties": {
+              "protocol": "All",
+              "frontendPort": 0,
+              "backendPort": 0,
+              "enableFloatingIP": true,
+              "disableOutboundSnat": true,
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', format('lb-security-{0}', variables('suffix')), 'internal')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', format('lb-security-{0}', variables('suffix')), 'nvas')]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', format('lb-security-{0}', variables('suffix')), 'health')]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "nvaPips",
+        "count": "[length(range(0, 2))]"
+      },
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2025-05-01",
+      "name": "[format('pip-nva-{0}-{1}', range(0, 2)[copyIndex()], variables('suffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4"
+      }
+    },
+    {
+      "copy": {
+        "name": "gateways",
+        "count": "[length(range(0, 2))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-gateway-{0}-{1}', range(0, 2)[copyIndex()], variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('{0}-{1}', variables('definitions')[range(0, 2)[copyIndex()]].name, variables('suffix'))]"
+          },
+          "subnetId": {
+            "value": "[format('{0}/subnets/GatewaySubnet', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[range(0, 2)[copyIndex()]].name, variables('suffix'))))]"
+          },
+          "asn": "[if(equals(range(0, 2)[copyIndex()], 0), createObject('value', 65515), createObject('value', 65031))]",
+          "activeActive": {
+            "value": "[equals(range(0, 2)[copyIndex()], 0)]"
+          },
+          "defaultSiteId": "[if(equals(range(0, 2)[copyIndex()], 1), createObject('value', resourceId('Microsoft.Network/localNetworkGateways', format('lng-pd-{0}', variables('suffix')))), createObject('value', ''))]",
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "17465228505822937815"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "asn": {
+              "type": "int"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "activeActive": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "defaultSiteId": {
+              "type": "string",
+              "defaultValue": ""
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "VpnGw1AZ",
+              "allowedValues": [
+                "VpnGw1AZ",
+                "VpnGw2AZ",
+                "VpnGw3AZ",
+                "VpnGw4AZ",
+                "VpnGw5AZ"
+              ]
+            }
+          },
+          "variables": {
+            "copy": [
+              {
+                "name": "gatewayIpConfigurations",
+                "count": "[length(range(0, if(parameters('activeActive'), 2, 1)))]",
+                "input": {
+                  "name": "[if(equals(range(0, if(parameters('activeActive'), 2, 1))[copyIndex('gatewayIpConfigurations')], 0), 'primary', 'secondary')]",
+                  "properties": {
+                    "privateIPAllocationMethod": "Dynamic",
+                    "subnet": {
+                      "id": "[parameters('subnetId')]"
+                    },
+                    "publicIPAddress": {
+                      "id": "[resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[range(0, if(parameters('activeActive'), 2, 1))[copyIndex('gatewayIpConfigurations')]], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name'))))]"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "pip",
+                "count": "[length(range(0, if(parameters('activeActive'), 2, 1)))]"
+              },
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2025-05-01",
+              "name": "[if(equals(range(0, if(parameters('activeActive'), 2, 1))[copyIndex()], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "zones": [
+                "1",
+                "2",
+                "3"
+              ],
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworkGateways",
+              "apiVersion": "2025-05-01",
+              "name": "[format('gw-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": "[union(createObject('gatewayType', 'Vpn', 'vpnType', 'RouteBased', 'vpnGatewayGeneration', if(equals(parameters('sku'), 'VpnGw1AZ'), 'Generation1', 'Generation2'), 'sku', createObject('name', parameters('sku'), 'tier', parameters('sku')), 'activeActive', parameters('activeActive'), 'enableBgp', true(), 'bgpSettings', createObject('asn', parameters('asn')), 'ipConfigurations', variables('gatewayIpConfigurations')), if(empty(parameters('defaultSiteId')), createObject(), createObject('gatewayDefaultSite', createObject('id', parameters('defaultSiteId')))))]",
+              "dependsOn": [
+                "pip"
+              ]
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name')))]"
+            },
+            "endpoint": {
+              "type": "object",
+              "value": {
+                "publicIp": "[reference(resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[0], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))), '2025-05-01').ipAddress]",
+                "bgpAddress": "[split(reference(resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name'))), '2025-05-01').bgpSettings.bgpPeeringAddress, ',')[0]]",
+                "asn": "[parameters('asn')]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-pd-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[range(0, 2)[copyIndex()]].name, variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "peerings",
+        "count": "[length(range(0, 2))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-peering-{0}-{1}', range(0, 2)[copyIndex()], variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "spokeName": {
+            "value": "[format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix'))]"
+          },
+          "hubName": {
+            "value": "[format('vnet-{0}-{1}', variables('definitions')[range(0, 2)[copyIndex()]].name, variables('suffix'))]"
+          },
+          "gatewayTransit": {
+            "value": "[equals(range(0, 2)[copyIndex()], 1)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "10770545772369764206"
+            }
+          },
+          "parameters": {
+            "spokeName": {
+              "type": "string"
+            },
+            "hubName": {
+              "type": "string"
+            },
+            "gatewayTransit": {
+              "type": "bool"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/to-{1}', parameters('hubName'), parameters('spokeName'))]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('spokeName'))]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "allowGatewayTransit": "[parameters('gatewayTransit')]",
+                "useRemoteGateways": false
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/to-{1}', parameters('spokeName'), parameters('hubName'))]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('hubName'))]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": "[parameters('gatewayTransit')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/virtualNetworkPeerings', split(format('{0}/to-{1}', parameters('hubName'), parameters('spokeName')), '/')[0], split(format('{0}/to-{1}', parameters('hubName'), parameters('spokeName')), '/')[1])]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "gateways",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[range(0, 2)[copyIndex()]].name, variables('suffix')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-ingress-parallel-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "condition": "[not(parameters('parallelProviderNetworking'))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-route-server-ingress-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('rs-{0}-{1}', variables('definitions')[0].name, variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "subnetId": {
+            "value": "[format('{0}/subnets/RouteServerSubnet', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[0].name, variables('suffix'))))]"
+          },
+          "peerIp": {
+            "value": "172.22.10.4"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "10934039309257417771"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "peerIp": {
+              "type": "string"
+            },
+            "createPeer": {
+              "type": "bool",
+              "defaultValue": true
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2025-05-01",
+              "name": "[format('pip-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualHubs",
+              "apiVersion": "2025-05-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": "Standard",
+                "allowBranchToBranchTraffic": true,
+                "hubRoutingPreference": "ExpressRoute",
+                "virtualRouterAutoScaleConfiguration": {
+                  "minCapacity": 2
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualHubs/ipConfigurations",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'default')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('subnetId')]"
+                },
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-{0}', parameters('name')))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-{0}', parameters('name')))]",
+                "[resourceId('Microsoft.Network/virtualHubs', parameters('name'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('createPeer')]",
+              "type": "Microsoft.Network/virtualHubs/bgpConnections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'nva-primary')]",
+              "properties": {
+                "peerAsn": 65050,
+                "peerIp": "[parameters('peerIp')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualHubs/ipConfigurations', parameters('name'), 'default')]",
+                "[resourceId('Microsoft.Network/virtualHubs', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "peerAddresses": {
+              "type": "array",
+              "value": "[reference(resourceId('Microsoft.Network/virtualHubs', parameters('name')), '2025-05-01').virtualRouterIps]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[0].name, variables('suffix')))]",
+        "peerings",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "condition": "[parameters('parallelProviderNetworking')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-route-server-ingress-parallel-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('rs-{0}-{1}', variables('definitions')[0].name, variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "subnetId": {
+            "value": "[format('{0}/subnets/RouteServerSubnet', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[0].name, variables('suffix'))))]"
+          },
+          "peerIp": {
+            "value": "172.22.10.4"
+          },
+          "createPeer": {
+            "value": false
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "10934039309257417771"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "peerIp": {
+              "type": "string"
+            },
+            "createPeer": {
+              "type": "bool",
+              "defaultValue": true
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2025-05-01",
+              "name": "[format('pip-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "Standard"
+              },
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4"
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualHubs",
+              "apiVersion": "2025-05-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": "Standard",
+                "allowBranchToBranchTraffic": true,
+                "hubRoutingPreference": "ExpressRoute",
+                "virtualRouterAutoScaleConfiguration": {
+                  "minCapacity": 2
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualHubs/ipConfigurations",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'default')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('subnetId')]"
+                },
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-{0}', parameters('name')))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-{0}', parameters('name')))]",
+                "[resourceId('Microsoft.Network/virtualHubs', parameters('name'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('createPeer')]",
+              "type": "Microsoft.Network/virtualHubs/bgpConnections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'nva-primary')]",
+              "properties": {
+                "peerAsn": 65050,
+                "peerIp": "[parameters('peerIp')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualHubs/ipConfigurations', parameters('name'), 'default')]",
+                "[resourceId('Microsoft.Network/virtualHubs', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "peerAddresses": {
+              "type": "array",
+              "value": "[reference(resourceId('Microsoft.Network/virtualHubs', parameters('name')), '2025-05-01').virtualRouterIps]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[0].name, variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "condition": "[parameters('parallelProviderNetworking')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-route-server-peer-parallel-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "routeServerName": {
+            "value": "[format('rs-{0}-{1}', variables('definitions')[0].name, variables('suffix'))]"
+          },
+          "peerIp": {
+            "value": "172.22.10.4"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "17450714817527140148"
+            }
+          },
+          "parameters": {
+            "routeServerName": {
+              "type": "string"
+            },
+            "peerIp": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualHubs/bgpConnections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('{0}/{1}', parameters('routeServerName'), 'nva-primary')]",
+              "properties": {
+                "peerAsn": 65050,
+                "peerIp": "[parameters('peerIp')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-ingress-parallel-{0}', variables('suffix')))]",
+        "peerings",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "nvas",
+        "count": "[length(range(0, 2))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-nva-{0}-{1}', range(0, 2)[copyIndex()], variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('nva-{0}-{1}', range(0, 2)[copyIndex()], variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "subnetId": {
+            "value": "[format('{0}/subnets/firewall', resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix'))))]"
+          },
+          "privateIp": "[if(equals(range(0, 2)[copyIndex()], 0), createObject('value', '172.22.10.4'), createObject('value', '172.22.10.5'))]",
+          "sshPublicKey": {
+            "value": "[parameters('sshPublicKey')]"
+          },
+          "publicIpId": {
+            "value": "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-nva-{0}-{1}', range(0, 2)[range(0, 2)[copyIndex()]], variables('suffix')))]"
+          },
+          "backendPoolId": {
+            "value": "[format('{0}/backendAddressPools/nvas', resourceId('Microsoft.Network/loadBalancers', format('lb-security-{0}', variables('suffix'))))]"
+          },
+          "ingressRouteServerName": {
+            "value": "[format('rs-{0}-{1}', variables('definitions')[0].name, variables('suffix'))]"
+          },
+          "bgpEnabled": {
+            "value": "[equals(range(0, 2)[copyIndex()], 0)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "17660088376674188276"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "subnetId": {
+              "type": "string"
+            },
+            "privateIp": {
+              "type": "string"
+            },
+            "sshPublicKey": {
+              "type": "string"
+            },
+            "publicIpId": {
+              "type": "string"
+            },
+            "backendPoolId": {
+              "type": "string"
+            },
+            "ingressRouteServerName": {
+              "type": "string"
+            },
+            "bgpEnabled": {
+              "type": "bool"
+            }
+          },
+          "variables": {
+            "$fxv#0": "#cloud-config\npackage_update: true\npackages:\n  - python3\n  - iptables\n  - frr\nwrite_files:\n  - path: /etc/sysctl.d/90-faas-forwarding.conf\n    permissions: '0644'\n    content: |\n      net.ipv4.ip_forward=1\n      net.ipv4.conf.all.rp_filter=0\n      net.ipv4.conf.default.rp_filter=0\n  - path: /usr/local/sbin/faas-forwarding\n    permissions: '0755'\n    content: |\n      #!/bin/bash\n      set -euo pipefail\n      sysctl --system\n      iptables -P FORWARD ACCEPT\n      for f in /proc/sys/net/ipv4/conf/*/rp_filter; do echo 0 > \"$f\"; done\n      iptables -t nat -N FAAS_NS_EGRESS 2>/dev/null || true\n      iptables -t nat -F FAAS_NS_EGRESS\n      for excluded in 0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.168.0.0/16 198.18.0.0/15 224.0.0.0/4 240.0.0.0/4; do\n        iptables -t nat -A FAAS_NS_EGRESS -d \"$excluded\" -j RETURN\n      done\n      iptables -t nat -A FAAS_NS_EGRESS -o eth0 -j MASQUERADE\n      for source in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do\n        iptables -t nat -C POSTROUTING -s \"$source\" -j FAAS_NS_EGRESS 2>/dev/null || iptables -t nat -A POSTROUTING -s \"$source\" -j FAAS_NS_EGRESS\n      done\n  - path: /etc/frr/frr.conf\n    permissions: '0640'\n    content: |\n      frr defaults traditional\n      hostname faas-nva\n      bgp no-rib\n      ip prefix-list FAAS-DEFAULT seq 10 permit 0.0.0.0/0\n      route-map FAAS-IN deny 10\n      route-map FAAS-OUT permit 10\n       match ip address prefix-list FAAS-DEFAULT\n      router bgp 65050\n       bgp router-id 172.22.10.4\n       no bgp default ipv4-unicast\n       no bgp network import-check\n       neighbor __INGRESS_PEER_1__ remote-as 65515\n       neighbor __INGRESS_PEER_1__ ebgp-multihop 5\n       neighbor __INGRESS_PEER_1__ update-source 172.22.10.4\n       neighbor __INGRESS_PEER_2__ remote-as 65515\n       neighbor __INGRESS_PEER_2__ ebgp-multihop 5\n       neighbor __INGRESS_PEER_2__ update-source 172.22.10.4\n       address-family ipv4 unicast\n        network 0.0.0.0/0\n        neighbor __INGRESS_PEER_1__ activate\n        neighbor __INGRESS_PEER_1__ route-map FAAS-IN in\n        neighbor __INGRESS_PEER_1__ route-map FAAS-OUT out\n        neighbor __INGRESS_PEER_2__ activate\n        neighbor __INGRESS_PEER_2__ route-map FAAS-IN in\n        neighbor __INGRESS_PEER_2__ route-map FAAS-OUT out\n       exit-address-family\n  - path: /etc/systemd/system/frr.service.d/faas-forwarding.conf\n    permissions: '0644'\n    content: |\n      [Unit]\n      After=faas-forwarding.service\n      Requires=faas-forwarding.service\n  - path: /opt/faas-health.py\n    permissions: '0644'\n    content: |\n      from http.server import BaseHTTPRequestHandler, HTTPServer\n      from pathlib import Path\n      class Health(BaseHTTPRequestHandler):\n          def do_GET(self):\n              ready = Path(\"/proc/sys/net/ipv4/ip_forward\").read_text().strip() == \"1\"\n              self.send_response(200 if ready else 503)\n              self.end_headers()\n              self.wfile.write(b\"faas-ubuntu-nva/1.5.0\\n\")\n          def log_message(self, *_): pass\n      HTTPServer((\"0.0.0.0\", 9999), Health).serve_forever()\n  - path: /etc/systemd/system/faas-forwarding.service\n    permissions: '0644'\n    content: |\n      [Unit]\n      After=network-pre.target systemd-sysctl.service\n      Wants=network-pre.target\n      [Service]\n      Type=oneshot\n      ExecStart=/usr/local/sbin/faas-forwarding\n      RemainAfterExit=yes\n      [Install]\n      WantedBy=multi-user.target\n  - path: /etc/systemd/system/faas-health.service\n    permissions: '0644'\n    content: |\n      [Unit]\n      After=faas-forwarding.service\n      Requires=faas-forwarding.service\n      [Service]\n      User=labuser\n      ExecStart=/usr/bin/python3 /opt/faas-health.py\n      Restart=always\n      [Install]\n      WantedBy=multi-user.target\nruncmd:\n  - systemctl daemon-reload\n  - systemctl enable --now faas-forwarding.service faas-health.service\n  - chown frr:frr /etc/frr/frr.conf\n  - if [ '__BGP_ENABLED__' = 'true' ]; then sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons; systemctl enable --now frr.service; systemctl restart frr.service; fi\n"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2025-04-01",
+              "name": "[format('{0}-vm-deployment', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "name": {
+                    "value": "[parameters('name')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "subnetId": {
+                    "value": "[parameters('subnetId')]"
+                  },
+                  "privateIp": {
+                    "value": "[parameters('privateIp')]"
+                  },
+                  "sshPublicKey": {
+                    "value": "[parameters('sshPublicKey')]"
+                  },
+                  "forwarding": {
+                    "value": true
+                  },
+                  "publicIpId": {
+                    "value": "[parameters('publicIpId')]"
+                  },
+                  "backendPoolId": {
+                    "value": "[parameters('backendPoolId')]"
+                  },
+                  "cloudInit": {
+                    "value": "[replace(replace(replace(variables('$fxv#0'), '__INGRESS_PEER_1__', reference(resourceId('Microsoft.Network/virtualHubs', parameters('ingressRouteServerName')), '2025-05-01').virtualRouterIps[0]), '__INGRESS_PEER_2__', reference(resourceId('Microsoft.Network/virtualHubs', parameters('ingressRouteServerName')), '2025-05-01').virtualRouterIps[1]), '__BGP_ENABLED__', if(parameters('bgpEnabled'), 'true', 'false'))]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.44.1.10279",
+                      "templateHash": "17425623576154094200"
+                    }
+                  },
+                  "parameters": {
+                    "location": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object"
+                    },
+                    "subnetId": {
+                      "type": "string"
+                    },
+                    "privateIp": {
+                      "type": "string"
+                    },
+                    "sshPublicKey": {
+                      "type": "string"
+                    },
+                    "forwarding": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "publicIpId": {
+                      "type": "string",
+                      "defaultValue": ""
+                    },
+                    "backendPoolId": {
+                      "type": "string",
+                      "defaultValue": ""
+                    },
+                    "cloudInit": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "string",
+                      "defaultValue": "Standard_B1ms"
+                    },
+                    "adminUsername": {
+                      "type": "string",
+                      "defaultValue": "labuser",
+                      "allowedValues": [
+                        "labuser"
+                      ]
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Network/networkInterfaces",
+                      "apiVersion": "2025-05-01",
+                      "name": "[format('nic-{0}', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "enableIPForwarding": "[parameters('forwarding')]",
+                        "ipConfigurations": [
+                          {
+                            "name": "primary",
+                            "properties": "[union(createObject('privateIPAllocationMethod', 'Static', 'privateIPAddress', parameters('privateIp'), 'subnet', createObject('id', parameters('subnetId'))), if(empty(parameters('publicIpId')), createObject(), createObject('publicIPAddress', createObject('id', parameters('publicIpId')))), if(empty(parameters('backendPoolId')), createObject(), createObject('loadBalancerBackendAddressPools', createArray(createObject('id', parameters('backendPoolId'))))))]"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "Microsoft.Compute/virtualMachines",
+                      "apiVersion": "2025-04-01",
+                      "name": "[format('vm-{0}', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "properties": {
+                        "hardwareProfile": {
+                          "vmSize": "[parameters('size')]"
+                        },
+                        "securityProfile": {
+                          "encryptionAtHost": true,
+                          "securityType": "TrustedLaunch",
+                          "uefiSettings": {
+                            "secureBootEnabled": true,
+                            "vTpmEnabled": true
+                          }
+                        },
+                        "storageProfile": {
+                          "imageReference": {
+                            "publisher": "Canonical",
+                            "offer": "ubuntu-24_04-lts",
+                            "sku": "server",
+                            "version": "24.04.202609040"
+                          },
+                          "osDisk": {
+                            "name": "[format('os-{0}', parameters('name'))]",
+                            "createOption": "FromImage",
+                            "deleteOption": "Delete",
+                            "managedDisk": {
+                              "storageAccountType": "StandardSSD_LRS"
+                            }
+                          }
+                        },
+                        "osProfile": {
+                          "computerName": "[take(parameters('name'), 64)]",
+                          "adminUsername": "[parameters('adminUsername')]",
+                          "customData": "[base64(parameters('cloudInit'))]",
+                          "allowExtensionOperations": true,
+                          "linuxConfiguration": {
+                            "disablePasswordAuthentication": true,
+                            "provisionVMAgent": true,
+                            "ssh": {
+                              "publicKeys": [
+                                {
+                                  "path": "[format('/home/{0}/.ssh/authorized_keys', parameters('adminUsername'))]",
+                                  "keyData": "[parameters('sshPublicKey')]"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "networkProfile": {
+                          "networkInterfaces": [
+                            {
+                              "id": "[resourceId('Microsoft.Network/networkInterfaces', format('nic-{0}', parameters('name')))]",
+                              "properties": {
+                                "primary": true,
+                                "deleteOption": "Delete"
+                              }
+                            }
+                          ]
+                        },
+                        "diagnosticsProfile": {
+                          "bootDiagnostics": {
+                            "enabled": true
+                          }
+                        }
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/networkInterfaces', format('nic-{0}', parameters('name')))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "id": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Compute/virtualMachines', format('vm-{0}', parameters('name')))]"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', format('rt-pi-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-ingress-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/loadBalancers', format('lb-security-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', format('vnet-{0}-{1}', variables('definitions')[2].name, variables('suffix')))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', format('pip-nva-{0}-{1}', range(0, 2)[range(0, 2)[copyIndex()]], variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-peer-parallel-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Network/routeTables', format('rt-security-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-ingress-connection-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('pi-{0}', variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "gatewayId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[0], variables('suffix'))), '2025-04-01').outputs.id.value]"
+          },
+          "remoteEndpoint": {
+            "value": {
+              "publicIp": "[parameters('customerIngressPublicIp')]",
+              "bgpAddress": "[parameters('customerIngressBgpAddress')]",
+              "asn": "[parameters('customerIngressAsn')]"
+            }
+          },
+          "remotePrefixes": {
+            "value": [
+              "172.18.0.0/16"
+            ]
+          },
+          "sharedKey": {
+            "value": "[parameters('ingressSharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "16687516990174916435"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "gatewayId": {
+              "type": "string"
+            },
+            "remoteEndpoint": {
+              "type": "object"
+            },
+            "remotePrefixes": {
+              "type": "array"
+            },
+            "enableBgp": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "useExistingLocalGateway": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "sharedKey": {
+              "type": "securestring"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[not(parameters('useExistingLocalGateway'))]",
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2025-05-01",
+              "name": "[format('lng-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": "[union(createObject('gatewayIpAddress', parameters('remoteEndpoint').publicIp, 'localNetworkAddressSpace', createObject('addressPrefixes', parameters('remotePrefixes'))), if(parameters('enableBgp'), createObject('bgpSettings', createObject('asn', parameters('remoteEndpoint').asn, 'bgpPeeringAddress', parameters('remoteEndpoint').bgpAddress)), createObject()))]"
+            },
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('conn-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "connectionType": "IPsec",
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('gatewayId')]"
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+                },
+                "enableBgp": "[parameters('enableBgp')]",
+                "sharedKey": "[parameters('sharedKey')]",
+                "connectionProtocol": "IKEv2"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[0], variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-ingress-{0}', variables('suffix')))]",
+        "[resourceId('Microsoft.Resources/deployments', format('provider-route-server-peer-parallel-{0}', variables('suffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-delivery-connection-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('pd-{0}', variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "gatewayId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix'))), '2025-04-01').outputs.id.value]"
+          },
+          "remoteEndpoint": {
+            "value": {
+              "publicIp": "[parameters('customerDeliveryPublicIp')]",
+              "bgpAddress": "[parameters('customerDeliveryBgpAddress')]",
+              "asn": "[parameters('customerDeliveryAsn')]"
+            }
+          },
+          "remotePrefixes": {
+            "value": [
+              "[format('{0}/32', parameters('customerDeliveryBgpAddress'))]"
+            ]
+          },
+          "enableBgp": {
+            "value": true
+          },
+          "useExistingLocalGateway": {
+            "value": true
+          },
+          "sharedKey": {
+            "value": "[parameters('deliverySharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "16687516990174916435"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "gatewayId": {
+              "type": "string"
+            },
+            "remoteEndpoint": {
+              "type": "object"
+            },
+            "remotePrefixes": {
+              "type": "array"
+            },
+            "enableBgp": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "useExistingLocalGateway": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "sharedKey": {
+              "type": "securestring"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[not(parameters('useExistingLocalGateway'))]",
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2025-05-01",
+              "name": "[format('lng-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": "[union(createObject('gatewayIpAddress', parameters('remoteEndpoint').publicIp, 'localNetworkAddressSpace', createObject('addressPrefixes', parameters('remotePrefixes'))), if(parameters('enableBgp'), createObject('bgpSettings', createObject('asn', parameters('remoteEndpoint').asn, 'bgpPeeringAddress', parameters('remoteEndpoint').bgpAddress)), createObject()))]"
+            },
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('conn-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "connectionType": "IPsec",
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('gatewayId')]"
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+                },
+                "enableBgp": "[parameters('enableBgp')]",
+                "sharedKey": "[parameters('sharedKey')]",
+                "connectionProtocol": "IKEv2"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "connectionManifest": {
+      "type": "object",
+      "value": {
+        "providerIngress": "[reference(resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[0], variables('suffix'))), '2025-04-01').outputs.endpoint.value]",
+        "providerDelivery": "[reference(resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix'))), '2025-04-01').outputs.endpoint.value]",
+        "firewallVip": "[variables('vip')]"
+      }
+    }
+  }
+}

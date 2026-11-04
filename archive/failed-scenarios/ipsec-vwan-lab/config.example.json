@@ -1,0 +1,22 @@
+{
+  "region": "israelcentral",
+  "networkApi": "2025-05-01",
+  "computeApi": "2025-04-01",
+  "resourceApi": "2022-09-01",
+  "hubPrefix": "10.253.0.0/23",
+  "gatewayScaleUnit": 1,
+  "testWindowSeconds": 10800,
+  "firewallSize": "Standard_B2s",
+  "workloadSize": "Standard_B1ms",
+  "image": {
+    "publisher": "Canonical",
+    "offer": "ubuntu-24_04-lts",
+    "sku": "server",
+    "version": "24.04.202609040"
+  },
+  "nodes": [
+    {"name": "ipsec-fw", "account": "A", "prefix": "172.26.10.0/24", "subnetPrefix": "172.26.10.0/24", "privateIp": "172.26.10.4", "firewall": true},
+    {"name": "ipsec-wl1", "account": "B", "prefix": "10.151.0.0/16", "subnetPrefix": "10.151.0.0/24", "privateIp": "10.151.0.4", "firewall": false},
+    {"name": "ipsec-wl2", "account": "B", "prefix": "10.152.0.0/16", "subnetPrefix": "10.152.0.0/24", "privateIp": "10.152.0.4", "firewall": false}
+  ]
+}

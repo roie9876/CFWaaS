@@ -1,0 +1,120 @@
+# Reference only: supply these values as App Service settings, not a dotenv file.
+# The public API and worker use ManagedIdentityCredential() and their OWN identity.
+# No Azure CLI, DefaultAzureCredential, customer bearer token, or client secret fallback.
+FAAS_API_AUDIENCE=<API-application-client-UUID>
+FAAS_AUTH_MODE=customer-managed-identity
+# Legacy authority defaults to the business customer tenant when omitted.
+# FAAS_AUTHORITY_TENANT_ID=<customer-tenant-UUID>
+FAAS_TRUSTED_TENANT_ID=<customer-tenant-UUID>
+FAAS_TRUSTED_PRINCIPAL_ID=<customer-managed-identity-object-UUID>
+FAAS_TRUSTED_CLIENT_ID=<customer-managed-identity-client-UUID>
+# For provider-api-client mode, FAAS_AUTHORITY_TENANT_ID is REQUIRED and must be
+# the provider tenant. Keep FAAS_TRUSTED_TENANT_ID as the business customer tenant;
+# set trusted principal/client IDs to its enrolled provider-tenant API-only SP/app.
+# CheckPoint creates this per-customer app/SP with only FirewallDeployment.Request,
+# NO Azure RBAC. Its client secret is used only by customer Bicep to acquire an
+# API token from the provider tenant, never stored/configured/logged on this service.
+# The customer's separate managed identity handles customer-local ARM operations.
+FAAS_REQUIRED_ROLE=FirewallDeployment.Request
+FAAS_TABLE_ENDPOINT=https://<storage-account>.table.core.windows.net
+FAAS_VAULT_URL=https://<exchange-vault>.vault.azure.net
+
+# Optional: exact one-record binding matching the three identity settings above.
+# FAAS_CUSTOMERS_JSON=[{"tenantId":"...","principalId":"...","clientId":"..."}]
+# Allocation records are retained; there is no environment-count cap.
+# Active and running deployment limits remain separate.
+FAAS_MAX_CALLER_ACTIVE=2
+FAAS_MAX_CALLER_RUNNING=1
+FAAS_MAX_ATTEMPTS=5
+FAAS_LEASE_SECONDS=90
+FAAS_POLL_SECONDS=5
+
+# Worker only. The RG and Operations table must already exist; no auto-creation.
+FAAS_PROVIDER_SUBSCRIPTION_ID=<provider-subscription-UUID>
+FAAS_PROVIDER_RESOURCE_GROUP=<dedicated-precreated-provider-RG>
+# Packaging must copy the COMPILED ARM JSON, not a Bicep source file, into the zip.
+FAAS_PROVIDER_TEMPLATE_PATH=service/templates/provider.json
+FAAS_PROVIDER_TEMPLATE_SHA256=<SHA256-of-the-exact-bundled-template-bytes>
+FAAS_NVA_SSH_PUBLIC_KEY=<valid-OpenSSH-public-key>
+# Experimental and disabled by default. Set only after separate live qualification;
+# enable on the API after publishing compatible API and worker packages.
+# FAAS_PROVIDER_PARALLEL_NETWORKING=true
+# Managed-host implementation is experimental and requires explicit lab-only
+# acceptance on both API and worker. Do not enable until separately qualified.
+# FAAS_PROVIDER_GROUP_MODE=isolated
+# FAAS_ALLOW_ISOLATED_LAB_RISK=true
+# All four managed-host names and all four FAAS_GROUP_* identity settings are
+# required together. The publisher and deployer client IDs must be identical.
+# FAAS_GROUP_SUBSCRIPTION_ID=<provider-subscription-UUID>
+# FAAS_GROUP_PROVISIONER_CLIENT_ID=<publisher-managed-identity-client-UUID>
+# FAAS_GROUP_DEPLOYER_CLIENT_ID=<same-publisher-managed-identity-client-UUID>
+# FAAS_GROUP_DEPLOYER_PRINCIPAL_ID=<publisher-managed-identity-principal-UUID>
+# FAAS_MANAGED_HOST_GROUP=<exclusive-host-RG>
+# FAAS_MANAGED_HOST_PARENT_GROUP=<host-application-RG>
+# FAAS_MANAGED_HOST_APPLICATION=<locked-host-application-name>
+# FAAS_MANAGED_HOST_DEFINITION=<incremental-child-definition-name>
+# FAAS_MANAGED_HOST_ALLOW_AZURE_CONDITION=true
+# The last option is lab-only: Azure identities associated with resources in
+# the protected group are also exempt from its deny assignment if they have RBAC.
+# Proof startup needs none of the three preceding network inputs. Network requests
+# fail explicitly until all three are supplied. Complete but invalid config fails startup.
+# Static proof creates exactly one tagged route table, no gateways or secrets.
+# Network secret names: env-<environment-UUID>-ingress / env-<environment-UUID>-delivery.
+# Only nonsecret pinned Key Vault version IDs are stored in the operation table.
+
+# Run from provider-provisioning after installing requirements.txt:
+# API:    bash startup-api.sh    (service.api:app)
+# Worker: bash startup-worker.sh (service.worker_app:app)
+# Each is one process; configure worker scale=1 and App Service Always On.
+PORT=8000
+# API roles: Storage Table Data Contributor + Key Vault Secrets User, no ARM roles.
+# Worker roles: Table Data Contributor + Secrets Officer + Contributor on ONLY its RG.
+# Customer identity: API application role only, NO provider Azure RBAC.
+# Public safe health: GET /healthz.
+# POST /v1/environments: bearer JWT + Idempotency-Key, strict JSON body.
+# GET /v1/operations/<UUID>: same owner, safe status + connectionManifest.
+# GET /v1/environments/<UUID>/connection-material: same owner, Ready/network only,
+# {environmentId,ingressSharedKey,deliverySharedKey}, always Cache-Control: no-store.
+# Never enable SDK HTTP/body DEBUG logging or capture the secret response in logs.
+
+# Browser-admin platform: API and worker use the provider issuer plus the
+# management-owned Customers registry. No per-customer trusted env overwrite.
+# FAAS_AUTH_MODE=provider-api-registry
+# FAAS_AUTHORITY_TENANT_ID=<provider-tenant-UUID>
+
+# Management app ONLY, isolated from the public provisioning API/worker.
+# Its automation credential is an App Service Key Vault reference, not a local file.
+# FAAS_MANAGEMENT_TENANT_ID=<provider-tenant-UUID>
+# FAAS_MANAGEMENT_CLIENT_ID=<management-application-client-UUID>
+# FAAS_MANAGEMENT_CLIENT_SECRET="@Microsoft.KeyVault(SecretUri=<versioned-secret-URI>)"
+# FAAS_ADMIN_OBJECT_IDS=["<explicit-provider-user-object-UUID>"]
+# Optional office/home public IPv4 hosts/CIDRs prefilled in new Check Point wizards.
+# Keep actual operator addresses in ignored local configuration/approved settings, never source.
+# FAAS_ADMIN_ALLOWED_SOURCES=[]
+# FAAS_MANAGEMENT_ORIGIN=https://<management-app>.azurewebsites.net
+# FAAS_MANAGEMENT_VAULT_URL=https://<private-management-vault>.vault.azure.net
+# FAAS_ARTIFACT_ACCOUNT_URL=https://<dedicated-artifact-account>.blob.core.windows.net
+# FAAS_API_URL=https://<provisioning-api>.azurewebsites.net
+# FAAS_API_APPLICATION_ID=<provider-API-application-client-UUID>
+# FAAS_API_ROLE_ID=<FirewallDeployment.Request-role-UUID>
+# Management: bash startup-management.sh (service.management:app)
+# App Service Authentication must require provider-tenant login, use a token
+# store and restrict principals. The backend independently verifies the signed
+# ID token and explicit admin OID allowlist. Mutations require the exact Origin.
+# Graph application permissions: Application.ReadWrite.OwnedBy,
+# Application.Read.All and AppRoleAssignment.ReadWrite.All. These are privileged
+# provider-directory permissions; require explicit security-admin consent.
+
+# Optional provider-only Check Point access-detail publication.
+# Worker: target the management app, using the existing provider API as the
+# v2 access-token audience. No customer Azure permission is granted.
+# FAAS_CHECKPOINT_MANAGEMENT_RELAY_URL=https://<management-app>.azurewebsites.net
+# FAAS_CHECKPOINT_MANAGEMENT_RELAY_CLIENT_ID=<provider-API-application-client-UUID>
+# Management: pin the exact existing Check Point publisher managed identity.
+# FAAS_CHECKPOINT_RELAY_CLIENT_ID=<checkpoint-publisher-managed-identity-client-UUID>
+# FAAS_CHECKPOINT_RELAY_PRINCIPAL_ID=<checkpoint-publisher-managed-identity-object-UUID>
+# FAAS_CHECKPOINT_RELAY_IDENTITY_ID=<checkpoint-publisher-managed-identity-resource-ID>
+# Also configure App Service Authentication to admit only that additional
+# principal and API audience. Backend administrator routes remain user-only;
+# the relay validates its own exact app-only identity, audience, tenant and MI ID.
+# Secrets stay in the private management vault, never lists, Operations or logs.

@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "status": "draft",
+    "executionApproved": false,
+    "parentRun": "<existing-lab-run>",
+    "retention": "keep",
+    "automaticCoreCleanup": false
+  },
+  "inputs": {
+    "goal": "Mandatory E-W IPsec inspection, default-only BGP export, automatic private VNet route learning/withdrawal",
+    "providerAccount": "A",
+    "customerAccount": "B"
+  },
+  "plan": {
+    "reuseHeldHubAndThreeVms": true,
+    "newVpnGateway": 1,
+    "newAzureIdentityOrRoles": false,
+    "lifecycleProbe": "Create and remove only one temporary customer workload VNet/VM; do not delete core resources",
+    "approvalRequired": true
+  }
+}

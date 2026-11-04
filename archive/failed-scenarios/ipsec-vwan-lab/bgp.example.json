@@ -1,0 +1,17 @@
+{
+  "providerAsn": 65010,
+  "azureAsn": 65515,
+  "providerBgpIp": "172.26.10.4",
+  "azureBgpAddressMode": "gateway-assigned",
+  "advertiseToCustomer": ["0.0.0.0/0"],
+  "acceptedCustomerAggregates": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+  "testWindowSeconds": 10800,
+  "lifecycleProbe": {
+    "name": "ipsec-wl3",
+    "account": "B",
+    "prefix": "10.153.0.0/16",
+    "subnetPrefix": "10.153.0.0/24",
+    "privateIp": "10.153.0.4",
+    "firewall": false
+  }
+}

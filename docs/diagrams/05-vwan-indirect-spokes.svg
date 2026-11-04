@@ -1,0 +1,601 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" style="background: #FFFFFF; background-color: #FFFFFF; color-scheme: light;" version="1.1" width="1763px" height="733px" viewBox="0 0 1763 733">
+  <defs>
+    <symbol id="mx-image-1hw2jha" viewBox="0 0 72 72">
+      <svg width="72" height="72" viewBox="0 0 18 17.953" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="icon-0-shape-0" x1="9" y1="13.456" x2="9" y2="6.995" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0078d4" />
+            <stop offset=".775" stop-color="#5ea0ef" />
+          </linearGradient>
+          <linearGradient id="icon-0-shape-1" x1="9.017" y1="9.494" x2="9.017" y2="10.471" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#fff" />
+            <stop offset="1" stop-color="#fff" stop-opacity=".6" />
+          </linearGradient>
+        </defs>
+        <path fill="#9cebff" d="M14.286 8.591v-.016l-2.244-.258V5.875l-.006-.011 1.588-4.062-.788-.302-1.599 4.089.002.001-1.718 1.983-2.706-2-.035-.029L5.198 1.5l-.788.302 1.6 4.09.021-.008 1.451 3.175-3.486-.484-.017.028v-.012l-2.675-.062-.02.844 2.675.062.007-.289 1.767.563.351 1.19-.034 1.368-1.6 4.089.788.303 1.6-4.09-.13-.05 1.261-1.224 3.285.777.411.348-.388.149 1.599 4.09.788-.303-1.599-4.089-.029.011.235-1.701 2.017-1.148v.006l2.705-.062-.019-.844z" />
+        <path d="M18 9.013a1.294 1.294 0 1 1-1.294-1.294A1.294 1.294 0 0 1 18 9.013zM1.294 7.719a1.294 1.294 0 1 0 1.294 1.294 1.294 1.294 0 0 0-1.294-1.294zm3.479 7.646a1.294 1.294 0 1 0 1.293 1.294 1.294 1.294 0 0 0-1.293-1.294zm8.68 0a1.294 1.294 0 1 0 1.293 1.294 1.294 1.294 0 0 0-1.293-1.294zM4.632 0a1.294 1.294 0 1 0 1.294 1.293A1.293 1.293 0 0 0 4.632 0zm8.916 0a1.294 1.294 0 1 0 1.293 1.293A1.293 1.293 0 0 0 13.548 0z" fill="#86d633" />
+        <path d="M3.533 6.995h10.934v6.1a.365.365 0 0 1-.365.365H3.9a.365.365 0 0 1-.365-.365v-6.1z" fill="url(#icon-0-shape-0)" />
+        <path d="M3.9 4.665h10.2a.365.365 0 0 1 .365.365v1.965H3.535V5.03a.365.365 0 0 1 .365-.365z" fill="#0078d4" />
+        <path d="M10.57 9.491a.487.487 0 1 1-.487.487.487.487 0 0 1 .487-.487zm-2.039.491a.487.487 0 1 0 .486-.487.487.487 0 0 0-.486.487zm-1.553 0a.487.487 0 1 0 .487-.487.487.487 0 0 0-.487.487z" fill="url(#icon-0-shape-1)" />
+        <g fill="#fff">
+          <path d="M7.818 11.928l-.278.279a.126.126 0 0 1-.178 0h0L5.3 10.151a.251.251 0 0 1 0-.356h0l.278-.279h0l2.24 2.234a.126.126 0 0 1 0 .178zm4.605-2.416l-2.24 2.234h0a.125.125 0 0 0 0 .178l.279.279h0a.125.125 0 0 0 .178 0l2.06-2.056h0a.252.252 0 0 0 0-.356l-.278-.279z" />
+          <path d="M7.5 7.762l.279.278a.126.126 0 0 1 0 .178l-2.2 2.208h0l-.279-.279a.251.251 0 0 1 0-.356h0l2.02-2.029a.126.126 0 0 1 .18 0zm5.2 2.379h0a.251.251 0 0 0 0-.356l-2.02-2.029h0a.126.126 0 0 0-.178 0l-.282.282h0a.126.126 0 0 0 0 .178l2.2 2.207h0l.279-.279z" opacity=".8" />
+        </g>
+      </svg>
+    </symbol>
+  </defs>
+  <rect fill="#FFFFFF" width="100%" height="100%" x="0" y="0" style="fill: rgb(255, 255, 255);" />
+  <g>
+    <g data-cell-id="0">
+      <g data-cell-id="1">
+        <g data-cell-id="title">
+          <g>
+            <rect x="1" y="0" width="1760" height="48" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="3" y="37" fill="#20324D" font-family="Helvetica" font-size="42px" font-weight="bold" style="fill: rgb(32, 50, 77);">vWAN with indirect customer spokes</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="status">
+          <g>
+            <rect x="1" y="52" width="1760" height="34" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="3" y="76" fill="#6A7587" font-family="Helvetica" font-size="24px" style="fill: rgb(106, 117, 135);">Documented architecture | Cross-tenant variant not yet tested</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="tenant-a">
+          <g>
+            <rect x="1" y="332" width="1760" height="348" rx="27.84" ry="27.84" fill="#fff5f9" stroke="#e8b8cb" stroke-width="2" pointer-events="all" style="fill: rgb(255, 245, 249); stroke: rgb(232, 184, 203);" />
+          </g>
+          <g data-cell-id="provider-label">
+            <g>
+              <rect x="1517" y="344" width="224" height="80" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="1739" y="376" fill="#B72960" font-family="Helvetica" font-size="26px" text-anchor="end" font-weight="bold" style="fill: rgb(183, 41, 96);">
+                  <tspan x="1739" y="376">Check Point</tspan>
+                  <tspan x="1739" y="407">Provider tenant A</tspan>
+                </text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="env-b">
+            <g>
+              <rect x="21" y="436" width="520" height="172" rx="13.76" ry="13.76" fill="#ffffff" stroke="#ebcedb" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(235, 206, 219);" />
+            </g>
+            <g data-cell-id="fw-b">
+              <g />
+              <g data-cell-id="fw-b-brick-0-0">
+                <g>
+                  <rect x="228" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-0-1">
+                <g>
+                  <rect x="264.19" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-0-2">
+                <g>
+                  <rect x="300.39" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-1-0">
+                <g>
+                  <rect x="228" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-1-1">
+                <g>
+                  <rect x="246.1" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-1-2">
+                <g>
+                  <rect x="282.29" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-1-3">
+                <g>
+                  <rect x="318.49" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-2-0">
+                <g>
+                  <rect x="228" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-2-1">
+                <g>
+                  <rect x="264.19" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-b-brick-2-2">
+                <g>
+                  <rect x="300.39" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-b-name">
+              <g>
+                <rect x="33" y="534" width="322" height="36" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="194" y="560" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Check Point firewall</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-b-scope">
+              <g>
+                <rect x="33" y="570" width="322" height="32" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="194" y="593" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">B / environment 1</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="hub-b">
+              <g>
+                <use href="#mx-image-1hw2jha" ns1:href="#mx-image-1hw2jha" x="421" y="446" width="72" height="72" />
+              </g>
+            </g>
+            <g data-cell-id="env-b-transit">
+              <g>
+                <rect x="367" y="530" width="168" height="68" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="451" y="557" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">
+                    <tspan x="451" y="557">Optional</tspan>
+                    <tspan x="451" y="586">vWAN transit</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-b-accent">
+              <g>
+                <rect x="21" y="436" width="5" height="172" rx="1" ry="1" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="env-c">
+            <g>
+              <rect x="621" y="436" width="520" height="172" rx="13.76" ry="13.76" fill="#ffffff" stroke="#ebcedb" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(235, 206, 219);" />
+            </g>
+            <g data-cell-id="fw-c">
+              <g />
+              <g data-cell-id="fw-c-brick-0-0">
+                <g>
+                  <rect x="828" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-0-1">
+                <g>
+                  <rect x="864.2" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-0-2">
+                <g>
+                  <rect x="900.39" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-1-0">
+                <g>
+                  <rect x="828" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-1-1">
+                <g>
+                  <rect x="846.1" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-1-2">
+                <g>
+                  <rect x="882.29" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-1-3">
+                <g>
+                  <rect x="918.49" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-2-0">
+                <g>
+                  <rect x="828" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-2-1">
+                <g>
+                  <rect x="864.2" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-c-brick-2-2">
+                <g>
+                  <rect x="900.39" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-c-name">
+              <g>
+                <rect x="633" y="534" width="322" height="36" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="794" y="560" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Check Point firewall</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-c-scope">
+              <g>
+                <rect x="633" y="570" width="322" height="32" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="794" y="593" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">C / environment 1</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="hub-c">
+              <g>
+                <use href="#mx-image-1hw2jha" ns1:href="#mx-image-1hw2jha" x="1021" y="446" width="72" height="72" />
+              </g>
+            </g>
+            <g data-cell-id="env-c-transit">
+              <g>
+                <rect x="967" y="530" width="168" height="68" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="1051" y="557" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">
+                    <tspan x="1051" y="557">Optional</tspan>
+                    <tspan x="1051" y="586">vWAN transit</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-c-accent">
+              <g>
+                <rect x="621" y="436" width="5" height="172" rx="1" ry="1" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="env-d">
+            <g>
+              <rect x="1221" y="436" width="520" height="172" rx="13.76" ry="13.76" fill="#ffffff" stroke="#ebcedb" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(235, 206, 219);" />
+            </g>
+            <g data-cell-id="fw-d">
+              <g />
+              <g data-cell-id="fw-d-brick-0-0">
+                <g>
+                  <rect x="1428" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-0-1">
+                <g>
+                  <rect x="1464.19" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-0-2">
+                <g>
+                  <rect x="1500.39" y="440" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-1-0">
+                <g>
+                  <rect x="1428" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-1-1">
+                <g>
+                  <rect x="1446.1" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-1-2">
+                <g>
+                  <rect x="1482.29" y="468.47" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-1-3">
+                <g>
+                  <rect x="1518.49" y="468.47" width="15.51" height="24.59" rx="1.24" ry="1.24" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-2-0">
+                <g>
+                  <rect x="1428" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-2-1">
+                <g>
+                  <rect x="1464.19" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+              <g data-cell-id="fw-d-brick-2-2">
+                <g>
+                  <rect x="1500.39" y="496.94" width="33.61" height="24.59" rx="1.97" ry="1.97" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-d-name">
+              <g>
+                <rect x="1233" y="534" width="322" height="36" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="1394" y="560" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Check Point firewall</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-d-scope">
+              <g>
+                <rect x="1233" y="570" width="322" height="32" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="1394" y="593" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">D / environment 1</text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="hub-d">
+              <g>
+                <use href="#mx-image-1hw2jha" ns1:href="#mx-image-1hw2jha" x="1621" y="446" width="72" height="72" />
+              </g>
+            </g>
+            <g data-cell-id="env-d-transit">
+              <g>
+                <rect x="1567" y="530" width="168" height="68" fill="none" stroke="none" pointer-events="all" />
+              </g>
+              <g>
+                <g>
+                  <text x="1651" y="557" fill="#627289" font-family="Helvetica" font-size="24px" text-anchor="middle" style="fill: rgb(98, 114, 137);">
+                    <tspan x="1651" y="557">Optional</tspan>
+                    <tspan x="1651" y="586">vWAN transit</tspan>
+                  </text>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="env-d-accent">
+              <g>
+                <rect x="1221" y="436" width="5" height="172" rx="1" ry="1" fill="#d94c80" stroke="none" pointer-events="all" style="fill: rgb(217, 76, 128);" />
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="control-title">
+            <g>
+              <rect x="21" y="610" width="1700" height="34" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="23" y="635" fill="#B72960" font-family="Helvetica" font-size="28px" font-weight="bold" style="fill: rgb(183, 41, 96);">Optional: AVNM or your own controller</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="control-detail">
+            <g>
+              <rect x="21" y="646" width="1700" height="34" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="23" y="670" fill="#627289" font-family="Helvetica" font-size="24px" style="fill: rgb(98, 114, 137);">Customer VNets peer with the firewall VNet, NOT directly with the vHub.</text>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="tenant-b">
+          <g>
+            <rect x="1" y="102" width="560" height="208" rx="16.64" ry="16.64" fill="#f7faff" stroke="#d9e5f3" stroke-width="2" pointer-events="all" style="fill: rgb(247, 250, 255); stroke: rgb(217, 229, 243);" />
+          </g>
+          <g data-cell-id="tenant-b-title">
+            <g>
+              <rect x="13" y="110" width="536" height="40" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="281" y="138" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Customer B | tenant B</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="b-vnet-1">
+            <g>
+              <path d="M 104 213 C 72.8 213 65 240 89.96 245.4 C 65 257.28 93.08 283.2 113.36 272.4 C 127.4 294 174.2 294 189.8 272.4 C 221 272.4 221 250.8 201.5 240 C 221 218.4 189.8 196.8 162.5 207.6 C 143 191.4 111.8 191.4 104 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="143" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 1</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="b-vnet-2">
+            <g>
+              <path d="M 380 213 C 348.8 213 341 240 365.96 245.4 C 341 257.28 369.08 283.2 389.36 272.4 C 403.4 294 450.2 294 465.8 272.4 C 497 272.4 497 250.8 477.5 240 C 497 218.4 465.8 196.8 438.5 207.6 C 419 191.4 387.8 191.4 380 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="419" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 2</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="tenant-b-routing">
+            <g>
+              <rect x="13" y="152" width="536" height="32" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="281" y="176" fill="#627289" font-family="Helvetica" font-size="26px" text-anchor="middle" style="fill: rgb(98, 114, 137);">UDRs -&gt; assigned firewall</text>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="optional-transit-b">
+          <g>
+            <path d="M 334 484 L 421 482" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-b-1">
+          <g>
+            <path d="M 143 294 L 143 306 Q 143 316 152.97 316.83 L 253.03 325.17 Q 263 326 262.91 336 L 261.92 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-b-2">
+          <g>
+            <path d="M 419 294 L 419 306 Q 419 316 409.03 316.83 L 308.97 325.17 Q 299 326 299.09 336 L 300.08 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="tenant-c">
+          <g>
+            <rect x="601" y="102" width="560" height="208" rx="16.64" ry="16.64" fill="#f7faff" stroke="#d9e5f3" stroke-width="2" pointer-events="all" style="fill: rgb(247, 250, 255); stroke: rgb(217, 229, 243);" />
+          </g>
+          <g data-cell-id="tenant-c-title">
+            <g>
+              <rect x="613" y="110" width="536" height="40" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="881" y="138" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Customer C | tenant C</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="c-vnet-1">
+            <g>
+              <path d="M 704 213 C 672.8 213 665 240 689.96 245.4 C 665 257.28 693.08 283.2 713.36 272.4 C 727.4 294 774.2 294 789.8 272.4 C 821 272.4 821 250.8 801.5 240 C 821 218.4 789.8 196.8 762.5 207.6 C 743 191.4 711.8 191.4 704 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="743" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 1</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="c-vnet-2">
+            <g>
+              <path d="M 980 213 C 948.8 213 941 240 965.96 245.4 C 941 257.28 969.08 283.2 989.36 272.4 C 1003.4 294 1050.2 294 1065.8 272.4 C 1097 272.4 1097 250.8 1077.5 240 C 1097 218.4 1065.8 196.8 1038.5 207.6 C 1019 191.4 987.8 191.4 980 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="1019" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 2</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="tenant-c-routing">
+            <g>
+              <rect x="613" y="152" width="536" height="32" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="881" y="176" fill="#627289" font-family="Helvetica" font-size="26px" text-anchor="middle" style="fill: rgb(98, 114, 137);">UDRs -&gt; assigned firewall</text>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="optional-transit-c">
+          <g>
+            <path d="M 934 484 L 1021 482" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-c-1">
+          <g>
+            <path d="M 743 294 L 743 306 Q 743 316 752.97 316.83 L 853.03 325.17 Q 863 326 862.91 336 L 861.92 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-c-2">
+          <g>
+            <path d="M 1019 294 L 1019 306 Q 1019 316 1009.03 316.83 L 908.97 325.17 Q 899 326 899.09 336 L 900.08 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="tenant-d">
+          <g>
+            <rect x="1201" y="102" width="560" height="208" rx="16.64" ry="16.64" fill="#f7faff" stroke="#d9e5f3" stroke-width="2" pointer-events="all" style="fill: rgb(247, 250, 255); stroke: rgb(217, 229, 243);" />
+          </g>
+          <g data-cell-id="tenant-d-title">
+            <g>
+              <rect x="1213" y="110" width="536" height="40" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="1481" y="138" fill="#20324D" font-family="Helvetica" font-size="28px" text-anchor="middle" font-weight="bold" style="fill: rgb(32, 50, 77);">Customer D | tenant D</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="d-vnet-1">
+            <g>
+              <path d="M 1304 213 C 1272.8 213 1265 240 1289.96 245.4 C 1265 257.28 1293.08 283.2 1313.36 272.4 C 1327.4 294 1374.2 294 1389.8 272.4 C 1421 272.4 1421 250.8 1401.5 240 C 1421 218.4 1389.8 196.8 1362.5 207.6 C 1343 191.4 1311.8 191.4 1304 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="1343" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 1</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="d-vnet-2">
+            <g>
+              <path d="M 1580 213 C 1548.8 213 1541 240 1565.96 245.4 C 1541 257.28 1569.08 283.2 1589.36 272.4 C 1603.4 294 1650.2 294 1665.8 272.4 C 1697 272.4 1697 250.8 1677.5 240 C 1697 218.4 1665.8 196.8 1638.5 207.6 C 1619 191.4 1587.8 191.4 1580 213 Z" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+            </g>
+            <g>
+              <g>
+                <text x="1619" y="249" fill="#FFFFFF" font-family="Helvetica" font-size="30px" text-anchor="middle" font-weight="bold" style="fill: rgb(255, 255, 255);">VNet 2</text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="tenant-d-routing">
+            <g>
+              <rect x="1213" y="152" width="536" height="32" fill="none" stroke="none" pointer-events="all" />
+            </g>
+            <g>
+              <g>
+                <text x="1481" y="176" fill="#627289" font-family="Helvetica" font-size="26px" text-anchor="middle" style="fill: rgb(98, 114, 137);">UDRs -&gt; assigned firewall</text>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="optional-transit-d">
+          <g>
+            <path d="M 1534 484 L 1621 482" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-d-1">
+          <g>
+            <path d="M 1343 294 L 1343 306 Q 1343 316 1352.97 316.83 L 1453.03 325.17 Q 1463 326 1462.91 336 L 1461.92 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="attachment-d-2">
+          <g>
+            <path d="M 1619 294 L 1619 306 Q 1619 316 1609.03 316.83 L 1508.97 325.17 Q 1499 326 1499.09 336 L 1500.08 440" fill="none" stroke="#4978c9" stroke-width="4" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="legend-line">
+          <g>
+            <rect x="5" y="710" width="44" height="4" fill="#4978c9" stroke="none" pointer-events="all" style="fill: rgb(73, 120, 201);" />
+          </g>
+        </g>
+        <g data-cell-id="flow">
+          <g>
+            <rect x="61" y="692" width="1700" height="40" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="63" y="719" fill="#275795" font-family="Helvetica" font-size="24px" style="fill: rgb(39, 87, 149);">Traffic: customer VNet -&gt; its assigned firewall -&gt; destination VNet | Customer environments stay isolated</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="eyebrow">
+          <g>
+            <rect x="1271" y="10" width="490" height="28" fill="none" stroke="none" pointer-events="all" />
+          </g>
+          <g>
+            <g>
+              <text x="1759" y="29" fill="#6A7587" font-family="Helvetica" font-size="18px" text-anchor="end" font-weight="bold" style="fill: rgb(106, 117, 135);">AZURE / CROSS-TENANT SECURITY</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

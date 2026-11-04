@@ -1,0 +1,27 @@
+name: Offline validation
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Publication boundaries and regression tests
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 -m unittest discover -s tests -v
+          python3 -m unittest discover -s archive/failed-scenarios/cross-tenant-nic-lab -p 'test_*.py' -v
+          python3 -m unittest discover -s avnm-faas-lab -p 'test_*.py' -v
+          python3 -m unittest discover -s cloudguard-vwan-lab -p 'test_*.py' -v
+          python3 -m unittest discover -s archive/failed-scenarios/ipsec-vwan-lab -p 'test_*.py' -v
+          python3 scripts/check_publication.py --staged --history

@@ -1,0 +1,214 @@
+<mxfile host="Electron">
+  <diagram id="working-lab-topology" name="Working FaaS lab">
+    <mxGraphModel dx="1218" dy="694" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2460" pageHeight="1460" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="rounded=0;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=30;fontStyle=1;fontColor=#243746;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=middle;" value="WORKING FAAS LAB | Managed VPN gateways and Check Point CloudGuard firewall" vertex="1">
+          <mxGeometry height="50" width="2380" x="35" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="summary" parent="1" style="rounded=1;arcSize=4;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=22;fontColor=#243746;fillColor=#fff9cc;strokeColor=#d6b656;strokeWidth=2;align=left;verticalAlign=middle;spacingLeft=15;" value="Two tenants | Four managed VPN gateways | One Route Server | Check Point gateway + separate management server per environment | Two IPsec connections" vertex="1">
+          <mxGeometry height="60" width="2380" x="35" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="provider" parent="1" style="rounded=1;arcSize=2;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=25;fontStyle=1;fontColor=#1a4568;fillColor=#e6f2ff;strokeColor=#0078d4;strokeWidth=3;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;" value="PROVIDER | tenant A | provider-owned resources" vertex="1">
+          <mxGeometry height="1080" width="1120" x="35" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-routing-note" parent="provider" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#243746;fillColor=#f7fbff;strokeColor=#91a8b7;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;" value="PROVIDER INGRESS ROUTING&#10;BGP-learned default to the Check Point gateway&#10;for E-W and egress. Ingress IPsec: static (no BGP).&#10;Ubuntu option: NVA pair + internal LB." vertex="1">
+          <mxGeometry height="150" width="535" x="35" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-ingress" parent="provider" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#d9eaff;strokeColor=#7a9db7;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Provider ingress VNet" vertex="1">
+          <mxGeometry height="250" width="465" x="620" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pi-route-subnet" parent="provider-ingress" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="Route Server subnet" vertex="1">
+          <mxGeometry height="175" width="225" x="15" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="route-server-ingress" parent="pi-route-subnet" style="image;image=img/lib/azure2/networking/Virtual_Router.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=200;" value="Azure Route Server&#10;BGP control plane" vertex="1">
+          <mxGeometry height="80" width="80" x="72" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="pi-gateway-subnet" parent="provider-ingress" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="GatewaySubnet" vertex="1">
+          <mxGeometry height="175" width="190" x="255" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-ingress-gw" parent="pi-gateway-subnet" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=185;" value="Provider ingress&#10;VPN Gateway" vertex="1">
+          <mxGeometry height="80" width="80" x="55" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-delivery" parent="provider" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#d9eaff;strokeColor=#7a9db7;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Provider delivery VNet" vertex="1">
+          <mxGeometry height="250" width="465" x="620" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="delivery-routing-note" parent="provider-delivery" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="No Route Server&#10;&#10;Customer prefixes learned via BGP&#10;&#10;VPN default site: /0" vertex="1">
+          <mxGeometry height="175" width="225" x="15" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="pd-gateway-subnet" parent="provider-delivery" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="GatewaySubnet" vertex="1">
+          <mxGeometry height="175" width="190" x="255" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-delivery-gw" parent="pd-gateway-subnet" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=185;" value="Provider delivery&#10;VPN Gateway&#10;ASN 65031" vertex="1">
+          <mxGeometry height="80" width="80" x="55" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="security-vnet" parent="provider" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#d9eaff;strokeColor=#7a9db7;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Provider security VNet | Check Point CloudGuard option" vertex="1">
+          <mxGeometry height="300" width="1050" x="35" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="management-subnet" parent="security-vnet" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=19;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=9;spacingTop=7;" value="Management subnet" vertex="1">
+          <mxGeometry as="geometry" x="20" y="50" width="300" height="225" />
+        </mxCell>
+        <mxCell id="automation-subnet" parent="security-vnet" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=19;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=9;spacingTop=7;" value="Automation | private endpoints" vertex="1">
+          <mxGeometry as="geometry" x="690" y="50" width="340" height="225" />
+        </mxCell>
+        <mxCell id="firewall-subnets" parent="security-vnet" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=19;fontColor=#243746;fillColor=#ffffff;strokeColor=#91a8b7;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=9;spacingTop=7;" value="Firewall frontend | backend subnets" vertex="1">
+          <mxGeometry height="225" width="330" x="340" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="checkpoint-gateway" parent="firewall-subnets" style="image;image=img/lib/azure2/networking/Firewalls.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=300;" value="Check Point CloudGuard&#10;gateway (BYOL)&#10;BGP ASN 65050 | egress NAT" vertex="1">
+          <mxGeometry height="80" width="80" x="140" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="checkpoint-management" parent="management-subnet" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=280;" value="Check Point Security&#10;Management (BYOL)&#10;SIC | policy | BGP push" vertex="1">
+          <mxGeometry as="geometry" x="110" y="55" width="80" height="80" />
+        </mxCell>
+        <mxCell id="provisioning-runner" parent="automation-subnet" style="image;image=img/lib/azure2/containers/Container_Instances.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=160;" value="Provisioning runner&#10;one-shot ACI job" vertex="1">
+          <mxGeometry as="geometry" x="50" y="55" width="80" height="80" />
+        </mxCell>
+        <mxCell id="private-vault" parent="automation-subnet" style="image;image=img/lib/azure2/security/Key_Vaults.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=160;" value="Key Vault + state&#10;private endpoints" vertex="1">
+          <mxGeometry as="geometry" x="210" y="55" width="80" height="80" />
+        </mxCell>
+        <mxCell id="customer" parent="1" style="rounded=1;arcSize=2;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=25;fontStyle=1;fontColor=#714b1e;fillColor=#fff4e6;strokeColor=#d88b27;strokeWidth=3;align=left;verticalAlign=top;spacingLeft=14;spacingTop=10;" value="CUSTOMER | tenant B | customer-owned resources" vertex="1">
+          <mxGeometry height="1080" width="1120" x="1300" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-ingress" parent="customer" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#ffead1;strokeColor=#c49a69;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Customer ingress VNet" vertex="1">
+          <mxGeometry height="250" width="610" x="35" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-gateway-subnet" parent="customer-ingress" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#bfa786;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="GatewaySubnet" vertex="1">
+          <mxGeometry height="175" width="200" x="20" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-ingress-gw" parent="ci-gateway-subnet" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=195;" value="Customer ingress&#10;VPN Gateway" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="appliance-subnet" parent="customer-ingress" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#bfa786;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="Routing Appliance subnet" vertex="1">
+          <mxGeometry height="175" width="350" x="240" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="routing-appliance" parent="appliance-subnet" style="image;image=img/lib/azure2/networking/Virtual_Router.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=300;" value="Managed Routing Appliance&#10;customer route table" vertex="1">
+          <mxGeometry height="80" width="80" x="135" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-delivery" parent="customer" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#ffead1;strokeColor=#c49a69;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Customer delivery VNet" vertex="1">
+          <mxGeometry height="250" width="465" x="35" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="cd-gateway-subnet" parent="customer-delivery" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#bfa786;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="GatewaySubnet" vertex="1">
+          <mxGeometry height="175" width="200" x="20" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-delivery-gw" parent="cd-gateway-subnet" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=195;" value="Customer delivery&#10;VPN Gateway&#10;ASN 65021" vertex="1">
+          <mxGeometry height="80" width="80" x="60" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a-vnet" parent="customer" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=22;fontColor=#243746;fillColor=#ffead1;strokeColor=#c49a69;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Customer workload VNet A" vertex="1">
+          <mxGeometry height="250" width="380" x="705" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a-subnet" parent="workload-a-vnet" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#243746;fillColor=#ffffff;strokeColor=#bfa786;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="Workload subnet | NSG and route table" vertex="1">
+          <mxGeometry height="175" width="340" x="20" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a" parent="workload-a-subnet" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=210;" value="Workload VM A&#10;public IP attached" vertex="1">
+          <mxGeometry height="80" width="80" x="130" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b-vnet" parent="customer" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=22;fontColor=#243746;fillColor=#ffead1;strokeColor=#c49a69;strokeWidth=4;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;" value="Customer workload VNet B" vertex="1">
+          <mxGeometry height="250" width="380" x="705" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b-subnet" parent="workload-b-vnet" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=17;fontColor=#243746;fillColor=#ffffff;strokeColor=#bfa786;strokeWidth=2;dashed=1;dashPattern=8 8;align=left;verticalAlign=top;spacingLeft=8;spacingTop=7;" value="Workload subnet | NSG and route table" vertex="1">
+          <mxGeometry height="175" width="340" x="20" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b" parent="workload-b-subnet" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=19;fontColor=#243746;labelWidth=210;" value="Workload VM B&#10;public IP attached" vertex="1">
+          <mxGeometry height="80" width="80" x="130" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="internet" parent="1" style="rounded=1;arcSize=5;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#243746;fillColor=#ffffff;strokeColor=#00897b;strokeWidth=2;align=center;verticalAlign=middle;" value="Public Internet&#10;HTTPS | DNS | NTP | ICMP" vertex="1">
+          <mxGeometry height="90" width="345" x="35" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a-to-ra" edge="1" parent="1" source="workload-a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="routing-appliance" value="peering + UDR">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b-to-ra" edge="1" parent="1" source="workload-b-vnet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.2;entryX=0.85;entryY=1;" target="customer-ingress" value="peering + UDR">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1970" y="990" />
+              <mxPoint x="1970" y="550" />
+              <mxPoint x="1840" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ra-to-ci" edge="1" parent="1" source="routing-appliance" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="customer-ingress-gw" value="route table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ingress-ipsec" edge="1" parent="1" source="customer-ingress-gw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=20;strokeColor=#e57800;fontColor=#a65d00;strokeWidth=3;startArrow=block;startFill=1;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="provider-ingress-gw" value="IPsec: static">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-ingress-to-gateway" edge="1" parent="1" source="provider-ingress-gw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#006c60;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.32;exitY=0.997;entryX=0.5;entryY=0;exitDx=0;exitDy=0;exitPerimeter=0;" target="checkpoint-gateway" value="default to gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway-to-delivery" edge="1" parent="1" source="checkpoint-gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#006c60;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;entryX=0.5;entryY=0;exitX=1;exitY=0.3;" target="provider-delivery-gw" value="gateway transit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="756" y="679" />
+              <mxPoint x="756" y="910" />
+              <mxPoint x="1005" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="delivery-ipsec" edge="1" parent="1" source="provider-delivery-gw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=20;strokeColor=#e57800;fontColor=#a65d00;strokeWidth=3;startArrow=block;startFill=1;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="customer-delivery-gw" value="IPsec + BGP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="delivery-to-a" edge="1" parent="1" source="customer-delivery-gw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.2;entryX=0.5;entryY=1;" target="workload-a" value="delivery peering">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1940" y="930" />
+              <mxPoint x="1940" y="470" />
+              <mxPoint x="2195" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="delivery-to-b" edge="1" parent="1" source="customer-delivery-gw" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="workload-b" value="delivery peering">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bgp-ingress" edge="1" parent="1" source="checkpoint-gateway" style="noEdgeStyle=1;curved=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#7c57a2;fontColor=#664587;strokeWidth=3;dashed=1;dashPattern=8 6;endArrow=none;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" target="route-server-ingress" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="590" y="500" />
+              <mxPoint x="630" y="380" />
+              <mxPoint x="700" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wykwOMffR1TmgsjFliwc-1" connectable="0" parent="bgp-ingress" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="BGP" vertex="1">
+          <mxGeometry relative="1" x="0.2321" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bgp-ingress-gateway" edge="1" parent="1" source="route-server-ingress" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=16;strokeColor=#7c57a2;fontColor=#664587;strokeWidth=3;dashed=1;dashPattern=8 6;endArrow=none;labelBackgroundColor=#ffffff;exitX=1;exitY=0.75;entryX=0;entryY=0.75;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="provider-ingress-gw" value="BGP">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="893.5" y="363" />
+              <mxPoint x="893.5" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gateway-to-internet" edge="1" parent="1" source="checkpoint-gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#006c60;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;entryX=0.5;entryY=0;exitX=1;exitY=0.7;" target="internet" value="hide NAT egress">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="746" y="711" />
+              <mxPoint x="746" y="890" />
+              <mxPoint x="207" y="890" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=19;fontColor=#243746;fillColor=#ffffff;strokeColor=#aab8c2;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;" value="TRAFFIC AND CONTROL PLANE&#10;Blue: customer steering. Orange: IPsec, with BGP on delivery.&#10;Teal: provider forwarding. Dashed red: provider-internal management.&#10;Dashed purple: ingress Route Server BGP with the gateway.&#10;Route Server exchanges routes; it does not carry packets." vertex="1">
+          <mxGeometry height="160" width="790" x="405" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="limits" parent="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=19;fontColor=#243746;fillColor=#fff9ef;strokeColor=#c49a69;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;" value="LAB BOUNDARIES&#10;Check Point is a lab preview: VMs, SIC, policy and BGP setup verified; customer traffic pending.&#10;Earlier traffic tests used the Ubuntu simulator. Single gateway; failover was not tested.&#10;E-W keeps customer IPs (no NAT); egress hide NAT covers RFC1918. Inbound DNAT tests were removed.&#10;East-west was reachable before VPN connection; fail-closed behavior is not established." vertex="1">
+          <mxGeometry height="160" width="1170" x="1250" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="management-to-gateway" edge="1" parent="1" source="checkpoint-management" target="checkpoint-gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#b85450;fontColor=#8f3a36;strokeWidth=2;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" value="SIC | policy">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="runner-to-management" edge="1" parent="1" source="provisioning-runner" target="checkpoint-management" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=0;fontFamily=Arial;fontSize=18;strokeColor=#b85450;fontColor=#8f3a36;strokeWidth=2;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=0;" value="">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="855" y="642" />
+              <mxPoint x="240" y="642" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

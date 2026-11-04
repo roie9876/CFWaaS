@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device" compressed="false">
+  <diagram id="06-customer-vwan-ipsec" name="06-customer-vwan-ipsec">
+    <mxGraphModel dx="1840" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1840" pageHeight="780" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Customer vWAN. Provider-side inspection." style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=42;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="12" width="1760" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="status" value="EXPERIMENT IN PROGRESS | Ubuntu/strongSwan simulator; real CloudGuard not validated" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#6A7587;fontSize=24;fontStyle=0;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="68" width="1760" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-b" value="" style="rounded=1;arcSize=8;html=0;strokeWidth=2;fillColor=#F7FAFF;strokeColor=#D9E5F3;" vertex="1" parent="1">
+          <mxGeometry x="40" y="132" width="1060" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-a" value="" style="rounded=1;arcSize=8;html=0;strokeWidth=2;fillColor=#FFF5F9;strokeColor=#E8B8CB;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="132" width="520" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-b-title" value="Customer B  |  tenant B" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="20" y="12" width="1020" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-label" value="Check Point&#10;Provider tenant A" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#B72960;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="12" y="12" width="496" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="b-vnet-1" value="VNet 1" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-b">
+          <mxGeometry x="64" y="96" width="180" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="b-vnet-2" value="VNet 2" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-b">
+          <mxGeometry x="64" y="264" width="180" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="hub-b" value="" style="shape=image;imageAspect=1;aspect=fixed;image=img/lib/azure2/networking/Virtual_WAN_Hub.svg;html=0;strokeColor=none;fillColor=none;" vertex="1" parent="tenant-b">
+          <mxGeometry x="780" y="166" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="hub-label" value="vWAN hub + S2S VPN" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="674" y="286" width="352" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="inspect-context" value="Workload association:&#10;route to inspection" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="280" y="64" width="370" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="deliver-context" value="VPN return association:&#10;deliver to destination" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="280" y="310" width="370" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-1" edge="1" parent="1" source="b-vnet-1" target="hub-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;startArrow=none;endArrow=none;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.3;exitPerimeter=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="286" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="workload-2" edge="1" parent="1" source="b-vnet-2" target="hub-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;startArrow=none;endArrow=none;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.7;exitPerimeter=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="454" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fw-b" value="" style="group;" vertex="1" parent="tenant-a">
+          <mxGeometry x="207" y="172" width="106" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="36.195" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="72.39" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="18.098" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="54.293" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-3" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="90.488" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="36.195" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="72.39" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall-role" value="Provider firewall role" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="12" y="280" width="496" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall-simulator" value="Ubuntu IPsec simulator" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="12" y="324" width="496" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="ipsec-to-provider" edge="1" parent="1" source="hub-b" target="fw-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#8055A4;strokeWidth=4;startArrow=none;endArrow=block;endFill=1;exitX=1;exitY=0.3;entryX=0;entryY=0.3;exitPerimeter=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ipsec-to-customer" edge="1" parent="1" source="fw-b" target="hub-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#8055A4;strokeWidth=4;startArrow=none;endArrow=block;endFill=1;exitX=0;exitY=0.75;entryX=1;entryY=0.75;exitPerimeter=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="transport-title" value="IPsec / IKEv2" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#6745A1;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="228" width="192" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="transport-detail" value="Out + return&#10;same VPN attachment" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#627289;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1094" y="398" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-c" value="" style="rounded=1;arcSize=8;html=0;strokeWidth=2;fillColor=#F7FAFF;strokeColor=#D9E5F3;" vertex="1" parent="1">
+          <mxGeometry x="40" y="574" width="850" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-c-title" value="Customer C  |  tenant C" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-c">
+          <mxGeometry x="12" y="4" width="826" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-c-repeat" value="Repeat with an isolated customer vWAN + provider firewall" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-c">
+          <mxGeometry x="12" y="46" width="826" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-d" value="" style="rounded=1;arcSize=8;html=0;strokeWidth=2;fillColor=#F7FAFF;strokeColor=#D9E5F3;" vertex="1" parent="1">
+          <mxGeometry x="950" y="574" width="850" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-d-title" value="Customer D  |  tenant D" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-d">
+          <mxGeometry x="12" y="4" width="826" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-d-repeat" value="Repeat independently; no shared customer routing assumed" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-d">
+          <mxGeometry x="12" y="46" width="826" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="flow" value="Traffic: VNet 1 -&gt; vWAN -&gt; IPsec -&gt; firewall -&gt; IPsec -&gt; vWAN -&gt; VNet 2" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#275795;fontSize=24;fontStyle=0;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="702" width="1760" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

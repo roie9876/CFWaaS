@@ -1,0 +1,10 @@
+{
+  "A": {
+    "tenant": "<provider-tenant-id>",
+    "subscription": "<provider-subscription-id>"
+  },
+  "B": {
+    "tenant": "<customer-tenant-id>",
+    "subscription": "<customer-subscription-id>"
+  }
+}

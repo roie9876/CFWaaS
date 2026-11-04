@@ -1,0 +1,156 @@
+<mxfile host="app.diagrams.net" version="24.0.0" type="device">
+  <diagram id="working-lab-routing" name="Lab-16 routing flow">
+    <mxGraphModel dx="2200" dy="1350" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1350" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="LAB-16 | Follow the route" style="text;html=0;align=left;fontFamily=Arial;fontSize=38;fontStyle=1;fontColor=#243746;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="2100" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="summary" value="East-west: 10.211.0.4 -&gt; 10.212.0.4 | TCP/8080 or ICMP | original IPs, no NAT" style="text;html=0;align=left;fontFamily=Arial;fontSize=27;fontColor=#243746;" vertex="1" parent="1">
+          <mxGeometry x="40" y="85" width="2100" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="provider" value="PROVIDER | tenant A" style="rounded=1;arcSize=2;html=0;align=left;verticalAlign=top;spacingLeft=20;spacingTop=14;fontFamily=Arial;fontSize=30;fontStyle=1;fillColor=#e6f2ff;strokeColor=#0078d4;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="1030" height="850" as="geometry" />
+        </mxCell>
+        <mxCell id="customer" value="CUSTOMER | tenant B" style="rounded=1;arcSize=2;html=0;align=left;verticalAlign=top;spacingLeft=20;spacingTop=14;fontFamily=Arial;fontSize=30;fontStyle=1;fillColor=#fff4e6;strokeColor=#e6821e;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="160" width="1030" height="850" as="geometry" />
+        </mxCell>
+        <mxCell id="rs-card" value="" style="rounded=1;html=0;fillColor=#f3e5f5;strokeColor=#9575cd;strokeWidth=2;" vertex="1" parent="provider">
+          <mxGeometry x="50" y="90" width="550" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="route-server" value="" style="image;image=img/lib/azure2/networking/Virtual_Router.svg;aspect=fixed;html=0;" vertex="1" parent="rs-card">
+          <mxGeometry x="25" y="45" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="rs-routes" value="Route Server | ASN 65515&#10;172.20.254.4 / .5&#10;Receives only /0 from Check Point" style="text;html=0;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#5c2d91;" vertex="1" parent="rs-card">
+          <mxGeometry x="130" y="25" width="405" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="pi-card" value="" style="rounded=1;html=0;fillColor=#ffffff;strokeColor=#7a9db7;strokeWidth=2;" vertex="1" parent="provider">
+          <mxGeometry x="690" y="100" width="310" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-ingress-gw" value="" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;" vertex="1" parent="pi-card">
+          <mxGeometry x="115" y="20" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pi-routes" value="Provider ingress VPN&#10;172.20.255.4 / .5&#10;BGP /0 -&gt; 172.22.10.4&#10;UDR table: empty" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="pi-card">
+          <mxGeometry x="10" y="110" width="290" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-card" value="" style="rounded=1;html=0;fillColor=#ffffff;strokeColor=#c9a981;strokeWidth=2;" vertex="1" parent="customer">
+          <mxGeometry x="30" y="100" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-ingress-gw" value="" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;" vertex="1" parent="ci-card">
+          <mxGeometry x="110" y="20" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ci-routes" value="Customer ingress VPN&#10;172.18.255.30&#10;Default site -&gt; provider&#10;Static IPsec, no BGP" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="ci-card">
+          <mxGeometry x="10" y="110" width="280" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="ra-card" value="" style="rounded=1;html=0;fillColor=#ede7f6;strokeColor=#9575cd;strokeWidth=2;" vertex="1" parent="customer">
+          <mxGeometry x="370" y="100" width="300" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="routing-appliance" value="" style="image;image=img/lib/azure2/networking/Virtual_Router.svg;aspect=fixed;html=0;" vertex="1" parent="ra-card">
+          <mxGeometry x="110" y="20" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ra-routes" value="Routing Appliance&#10;172.18.10.4&#10;UDR: /0 + customer /16s&#10;-&gt; ingress VPN gateway" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="ra-card">
+          <mxGeometry x="10" y="110" width="280" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="a-card" value="" style="rounded=1;html=0;fillColor=#e8f5e9;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="customer">
+          <mxGeometry x="710" y="100" width="290" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a" value="" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;" vertex="1" parent="a-card">
+          <mxGeometry x="105" y="20" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-a-routes" value="Workload A&#10;10.211.0.4&#10;UDR: /0 + 10.212.0.0/16&#10;-&gt; 172.18.10.4" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="a-card">
+          <mxGeometry x="5" y="110" width="280" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-card" value="" style="rounded=1;html=0;fillColor=#ffffff;strokeColor=#0078d4;strokeWidth=3;" vertex="1" parent="provider">
+          <mxGeometry x="50" y="350" width="550" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="checkpoint-gateway" value="" style="image;image=img/lib/azure2/networking/Firewalls.svg;aspect=fixed;html=0;" vertex="1" parent="fw-card">
+          <mxGeometry x="25" y="80" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall-routes" value="Check Point | ASN 65050&#10;Frontend: 172.22.10.4&#10;Backend: 172.22.20.4&#10;UDR: /0 -&gt; Internet&#10;Azure BGP: /16s -&gt; delivery" style="text;html=0;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="fw-card">
+          <mxGeometry x="140" y="25" width="400" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="pd-card" value="" style="rounded=1;html=0;fillColor=#ffffff;strokeColor=#7a9db7;strokeWidth=2;" vertex="1" parent="provider">
+          <mxGeometry x="690" y="600" width="310" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-delivery-gw" value="" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;" vertex="1" parent="pd-card">
+          <mxGeometry x="120" y="15" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="pd-routes" value="Delivery VPN | AS 65031&#10;172.21.255.30&#10;BGP: customer /16s&#10;-&gt; customer delivery VPN" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=24;fontColor=#243746;" vertex="1" parent="pd-card">
+          <mxGeometry x="10" y="90" width="290" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cd-card" value="" style="rounded=1;html=0;fillColor=#ffffff;strokeColor=#c9a981;strokeWidth=2;" vertex="1" parent="customer">
+          <mxGeometry x="30" y="600" width="300" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-delivery-gw" value="" style="image;image=img/lib/azure2/networking/Virtual_Network_Gateways.svg;aspect=fixed;html=0;" vertex="1" parent="cd-card">
+          <mxGeometry x="115" y="15" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cd-routes" value="Delivery VPN | AS 65021&#10;172.19.255.30&#10;Advertises customer /16s&#10;Delivery -&gt; peered VNets" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=24;fontColor=#243746;" vertex="1" parent="cd-card">
+          <mxGeometry x="10" y="90" width="280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="b-card" value="" style="rounded=1;html=0;fillColor=#e8f5e9;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="customer">
+          <mxGeometry x="710" y="600" width="290" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b" value="" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;" vertex="1" parent="b-card">
+          <mxGeometry x="110" y="15" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="workload-b-routes" value="Workload B | 10.212.0.4&#10;UDR: /0 + 10.211.0.0/16&#10;-&gt; 172.18.10.4" style="text;html=0;align=center;verticalAlign=middle;fontFamily=Arial;fontSize=24;fontColor=#243746;" vertex="1" parent="b-card">
+          <mxGeometry x="5" y="90" width="280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="a-to-ra" value="" style="edgeStyle=orthogonalEdgeStyle;html=0;strokeColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;flowAnimation=1;" edge="1" parent="1" source="a-card" target="ra-card">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ra-to-ci" value="" style="edgeStyle=orthogonalEdgeStyle;html=0;strokeColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;flowAnimation=1;" edge="1" parent="1" source="ra-card" target="ci-card">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ingress-ipsec" value="IPsec&#10;NO BGP" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=23;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;flowAnimation=1;" edge="1" parent="1" source="ci-card" target="pi-card">
+          <mxGeometry relative="1" y="-35" as="geometry" />
+        </mxCell>
+        <mxCell id="pi-to-firewall" value="BGP /0" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=1;entryY=0.35;flowAnimation=1;" edge="1" parent="1" source="pi-card" target="fw-card">
+          <mxGeometry relative="1" y="-20" as="geometry">
+            <Array as="points"><mxPoint x="885" y="605" /><mxPoint x="680" y="605" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bgp-default-advertisement" value="" style="edgeStyle=orthogonalEdgeStyle;html=0;strokeColor=#5c2d91;strokeWidth=3;dashed=1;dashPattern=8 5;endArrow=block;endFill=1;exitX=0.3;exitY=0;entryX=0.3;entryY=1;" edge="1" parent="1" source="fw-card" target="rs-card">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bgp-rs-to-pi" value="/0" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=3;dashed=1;dashPattern=8 5;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.35;entryX=0;entryY=0.2;" edge="1" parent="1" source="rs-card" target="pi-card">
+          <mxGeometry relative="1" y="-20" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall-to-pd" value="Customer /16s" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.8;entryX=0;entryY=0.35;flowAnimation=1;" edge="1" parent="1" source="fw-card" target="pd-card">
+          <mxGeometry relative="1" y="25" as="geometry">
+            <Array as="points"><mxPoint x="680" y="726" /><mxPoint x="680" y="837" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="delivery-ipsec" value="IPsec&#10;+ BGP" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=23;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.35;entryX=0;entryY=0.35;flowAnimation=1;" edge="1" parent="1" source="pd-card" target="cd-card">
+          <mxGeometry relative="1" y="-35" as="geometry" />
+        </mxCell>
+        <mxCell id="delivery-bgp" value="BGP: customer /16s" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=24;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=3;dashed=1;dashPattern=8 5;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.3;exitY=1;entryX=0.7;entryY=1;" edge="1" parent="1" source="cd-card" target="pd-card">
+          <mxGeometry relative="1" y="25" as="geometry">
+            <Array as="points"><mxPoint x="1250" y="1050" /><mxPoint x="947" y="1050" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cd-to-b" value="Customer peering" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.35;entryX=0;entryY=0.35;flowAnimation=1;" edge="1" parent="1" source="cd-card" target="b-card">
+          <mxGeometry relative="1" y="-25" as="geometry" />
+        </mxCell>
+        <mxCell id="b-to-ra" value="Replies: same inspection loop" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#00897b;fontColor=#00897b;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;flowAnimation=1;" edge="1" parent="1" source="b-card" target="ra-card">
+          <mxGeometry relative="1" y="-20" as="geometry">
+            <Array as="points"><mxPoint x="1985" y="650" /><mxPoint x="1650" y="650" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="internet" value="INTERNET | HTTPS/443&#10;Hide NAT after policy; replies return via delivery VPN" style="rounded=1;html=0;align=center;fontFamily=Arial;fontSize=25;fillColor=#ffe6cc;strokeColor=#e6821e;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1100" width="760" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="internet-egress" value="Internet /0 [UDR]" style="edgeStyle=orthogonalEdgeStyle;html=0;fontFamily=Arial;fontSize=25;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=4;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.36;entryY=0;flowAnimation=1;" edge="1" parent="1" source="fw-card" target="internet">
+          <mxGeometry relative="1" y="-20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Teal = packets | Blue = Internet | Purple dashed = BGP TCP/179&#10;/0 = 0.0.0.0/0 | /16s = 10.211.0.0/16 and 10.212.0.0/16&#10;Ownership groups only; VNet/subnet detail is in the topology above." style="text;html=0;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=25;fontColor=#243746;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1110" width="1210" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="evidence" value="2026-11-04 snapshot | Selected routes, not full tables. Provider effective-route queries denied; forwarding shown from configuration. Evidence and limits: README / EW-44." style="text;html=0;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=22;fontColor=#64748b;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1270" width="2120" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

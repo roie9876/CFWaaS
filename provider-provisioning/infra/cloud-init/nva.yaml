@@ -1,0 +1,107 @@
+#cloud-config
+package_update: true
+packages:
+  - python3
+  - iptables
+  - frr
+write_files:
+  - path: /etc/sysctl.d/90-faas-forwarding.conf
+    permissions: '0644'
+    content: |
+      net.ipv4.ip_forward=1
+      net.ipv4.conf.all.rp_filter=0
+      net.ipv4.conf.default.rp_filter=0
+  - path: /usr/local/sbin/faas-forwarding
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+      sysctl --system
+      iptables -P FORWARD ACCEPT
+      for f in /proc/sys/net/ipv4/conf/*/rp_filter; do echo 0 > "$f"; done
+      iptables -t nat -N FAAS_NS_EGRESS 2>/dev/null || true
+      iptables -t nat -F FAAS_NS_EGRESS
+      for excluded in 0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.168.0.0/16 198.18.0.0/15 224.0.0.0/4 240.0.0.0/4; do
+        iptables -t nat -A FAAS_NS_EGRESS -d "$excluded" -j RETURN
+      done
+      iptables -t nat -A FAAS_NS_EGRESS -o eth0 -j MASQUERADE
+      for source in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16; do
+        iptables -t nat -C POSTROUTING -s "$source" -j FAAS_NS_EGRESS 2>/dev/null || iptables -t nat -A POSTROUTING -s "$source" -j FAAS_NS_EGRESS
+      done
+  - path: /etc/frr/frr.conf
+    permissions: '0640'
+    content: |
+      frr defaults traditional
+      hostname faas-nva
+      bgp no-rib
+      ip prefix-list FAAS-DEFAULT seq 10 permit 0.0.0.0/0
+      route-map FAAS-IN deny 10
+      route-map FAAS-OUT permit 10
+       match ip address prefix-list FAAS-DEFAULT
+      router bgp 65050
+       bgp router-id 172.22.10.4
+       no bgp default ipv4-unicast
+       no bgp network import-check
+       neighbor __INGRESS_PEER_1__ remote-as 65515
+       neighbor __INGRESS_PEER_1__ ebgp-multihop 5
+       neighbor __INGRESS_PEER_1__ update-source 172.22.10.4
+       neighbor __INGRESS_PEER_2__ remote-as 65515
+       neighbor __INGRESS_PEER_2__ ebgp-multihop 5
+       neighbor __INGRESS_PEER_2__ update-source 172.22.10.4
+       address-family ipv4 unicast
+        network 0.0.0.0/0
+        neighbor __INGRESS_PEER_1__ activate
+        neighbor __INGRESS_PEER_1__ route-map FAAS-IN in
+        neighbor __INGRESS_PEER_1__ route-map FAAS-OUT out
+        neighbor __INGRESS_PEER_2__ activate
+        neighbor __INGRESS_PEER_2__ route-map FAAS-IN in
+        neighbor __INGRESS_PEER_2__ route-map FAAS-OUT out
+       exit-address-family
+  - path: /etc/systemd/system/frr.service.d/faas-forwarding.conf
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=faas-forwarding.service
+      Requires=faas-forwarding.service
+  - path: /opt/faas-health.py
+    permissions: '0644'
+    content: |
+      from http.server import BaseHTTPRequestHandler, HTTPServer
+      from pathlib import Path
+      class Health(BaseHTTPRequestHandler):
+          def do_GET(self):
+              ready = Path("/proc/sys/net/ipv4/ip_forward").read_text().strip() == "1"
+              self.send_response(200 if ready else 503)
+              self.end_headers()
+              self.wfile.write(b"faas-ubuntu-nva/1.5.0\n")
+          def log_message(self, *_): pass
+      HTTPServer(("0.0.0.0", 9999), Health).serve_forever()
+  - path: /etc/systemd/system/faas-forwarding.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=network-pre.target systemd-sysctl.service
+      Wants=network-pre.target
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/faas-forwarding
+      RemainAfterExit=yes
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/systemd/system/faas-health.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=faas-forwarding.service
+      Requires=faas-forwarding.service
+      [Service]
+      User=labuser
+      ExecStart=/usr/bin/python3 /opt/faas-health.py
+      Restart=always
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - systemctl daemon-reload
+  - systemctl enable --now faas-forwarding.service faas-health.service
+  - chown frr:frr /etc/frr/frr.conf
+  - if [ '__BGP_ENABLED__' = 'true' ]; then sed -i 's/^bgpd=no/bgpd=yes/' /etc/frr/daemons; systemctl enable --now frr.service; systemctl restart frr.service; fi

@@ -1,0 +1,284 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device" compressed="false">
+  <diagram id="03-vwan-cloudguard" name="03-vwan-cloudguard">
+    <mxGraphModel dx="1840" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1840" pageHeight="780" math="0" shadow="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Native CloudGuard inside vWAN" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=42;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="12" width="1760" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="status" value="Prepared deployment | Not yet deployed or traffic-tested" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#6A7587;fontSize=24;fontStyle=0;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="64" width="1760" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-a" value="" style="rounded=1;arcSize=8;html=0;fillColor=#FFF5F9;strokeColor=#E8B8CB;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="344" width="1760" height="348" as="geometry" />
+        </mxCell>
+        <mxCell id="provider-label" value="Check Point&#10;Provider tenant A" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#B72960;fontSize=26;fontStyle=1;align=right;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="1516" y="12" width="224" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-b" value="" style="rounded=1;arcSize=8;html=0;fillColor=#F7FAFF;strokeColor=#D9E5F3;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="114" width="560" height="208" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-b-title" value="Customer B  |  tenant B" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="12" y="8" width="536" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="b-vnet-1" value="VNet 1" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-b">
+          <mxGeometry x="64" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="b-vnet-2" value="VNet 2" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-b">
+          <mxGeometry x="340" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-b-routing" value="Workloads stay in customer tenant" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-b">
+          <mxGeometry x="12" y="50" width="536" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="env-b" value="" style="rounded=1;arcSize=8;html=0;fillColor=#FFFFFF;strokeColor=#EBCEDB;strokeWidth=2;dashed=0;" vertex="1" parent="tenant-a">
+          <mxGeometry x="20" y="104" width="520" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="hub-b" value="" style="shape=image;imageAspect=1;aspect=fixed;image=img/lib/azure2/networking/Virtual_WAN_Hub.svg;html=0;strokeColor=none;fillColor=none;" vertex="1" parent="env-b">
+          <mxGeometry x="84" y="0" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b" value="" style="group;" vertex="1" parent="env-b">
+          <mxGeometry x="320" y="4" width="106" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="36.195" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-0-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="72.39" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="18.098" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="54.293" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-1-3" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="90.488" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="0.0" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="36.195" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-b-brick-2-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-b">
+          <mxGeometry x="72.39" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="native-insertion-b" edge="1" parent="1" source="hub-b" target="fw-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="env-b-name" value="vHub + native CloudGuard" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="env-b">
+          <mxGeometry x="12" y="98" width="496" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="env-b-scope" value="Dedicated to B / environment 1" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="env-b">
+          <mxGeometry x="12" y="134" width="496" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="attachment-b-1" edge="1" parent="1" source="b-vnet-1" target="hub-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.32;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="182" y="328" />
+              <mxPoint x="176" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="attachment-b-2" edge="1" parent="1" source="b-vnet-2" target="hub-b" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.68;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="458" y="328" />
+              <mxPoint x="212" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tenant-c" value="" style="rounded=1;arcSize=8;html=0;fillColor=#F7FAFF;strokeColor=#D9E5F3;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="114" width="560" height="208" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-c-title" value="Customer C  |  tenant C" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-c">
+          <mxGeometry x="12" y="8" width="536" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c-vnet-1" value="VNet 1" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-c">
+          <mxGeometry x="64" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c-vnet-2" value="VNet 2" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-c">
+          <mxGeometry x="340" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-c-routing" value="Workloads stay in customer tenant" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-c">
+          <mxGeometry x="12" y="50" width="536" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="env-c" value="" style="rounded=1;arcSize=8;html=0;fillColor=#FFFFFF;strokeColor=#EBCEDB;strokeWidth=2;dashed=0;" vertex="1" parent="tenant-a">
+          <mxGeometry x="620" y="104" width="520" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="hub-c" value="" style="shape=image;imageAspect=1;aspect=fixed;image=img/lib/azure2/networking/Virtual_WAN_Hub.svg;html=0;strokeColor=none;fillColor=none;" vertex="1" parent="env-c">
+          <mxGeometry x="84" y="0" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c" value="" style="group;" vertex="1" parent="env-c">
+          <mxGeometry x="320" y="4" width="106" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-0-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="0.0" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-0-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="36.195" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-0-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="72.39" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-1-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="0.0" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-1-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="18.098" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-1-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="54.293" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-1-3" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="90.488" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-2-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="0.0" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-2-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="36.195" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-c-brick-2-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-c">
+          <mxGeometry x="72.39" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="native-insertion-c" edge="1" parent="1" source="hub-c" target="fw-c" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="env-c-name" value="vHub + native CloudGuard" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="env-c">
+          <mxGeometry x="12" y="98" width="496" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="env-c-scope" value="Dedicated to C / environment 1" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="env-c">
+          <mxGeometry x="12" y="134" width="496" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="attachment-c-1" edge="1" parent="1" source="c-vnet-1" target="hub-c" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.32;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="782" y="328" />
+              <mxPoint x="776" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="attachment-c-2" edge="1" parent="1" source="c-vnet-2" target="hub-c" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.68;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1058" y="328" />
+              <mxPoint x="812" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tenant-d" value="" style="rounded=1;arcSize=8;html=0;fillColor=#F7FAFF;strokeColor=#D9E5F3;strokeWidth=2;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="114" width="560" height="208" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-d-title" value="Customer D  |  tenant D" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="tenant-d">
+          <mxGeometry x="12" y="8" width="536" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="d-vnet-1" value="VNet 1" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-d">
+          <mxGeometry x="64" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="d-vnet-2" value="VNet 2" style="shape=cloud;html=0;whiteSpace=wrap;fillColor=#4978C9;strokeColor=none;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=30;fontStyle=1;" vertex="1" parent="tenant-d">
+          <mxGeometry x="340" y="84" width="156" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant-d-routing" value="Workloads stay in customer tenant" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=26;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="tenant-d">
+          <mxGeometry x="12" y="50" width="536" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="env-d" value="" style="rounded=1;arcSize=8;html=0;fillColor=#FFFFFF;strokeColor=#EBCEDB;strokeWidth=2;dashed=0;" vertex="1" parent="tenant-a">
+          <mxGeometry x="1220" y="104" width="520" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="hub-d" value="" style="shape=image;imageAspect=1;aspect=fixed;image=img/lib/azure2/networking/Virtual_WAN_Hub.svg;html=0;strokeColor=none;fillColor=none;" vertex="1" parent="env-d">
+          <mxGeometry x="84" y="0" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d" value="" style="group;" vertex="1" parent="env-d">
+          <mxGeometry x="320" y="4" width="106" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-0-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="0.0" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-0-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="36.195" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-0-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="72.39" y="0.0" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-1-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="0.0" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-1-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="18.098" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-1-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="54.293" y="28.471" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-1-3" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="90.488" y="28.471" width="15.512" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-2-0" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="0.0" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-2-1" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="36.195" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-d-brick-2-2" value="" style="rounded=1;arcSize=8;fillColor=#D94C80;strokeColor=none;" vertex="1" parent="fw-d">
+          <mxGeometry x="72.39" y="56.941" width="33.61" height="24.588" as="geometry" />
+        </mxCell>
+        <mxCell id="native-insertion-d" edge="1" parent="1" source="hub-d" target="fw-d" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=1;exitY=0.5;exitPerimeter=0;entryX=0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="env-d-name" value="vHub + native CloudGuard" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#20324D;fontSize=28;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="env-d">
+          <mxGeometry x="12" y="98" width="496" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="env-d-scope" value="Dedicated to D / environment 1" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=24;fontStyle=0;align=center;verticalAlign=middle;" vertex="1" parent="env-d">
+          <mxGeometry x="12" y="134" width="496" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="attachment-d-1" edge="1" parent="1" source="d-vnet-1" target="hub-d" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.32;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1382" y="328" />
+              <mxPoint x="1376" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="attachment-d-2" edge="1" parent="1" source="d-vnet-2" target="hub-d" style="edgeStyle=none;rounded=1;html=0;strokeColor=#4978C9;strokeWidth=4;dashed=0;startArrow=none;endArrow=none;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.68;entryY=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1658" y="328" />
+              <mxPoint x="1412" y="338" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="control-title" value="Routing Intent: native service insertion" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#B72960;fontSize=28;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="20" y="278" width="1700" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="control-detail" value="Each environment has an isolated hub/firewall domain. No AVNM required." style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#627289;fontSize=24;fontStyle=0;align=left;verticalAlign=middle;" vertex="1" parent="tenant-a">
+          <mxGeometry x="20" y="314" width="1700" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line" value="" style="fillColor=#4978C9;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="44" y="722" width="44" height="4" as="geometry" />
+        </mxCell>
+        <mxCell id="flow" value="Traffic: customer VNet -&gt; vHub -&gt; native CloudGuard -&gt; vHub -&gt; destination VNet | Customer environments stay isolated" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#20324D;fontColor=#275795;fontSize=24;fontStyle=0;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="100" y="704" width="1700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="env-b-accent" vertex="1" parent="env-b" style="rounded=1;arcSize=20;fillColor=#D94C80;strokeColor=none;">
+          <mxGeometry x="0" y="0" width="5" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="env-c-accent" vertex="1" parent="env-c" style="rounded=1;arcSize=20;fillColor=#D94C80;strokeColor=none;">
+          <mxGeometry x="0" y="0" width="5" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="env-d-accent" vertex="1" parent="env-d" style="rounded=1;arcSize=20;fillColor=#D94C80;strokeColor=none;">
+          <mxGeometry x="0" y="0" width="5" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="eyebrow" vertex="1" parent="1" value="AZURE / CROSS-TENANT SECURITY" style="text;html=0;whiteSpace=wrap;overflow=hidden;strokeColor=none;fillColor=none;fontFamily=Helvetica;fontColor=#6A7587;fontSize=18;fontStyle=1;align=right;verticalAlign=middle;">
+          <mxGeometry x="1310" y="22" width="490" height="28" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

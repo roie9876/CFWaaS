@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "deploymentEnabled": false,
+  "location": "israelcentral",
+  "provider": {
+    "tenantId": "<provider-tenant-id>",
+    "subscriptionId": "<provider-subscription-id>",
+    "resourceGroup": "rg-cgvwan-provider",
+    "managedResourceGroup": "mrg-cgvwan-cloudguard"
+  },
+  "customer": {
+    "tenantId": "<customer-tenant-id>",
+    "subscriptionId": "<customer-subscription-id>",
+    "resourceGroup": "rg-cgvwan-customer"
+  },
+  "hub": {
+    "wanName": "vwan-cgvwan-provider",
+    "name": "vhub-cgvwan-provider",
+    "addressPrefix": "10.250.0.0/23",
+    "minRoutingCapacity": 2
+  },
+  "cloudguard": {
+    "applicationName": "app-cgvwan-cloudguard",
+    "nvaName": "nva-cgvwan-cloudguard",
+    "licenseType": "Security Enforcement (NGTP)",
+    "osVersion": "R8210",
+    "imageVersion": "8210.900467.2216",
+    "scaleUnit": "2",
+    "bgpAsn": "64512",
+    "planProduct": "cp-vwan-managed-app",
+    "planVersion": "1.0.30",
+    "ingressPublicIpName": "pip-cgvwan-ingress"
+  },
+  "management": {
+    "vmName": "vm-cgvwan-management",
+    "vmSize": "Standard_D4ds_v5",
+    "version": "R82.10 - Pay As You Go (MGMT25)",
+    "virtualNetworkName": "vnet-cgvwan-management",
+    "addressPrefix": "172.29.0.0/24",
+    "subnetPrefix": "172.29.0.0/26",
+    "privateIp": "172.29.0.4",
+    "nsgName": "nsg-cgvwan-management",
+    "diskSizeGb": 200,
+    "cmeAccountName": "faas-provider",
+    "policyName": "FaaS-Lab"
+  },
+  "workload": {
+    "vmSize": "Standard_B2s",
+    "adminUsername": "labuser",
+    "image": {
+      "publisher": "Canonical",
+      "offer": "ubuntu-24_04-lts",
+      "sku": "server",
+      "version": "24.04.202609040"
+    },
+    "encryptionAtHost": true
+  },
+  "spokes": [
+    {
+      "name": "spoke1",
+      "addressPrefix": "10.10.0.0/16",
+      "subnetPrefix": "10.10.0.0/24",
+      "privateIp": "10.10.0.4"
+    },
+    {
+      "name": "spoke2",
+      "addressPrefix": "10.20.0.0/16",
+      "subnetPrefix": "10.20.0.0/24",
+      "privateIp": "10.20.0.4"
+    }
+  ],
+  "vendor": {
+    "repository": "https://github.com/CheckPointSW/CloudGuardIaaS",
+    "commit": "1ce7ce3accfe2fa455e9a9fc6cc2c443d1a5bff2"
+  }
+}

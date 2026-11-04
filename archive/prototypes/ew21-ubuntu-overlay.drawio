@@ -1,0 +1,239 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="24.0.0" type="device">
+  <diagram id="ew21-ubuntu-overlay" name="ARCHIVED EW-21 Ubuntu overlay">
+    <mxGraphModel dx="2000" dy="1300" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1640" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ARCHIVED EW-21 | Ubuntu + WireGuard | Not a deployment candidate" parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=27;fontColor=#243746;fillColor=#ffffff;strokeColor=#ffffff;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="20" width="1940" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="isolation" value="ONE physical tenant / subscription; provider and customer below are logical roles.&#10;Thick outer boundaries = roles; shaded boxes = VNets; dashed boxes = subnets. No cross-side peering." parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff9cc;strokeColor=#d6b656;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="95" width="1940" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="provider" value="FWaaS PROVIDER | logical lab role" parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#e6f2ff;strokeColor=#0078d4;strokeWidth=3;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="180" width="920" height="1120" as="geometry" />
+        </mxCell>
+        <mxCell id="customer" value="FWaaS CUSTOMER | logical lab role" parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=23;fontColor=#243746;fillColor=#fff4e6;strokeColor=#ff8c00;strokeWidth=3;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="990" y="180" width="980" height="1120" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-p" value="Provider hub VNet | 10.202.0.0/16" parent="provider" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#d9eaff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="75" width="860" height="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="wan-p" value="wan | 10.202.10.0/24" parent="vnet-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#edf6ff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="35" y="70" width="790" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="router-p-card" value="vm-overlay-p | Router | 3 Azure NICs + 2 WireGuard interfaces" parent="wan-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#f7fbff;strokeColor=#aab8c2;strokeWidth=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="20" y="35" width="750" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="router-p" value="Ubuntu" parent="router-p-card" vertex="1" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=18;fontColor=#243746;labelWidth=270;">
+          <mxGeometry x="12.0" y="37.0" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p-inspect" value="wg-inspect&#10;10.254.21.2" parent="router-p-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#ff8c00;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="120" y="40" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p-wan-nic" value="vm-overlay-p | WAN NIC&#10;10.202.10.4" parent="router-p-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#0078d4;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=36;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="120" y="90" width="250" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p-deliver" value="wg-deliver&#10;10.254.21.5" parent="router-p-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#ff8c00;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="430" y="90" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pre-p" value="PRE | 10.202.20.0/24" parent="vnet-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#edf6ff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="35" y="305" width="340" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="post-p" value="POST | 10.202.30.0/24" parent="vnet-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#edf6ff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="425" y="305" width="400" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p-pre-nic" value="vm-overlay-p | PRE NIC&#10;10.202.20.4" parent="pre-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#0078d4;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="30" y="55" width="280" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="p-post-nic" value="vm-overlay-p | POST NIC&#10;10.202.30.4" parent="post-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#0078d4;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="30" y="55" width="320" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-pre-nic" value="vm-overlay-fw | PRE NIC&#10;10.202.20.5" parent="pre-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#00897b;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="30" y="185" width="280" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-post-nic" value="vm-overlay-fw | POST NIC&#10;10.202.30.5" parent="post-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#00897b;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="30" y="185" width="320" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-card" value="vm-overlay-fw | Plain firewall | 2 Azure NICs" parent="vnet-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=20;fontColor=#243746;fillColor=#e8f5f2;strokeColor=#00897b;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="35" y="635" width="790" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="fw" value="NO VPN" parent="fw-card" vertex="1" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=18;fontColor=#243746;labelWidth=110;">
+          <mxGeometry x="17.0" y="37.0" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-nic-summary" value="PRE: nic-overlay-fw-0 | 10.202.20.5&#10;POST: nic-overlay-fw-1 | 10.202.30.5&#10;Both NICs belong to this VM; no tunnel interfaces." parent="fw-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#e8f5f2;strokeColor=#e8f5f2;strokeWidth=0;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="140" y="45" width="620" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="p-notes" value="FIXED PROVIDER: RFC1918 private IPv4 coverage (not a customer allocation).&#10;PRE UDR -&gt; firewall 10.202.20.5; POST UDR -&gt; router 10.202.30.4.&#10;WG AllowedIPs 0.0.0.0/0; explicit service tables, not Internet default.&#10;No per-VNet provider route, NSG or WireGuard update." parent="vnet-p" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#f7fbff;strokeColor=#aab8c2;strokeWidth=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="35" y="825" width="790" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-c" value="Customer hub VNet | 10.201.0.0/16" parent="customer" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffead1;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="75" width="920" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="wan-c" value="wan / source ingress | 10.201.10.0/24" parent="vnet-c" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff7ed;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="30" y="70" width="860" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="router-c-card" value="vm-overlay-c | Ubuntu router | 2 NICs + 2 WireGuard interfaces" parent="wan-c" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fffaf4;strokeColor=#aab8c2;strokeWidth=1;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="20" y="35" width="820" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="c-inspect" value="wg-inspect&#10;10.254.21.1" parent="router-c-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#ff8c00;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="20" y="40" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c-deliver" value="wg-deliver&#10;10.254.21.6" parent="router-c-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#ff8c00;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="20" y="90" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c-ingress-nic" value="Workload ingress NIC&#10;10.201.10.4" parent="router-c-card" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#5c2d91;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="375" y="40" width="250" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="router-c" value="Ubuntu" parent="router-c-card" vertex="1" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=18;fontColor=#243746;labelWidth=270;">
+          <mxGeometry x="692.0" y="37.0" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="post-c" value="post / destination delivery | 10.201.20.0/24" parent="vnet-c" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff7ed;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="30" y="320" width="860" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="c-post-nic" value="7 | Customer delivery table&#10;10.201.20.4" parent="post-c" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#00897b;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=42;shape=label;image=img/lib/azure2/networking/Network_Interfaces.svg;imageWidth=32;imageHeight=32;imageAlign=left;imageVerticalAlign=middle;">
+          <mxGeometry x="340" y="45" width="280" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-a" value="Workload VNet A | 10.203.0.0/16" parent="customer" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffead1;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="60" y="650" width="400" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="subnet-a" value="lan | 10.203.0.0/24" parent="vnet-a" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff7ed;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="20" y="70" width="360" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="vm-a" value="vm-overlay-a&#10;10.203.0.4" parent="subnet-a" vertex="1" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=18;fontColor=#243746;labelWidth=270;">
+          <mxGeometry x="52.0" y="37.0" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="udr-a" value="1 | UDR: other /16&#10;next hop&#10;10.201.10.4" parent="subnet-a" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#5c2d91;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="180" y="65" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="vnet-b" value="Workload VNet B | 10.204.0.0/16" parent="customer" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffead1;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="520" y="650" width="400" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="subnet-b" value="lan | 10.204.0.0/24" parent="vnet-b" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff7ed;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;dashed=1;dashPattern=8 8;">
+          <mxGeometry x="20" y="70" width="360" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="vm-b" value="vm-overlay-b&#10;10.204.0.4" parent="subnet-b" vertex="1" style="image;image=img/lib/azure2/compute/Virtual_Machine.svg;aspect=fixed;html=0;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontFamily=Arial;fontSize=18;fontColor=#243746;labelWidth=270;">
+          <mxGeometry x="52.0" y="37.0" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="udr-b" value="UDR: other /16&#10;next hop&#10;10.201.10.4" parent="subnet-b" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#5c2d91;strokeWidth=2;verticalAlign=middle;align=center;spacingTop=2;spacingLeft=2;">
+          <mxGeometry x="180" y="65" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="peering-a" value="VNet peering" parent="1" edge="1" source="vnet-c" target="vnet-a" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=0.2;exitY=1;entryX=0.5;entryY=0;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1204" y="790" />
+              <mxPoint x="1250" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="peering-b" value="VNet peering" parent="1" edge="1" source="vnet-c" target="vnet-b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=0.8;exitY=1;entryX=0.5;entryY=0;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1756" y="790" />
+              <mxPoint x="1710" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="source-udr" value="" parent="1" edge="1" source="udr-a" target="c-ingress-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;dashed=1;dashPattern=2 5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1325" y="810" />
+              <mxPoint x="1950" y="810" />
+              <mxPoint x="1950" y="550" />
+              <mxPoint x="1530" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c-pre" value="PBR 100" parent="1" edge="1" source="c-ingress-nic" target="c-inspect" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;dashed=1;dashPattern=2 5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tunnel-1" value="2 | WireGuard inspection / UDP 51820" parent="1" edge="1" source="c-inspect" target="p-inspect" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#ff8c00;fontColor=#ff8c00;strokeWidth=3;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p-pre" value="3 | PBR 100" parent="1" edge="1" source="p-inspect" target="p-pre-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#0078d4;fontColor=#0078d4;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=1;entryX=1;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="440" />
+              <mxPoint x="220" y="550" />
+              <mxPoint x="455" y="550" />
+              <mxPoint x="455" y="647.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="to-firewall" value="PRE UDR" parent="1" edge="1" source="p-pre-nic" target="fw-pre-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;dashed=1;dashPattern=2 5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-egress" value="4 | firewall inspection" parent="1" edge="1" source="fw-pre-nic" target="fw-post-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#00897b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-60" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="post-udr" value="POST UDR" parent="1" edge="1" source="fw-post-nic" target="p-post-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#5c2d91;fontColor=#5c2d91;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;dashed=1;dashPattern=2 5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="p-delivery" value="5 | PBR 200" parent="1" edge="1" source="p-post-nic" target="p-deliver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#00897b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0.5;entryY=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="640" />
+              <mxPoint x="900" y="550" />
+              <mxPoint x="670" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tunnel-2" value="6 | WireGuard delivery / UDP 51821" parent="1" edge="1" source="p-deliver" target="c-deliver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#ff8c00;fontColor=#ff8c00;strokeWidth=3;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c-delivery" value="PBR 200" parent="1" edge="1" source="c-deliver" target="c-post-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#00897b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1215" y="550" />
+              <mxPoint x="1370" y="550" />
+              <mxPoint x="1370" y="647" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="destination" value="" parent="1" edge="1" source="c-post-nic" target="vm-b" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#00897b;fontColor=#00897b;strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1530" y="765" />
+              <mxPoint x="1480" y="765" />
+              <mxPoint x="1480" y="977" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p-pre-owner" value="" parent="1" edge="1" source="router-p-card" target="p-pre-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#64748b;fontColor=#64748b;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=0;exitY=0.9;entryX=0;entryY=0.2;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="110" y="500" />
+              <mxPoint x="110" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="p-post-owner" value="" parent="1" edge="1" source="router-p-card" target="p-post-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#64748b;fontColor=#64748b;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=1;exitY=0.9;entryX=1;entryY=0.2;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="500" />
+              <mxPoint x="920" y="628" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fw-pre-owner" value="" parent="1" edge="1" source="fw-card" target="fw-pre-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#64748b;fontColor=#64748b;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=0.2;exitY=0;entryX=0.5;entryY=1;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-post-owner" value="" parent="1" edge="1" source="fw-card" target="fw-post-nic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=12;html=0;fontFamily=Arial;fontSize=18;strokeColor=#64748b;fontColor=#64748b;strokeWidth=2;endArrow=none;endFill=1;labelBackgroundColor=#ffffff;exitX=0.8;exitY=0;entryX=0.5;entryY=1;dashed=1;dashPattern=8 5;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="LEGEND&#10;Blue dashed = ordinary peering; purple dotted = UDR / policy steering.&#10;Orange = encrypted transport; teal = post-inspection delivery.&#10;Grey dashed, no arrows = NIC ownership, NOT packet flow.&#10;NIC labels name their VM; router = 3 NICs, firewall = 2 NICs." parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="1320" width="940" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="reading" value="READ THIS AS A -&gt; B; B -&gt; A AND RESPONSES USE THE SAME PIPELINE.&#10;4 VNets | 5 Ubuntu VMs | 9 NICs | 2 tunnels | original inner addresses.&#10;No Azure VPN gateways, cross-side peering or firewall VPN termination.&#10;ARM test management; manual SSH via routers, operator IPv4 /32 only." parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#ffffff;strokeColor=#aab8c2;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="990" y="1320" width="980" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="customer-lifecycle" value="CUSTOMER LIFECYCLE TEST | 192.168.77.0/24 + workload VM: CREATED, TESTED, THEN REMOVED.&#10;Customer-only: peering + UDRs + delivery-table update; deleted prefix explicitly unreachable.&#10;24 original-source deliveries + 6 selective denials; removal/no-loop checks passed.&#10;CAVEAT: combined runs after DNS/shutdown interruption; audited redundant DHCP rule difference after reboot.&#10;Not an uninterrupted lifecycle or production multi-customer qualification; service/tunnel overlaps excluded." parent="1" vertex="1" style="rounded=1;arcSize=3;html=0;whiteSpace=wrap;fontFamily=Arial;fontSize=18;fontColor=#243746;fillColor=#fff9cc;strokeColor=#d6b656;strokeWidth=2;verticalAlign=top;align=left;spacingTop=10;spacingLeft=10;">
+          <mxGeometry x="30" y="1470" width="1940" height="150" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

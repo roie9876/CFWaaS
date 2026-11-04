@@ -1,0 +1,11 @@
+framework:
+  - arm
+skip-download: true
+quiet: true
+skip-check:
+  # Approved lab: private workload management requires Azure Run Command extensions.
+  - CKV_AZURE_50
+  # Approved lab: do not change the customer's unregistered host-encryption feature.
+  - CKV_AZURE_97
+  # This ARM rule checks the same host-encryption property even on Linux VMs.
+  - CKV_AZURE_151

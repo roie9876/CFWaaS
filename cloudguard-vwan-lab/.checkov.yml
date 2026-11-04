@@ -1,0 +1,7 @@
+framework:
+  - arm
+skip-download: true
+quiet: true
+skip-check:
+  # Authenticated Azure Run Command requires extensions on the private lab VMs.
+  - CKV_AZURE_50

@@ -1,0 +1,652 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" style="background: transparent; background-color: transparent; color-scheme: light;" version="1.1" width="2333px" height="1673px" viewBox="0 0 2333 1673">
+  <defs>
+    <symbol id="mx-image-1j2vrc8" viewBox="0 0 80 80">
+      <svg id="icon-0-shape-0" width="80" height="80" viewBox="0 0 13.56 18.050442" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-0-shape-1">
+          <linearGradient id="icon-0-shape-2" x1="8.5900002" y1="-7.79" x2="9.1199999" y2="20.049999" gradientUnits="userSpaceOnUse">
+            <stop offset="0.22" stop-color="#32d4f5" id="icon-0-shape-3" />
+            <stop offset="0.47" stop-color="#31d1f3" id="icon-0-shape-4" />
+            <stop offset="0.63" stop-color="#2ec9eb" id="icon-0-shape-5" />
+            <stop offset="0.77" stop-color="#29bade" id="icon-0-shape-6" />
+            <stop offset="0.89" stop-color="#22a5cb" id="icon-0-shape-7" />
+            <stop offset="1" stop-color="#198ab3" id="icon-0-shape-8" />
+            <stop offset="1" stop-color="#198ab3" id="icon-0-shape-9" />
+          </linearGradient>
+        </defs>
+        <title id="icon-0-shape-10">Icon-networking-63</title>
+        <path d="m 12.84,8.6704425 h -1 v -3.08 a 5.81,5.81 0 0 0 -1.49,-3.92 A 4.79,4.79 0 0 0 6.69,4.4247096e-4 4.79,4.79 0 0 0 2.99,1.6704425 a 5.73,5.73 0 0 0 -1.49,3.92 v 3.08 H 0.69 a 0.7,0.7 0 0 0 -0.69,0.69 v 7.9999995 a 0.7,0.7 0 0 0 0.69,0.69 h 12.15 a 0.71,0.71 0 0 0 0.7,-0.69 V 9.3604425 a 0.71,0.71 0 0 0 -0.7,-0.69 z m -3.37,0 H 3.91 v -3.13 a 3.18,3.18 0 0 1 0.87,-2.15 2.51,2.51 0 0 1 1.88,-0.86 2.54,2.54 0 0 1 1.89,0.86 3.19,3.19 0 0 1 0.32,0.43 v 0 a 3,3 0 0 1 0.61,1.71 z" id="icon-0-shape-11" style="fill:url(#icon-0-shape-2)" />
+        <path d="M 12.87,8.6704425 H 0.7 a 0.66,0.66 0 0 0 -0.44,0.17 l 13.05,8.9999995 a 0.67,0.67 0 0 0 0.25,-0.52 V 9.3204425 a 0.71,0.71 0 0 0 -0.69,-0.65 z" id="icon-0-shape-12" style="fill:#50e6ff" />
+        <path d="m 0.72,8.6704425 h 12.16 a 0.7,0.7 0 0 1 0.45,0.17 L 0.27,17.840442 a 0.7,0.7 0 0 1 -0.25,-0.52 V 9.3204425 a 0.72,0.72 0 0 1 0.7,-0.65 z" id="icon-0-shape-13" style="opacity:0.2;fill:#ffffff" />
+        <path d="m 5.58,10.600442 1.2,-1.1999995 a 0.07,0.07 0 0 1 0.09,0 l 1.19,1.1999995 a 0.06,0.06 0 0 1 0,0.1 h -0.7 a 0.06,0.06 0 0 0 -0.06,0.06 v 1.54 a 0.06,0.06 0 0 1 -0.06,0.06 H 6.45 a 0.05,0.05 0 0 1 -0.06,-0.06 v -1.54 a 0.07,0.07 0 0 0 -0.07,-0.06 h -0.7 a 0.06,0.06 0 0 1 -0.04,-0.1 z m 2.47,5.48 -1.19,1.19 a 0.06,0.06 0 0 1 -0.09,0 l -1.19,-1.19 a 0.06,0.06 0 0 1 0,-0.1 h 0.7 a 0.07,0.07 0 0 0 0.07,-0.06 v -1.55 a 0.06,0.06 0 0 1 0.06,-0.06 h 0.74 a 0.06,0.06 0 0 1 0.06,0.06 v 1.55 a 0.06,0.06 0 0 0 0.06,0.06 h 0.7 a 0.06403124,0.06403124 0 0 1 0.08,0.1 z m -4.7,-1.55 v -0.7 a 0.06,0.06 0 0 0 -0.06,-0.06 H 1.78 a 0.06,0.06 0 0 1 -0.06,-0.06 v -0.71 a 0.06,0.06 0 0 1 0.06,-0.09 h 1.51 a 0.06,0.06 0 0 0 0.06,-0.06 v -0.7 a 0.07,0.07 0 0 1 0.11,-0.05 l 1.19,1.2 a 0.06,0.06 0 0 1 0,0.08 l -1.19,1.2 a 0.07,0.07 0 0 1 -0.11,-0.05 z m 6.93,-2.38 v 0.7 a 0.06,0.06 0 0 0 0.06,0.06 h 1.54 c 0,0 0.07,0 0.07,0.06 v 0.74 a 0.07,0.07 0 0 1 -0.07,0.06 h -1.54 a 0.06,0.06 0 0 0 -0.06,0.06 v 0.7 a 0.06,0.06 0 0 1 -0.1,0.05 l -1.19,-1.2 a 0,0 0 0 0 0,-0.08 l 1.19,-1.2 c 0,0 0.1,-0.01 0.1,0.05 z" id="icon-0-shape-14" style="fill:#ffffff" />
+      </svg>
+    </symbol>
+    <symbol id="mx-image-1hhu9j8" viewBox="0 0 80 80">
+      <svg id="icon-1-shape-0" width="80" height="80" viewBox="0 0 18 16.629999" version="1.1" preserveAspectRatio="xMidYMid meet">
+        <defs id="icon-1-shape-1">
+          <linearGradient id="icon-1-shape-2" x1="8.8800001" y1="12.21" x2="8.8800001" y2="0.20999999" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0078d4" id="icon-1-shape-3" />
+            <stop offset="0.82" stop-color="#5ea0ef" id="icon-1-shape-4" />
+          </linearGradient>
+          <linearGradient id="icon-1-shape-5" x1="8.8800001" y1="16.84" x2="8.8800001" y2="12.21" gradientUnits="userSpaceOnUse">
+            <stop offset="0.15" stop-color="#ccc" id="icon-1-shape-6" />
+            <stop offset="1" stop-color="#707070" id="icon-1-shape-7" />
+          </linearGradient>
+        </defs>
+        <title id="icon-1-shape-8">Icon-compute-21</title>
+        <rect x="0" y="0" width="18" height="12" rx="0.60000002" id="icon-1-shape-9" style="fill:url(#icon-1-shape-2)" />
+        <polygon points="8.88,9.71 8.88,6.21 11.88,4.46 11.88,7.95 " id="icon-1-shape-10" style="fill:#50e6ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,4.46 8.88,2.71 11.88,4.46 8.88,6.22 " id="icon-1-shape-11" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="5.88,7.95 5.88,4.46 8.88,6.22 8.88,9.71 " id="icon-1-shape-12" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 5.88,7.95 8.88,6.21 " id="icon-1-shape-13" style="fill:#c3f1ff" transform="translate(0.12,-0.20999999)" />
+        <polygon points="8.88,9.71 11.88,7.95 8.88,6.21 " id="icon-1-shape-14" style="fill:#9cebff" transform="translate(0.12,-0.20999999)" />
+        <path d="M 12.61,15.63 C 10.83,15.35 10.76,14.07 10.76,12 H 7.23 c 0,2.07 -0.06,3.35 -1.84,3.63 a 1,1 0 0 0 -0.89,1 h 9 a 1,1 0 0 0 -0.89,-1 z" id="icon-1-shape-15" style="fill:url(#icon-1-shape-5)" />
+      </svg>
+    </symbol>
+  </defs>
+  <g>
+    <g data-cell-id="0">
+      <g data-cell-id="1">
+        <g data-cell-id="title">
+          <g>
+            <rect x="1" y="1" width="2240" height="60" rx="1.8" ry="1.8" fill="#ffffff" stroke="#ffffff" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="46" fill="#243746" font-family="Arial" font-size="28px" style="fill: rgb(36, 55, 70);">EW-18 → EW-24 | Managed IPsec + two Ubuntu NVAs + internal HA-ports LB</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="flow-summary">
+          <g>
+            <rect x="1" y="71" width="2240" height="70" rx="2.1" ry="2.1" fill="#fff9cc" stroke="#d6b656" stroke-width="2" pointer-events="all" style="fill: rgb(255, 249, 204); stroke: rgb(214, 182, 86);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="109" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                <tspan x="13" y="109">ONE physical lab tenant / subscription; customer and provider are logical roles.</tspan>
+                <tspan x="13" y="134">Source &gt; managed RA &gt; CI &gt; IPsec &gt; PI &gt; LB VIP &gt; NVA1 OR NVA2 &gt; PD &gt; IPsec &gt; CD &gt; destination.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="provider">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1" y="161" width="1100" height="1300" rx="33" ry="33" fill="#e6f2ff" stroke="#0078d4" stroke-width="3" pointer-events="all" style="fill: rgb(230, 242, 255); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="202" fill="#243746" font-family="Arial" font-size="24px" style="fill: rgb(36, 55, 70);">FWaaS PROVIDER | logical lab role</text>
+            </g>
+          </g>
+          <g data-cell-id="provider-ingress">
+            <g>
+              <rect x="621" y="231" width="440" height="280" rx="8.4" ry="8.4" fill="#d9eaff" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(217, 234, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="633" y="269" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="633" y="269">Ingress hub VNet</tspan>
+                  <tspan x="633" y="294">172.26.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="pi-subnet">
+              <g>
+                <rect x="641" y="306" width="300" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="653" y="341" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">GatewaySubnet</text>
+                </g>
+              </g>
+              <g data-cell-id="pi">
+                <g>
+                  <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="781" y="341" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="821" y="446" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="821" y="446">Provider ingress GW</tspan>
+                      <tspan x="821" y="468">IPsec decrypt</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="provider-delivery">
+            <g>
+              <rect x="621" y="1111" width="440" height="280" rx="8.4" ry="8.4" fill="#d9eaff" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(217, 234, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="633" y="1149" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="633" y="1149">Delivery hub VNet</tspan>
+                  <tspan x="633" y="1174">172.31.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="pd-subnet">
+              <g>
+                <rect x="641" y="1186" width="300" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="653" y="1221" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">GatewaySubnet</text>
+                </g>
+              </g>
+              <g data-cell-id="pd">
+                <g>
+                  <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="781" y="1221" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="821" y="1326" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="821" y="1326">Provider delivery GW</tspan>
+                      <tspan x="821" y="1348">IPsec encrypt / ASN 65031</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="security-vnet">
+            <g>
+              <rect x="41" y="541" width="1020" height="460" rx="13.8" ry="13.8" fill="#d9eaff" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(217, 234, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="53" y="579" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">Provider security VNet | 172.30.0.0/16 | no local gateway</text>
+              </g>
+            </g>
+            <g data-cell-id="fw-subnet">
+              <g>
+                <rect x="61" y="616" width="980" height="345" rx="10.35" ry="10.35" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="73" y="651" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Firewall subnet | 172.30.10.0/24 | same subnet for both backends</text>
+                </g>
+              </g>
+              <g data-cell-id="lb">
+                <g>
+                  <svg id="icon-2-shape-0" width="80" height="80" viewBox="0 0 18.003101 18.003065" version="1.1" x="131" y="716" preserveAspectRatio="xMidYMid meet">
+                    <defs id="icon-2-shape-1">
+                      <linearGradient id="icon-2-shape-2" x1="9" y1="19.85" x2="9" y2="-1.02" gradientUnits="userSpaceOnUse">
+                        <stop offset="0" stop-color="#5e9624" id="icon-2-shape-3" />
+                        <stop offset="0.02" stop-color="#5f9724" id="icon-2-shape-4" />
+                        <stop offset="1" stop-color="#76bc2d" id="icon-2-shape-5" />
+                      </linearGradient>
+                    </defs>
+                    <title id="icon-2-shape-6">Icon-networking-62</title>
+                    <path d="M 0.18155048,8.5715505 8.5715505,0.18155048 a 0.6,0.6 0 0 1 0.86,0 L 17.82155,8.5715505 a 0.6,0.6 0 0 1 0,0.86 L 9.4215505,17.83155 a 0.6,0.6 0 0 1 -0.84,0 L 0.18155048,9.4315505 a 0.6,0.6 0 0 1 0,-0.86 z" id="icon-2-shape-7" style="fill:url(#icon-2-shape-2)" />
+                    <path d="m 11.20155,4.0015505 -2.1199995,-2.11 a 0.12,0.12 0 0 0 -0.16,0 l -2.12,2.11 a 0.1,0.1 0 0 0 0.08,0.18 h 1.24 a 0.11,0.11 0 0 1 0.11,0.11 v 2 a 0.11,0.11 0 0 0 0.11,0.11 h 1.32 a 0.11,0.11 0 0 0 0.11,-0.11 v -2 a 0.11,0.11 0 0 1 0.11,-0.11 H 11.12155 a 0.1,0.1 0 0 0 0.08,-0.18 z" id="icon-2-shape-8" style="fill:#b4ec36" />
+                    <path d="m 4.0015505,6.6115505 -2.1,2.13 a 0.11,0.11 0 0 0 0,0.15 l 2.1,2.1099995 a 0.11,0.11 0 0 0 0.19,-0.08 V 9.6915505 a 0.11,0.11 0 0 1 0.11,-0.11 h 2 a 0.1,0.1 0 0 0 0.1,-0.11 v -1.32 a 0.1,0.1 0 0 0 -0.07,-0.15 h -2 a 0.1,0.1 0 0 1 -0.11,-0.1 v -1.21 a 0.117047,0.117047 0 0 0 -0.22,-0.08 z" id="icon-2-shape-9" style="fill:#b4ec36" />
+                    <path d="m 14.08155,11.00155 2.13,-2.1199995 a 0.11,0.11 0 0 0 0,-0.15 l -2.13,-2.12 a 0.11,0.11 0 0 0 -0.18,0.08 v 1.25 a 0.1,0.1 0 0 1 -0.11,0.1 h -2 a 0.1,0.1 0 0 0 -0.1,0.11 v 1.32 a 0.1,0.1 0 0 0 0.1,0.11 h 2 a 0.11,0.11 0 0 1 0.11,0.11 V 10.93155 a 0.11,0.11 0 0 0 0.18,0.07 z" id="icon-2-shape-10" style="fill:#b4ec36" />
+                    <path d="M 11.79155,9.0015505 A 2.79,2.79 0 1 0 8.2515505,11.67155 v 0.95 a 1.71,1.71 0 1 0 1.57,0 v -1 A 2.77,2.77 0 0 0 11.79155,9.0015505 Z" id="icon-2-shape-11" style="fill:#ffffff" />
+                    <circle id="icon-2-shape-12" cx="9.0115509" cy="8.9915504" r="1.62" style="fill:#5ea0ef" />
+                  </svg>
+                </g>
+                <g>
+                  <g>
+                    <text x="171" y="821" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="171" y="821">Internal Standard LB</tspan>
+                      <tspan x="171" y="843">VIP 172.30.10.10</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="fw">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="481" y="716" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="521" y="821" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="521" y="821">NVA1 | vm-cvpn-ew18-fw</tspan>
+                      <tspan x="521" y="843">172.30.10.4 / eth0</tspan>
+                      <tspan x="521" y="865">NO VPN termination</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+              <g data-cell-id="fw2">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="791" y="716" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="831" y="821" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="831" y="821">NVA2 | vm-cvpn-ew24-fw</tspan>
+                      <tspan x="831" y="843">172.30.10.5 / eth0</tspan>
+                      <tspan x="831" y="865">NO VPN termination</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="lb-policy">
+            <g>
+              <rect x="41" y="231" width="540" height="125" rx="3.75" ry="3.75" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="53" y="268" fill="#243746" font-family="Arial" font-size="20px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="53" y="268">INTERNAL LB / BACKEND POLICY</tspan>
+                  <tspan x="53" y="292">ONE frontend / pool | floating IP | HA ports | TCP health</tspan>
+                  <tspan x="53" y="316">9999</tspan>
+                  <tspan x="53" y="340">Two ALTERNATIVE backends — never serial firewalls</tspan>
+                </text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="delivery-policy">
+            <g>
+              <rect x="71" y="1201" width="550" height="115" rx="3.45" ry="3.45" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="83" y="1237" fill="#243746" font-family="Arial" font-size="19px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="83" y="1237">Delivery peering: useRemoteGateways ONLY toward PD.</tspan>
+                  <tspan x="83" y="1260">Firewall prefix UDRs removed; BGP propagation enabled.</tspan>
+                  <tspan x="83" y="1283">Both guests: default route only; no BGP/VPN daemon; no</tspan>
+                  <tspan x="83" y="1306">customer SNAT.</tspan>
+                </text>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="update-egress">
+            <g>
+              <rect x="41" y="1361" width="1020" height="85" rx="2.55" ry="2.55" fill="#edf6ff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(237, 246, 255); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="53" y="1397" fill="#243746" font-family="Arial" font-size="19px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="53" y="1397">UPDATE EGRESS ONLY | 2 Standard public IPs</tspan>
+                  <tspan x="53" y="1420">One per NVA NIC for own updates; SSH currently closed; user-opened TCP/22 (key-only).</tspan>
+                  <tspan x="53" y="1443">No extra NIC / NAT Gateway; not the customer inspection path.</tspan>
+                </text>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="customer">
+          <g transform="translate(0.5,0.5)">
+            <rect x="1141" y="161" width="1100" height="1300" rx="33" ry="33" fill="#fff4e6" stroke="#ff8c00" stroke-width="3" pointer-events="all" style="fill: rgb(255, 244, 230); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g>
+              <text x="1153" y="202" fill="#243746" font-family="Arial" font-size="24px" style="fill: rgb(36, 55, 70);">FWaaS CUSTOMER | logical lab role</text>
+            </g>
+          </g>
+          <g data-cell-id="customer-ingress">
+            <g>
+              <rect x="1171" y="231" width="630" height="280" rx="8.4" ry="8.4" fill="#ffead1" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1183" y="269" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="1183" y="269">Ingress hub VNet</tspan>
+                  <tspan x="1183" y="294">172.28.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="ci-subnet">
+              <g>
+                <rect x="1191" y="306" width="300" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1203" y="341" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">GatewaySubnet</text>
+                </g>
+              </g>
+              <g data-cell-id="ci">
+                <g>
+                  <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="1331" y="341" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1371" y="446" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">Customer ingress GW</text>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g data-cell-id="ra-subnet">
+              <g>
+                <rect x="1511" y="306" width="270" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1523" y="341" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Appliance subnet</text>
+                </g>
+              </g>
+              <g data-cell-id="ra">
+                <g>
+                  <svg width="80" height="80" viewBox="0 0 16.658001 16.658001" version="1.1" id="icon-3-shape-0" x="1606" y="341" preserveAspectRatio="xMidYMid meet">
+                    <defs id="icon-3-shape-1">
+                      <linearGradient id="icon-3-shape-2" x1="9" y1="17.329" x2="9" y2="0.671" gradientUnits="userSpaceOnUse" gradientTransform="translate(-0.67099953,-0.67099953)">
+                        <stop offset="0" stop-color="#005ba1" id="icon-3-shape-3" />
+                        <stop offset="0.15" stop-color="#0063af" id="icon-3-shape-4" />
+                        <stop offset="0.439" stop-color="#006fc3" id="icon-3-shape-5" />
+                        <stop offset="0.724" stop-color="#0076d0" id="icon-3-shape-6" />
+                        <stop offset="1" stop-color="#0078d4" id="icon-3-shape-7" />
+                      </linearGradient>
+                    </defs>
+                    <circle cx="8.3290005" cy="8.3290005" r="8.3290005" fill="url(#icon-3-shape-2)" id="icon-3-shape-8" style="fill:url(#icon-3-shape-2)" />
+                    <path d="m 5.9290005,3.4670005 2.3,-2.3 a 0.273,0.273 0 0 1 0.387,0 l 2.2999995,2.3 a 0.122,0.122 0 0 1 -0.086,0.209 H 9.4150005 a 0.122,0.122 0 0 0 -0.122,0.123 v 2.873 a 0.1,0.1 0 0 1 -0.1,0.1 h -1.543 a 0.1,0.1 0 0 1 -0.1,-0.1 v -2.873 a 0.122,0.122 0 0 0 -0.121,-0.123 h -1.413 a 0.123,0.123 0 0 1 -0.087,-0.209 z" fill="#9cebff" id="icon-3-shape-9" />
+                    <path d="m 10.915,13.191 -2.2999995,2.3 a 0.273,0.273 0 0 1 -0.387,0 l -2.3,-2.3 a 0.123,0.123 0 0 1 0.087,-0.209 h 1.414 a 0.122,0.122 0 0 0 0.122,-0.123 V 9.9860005 a 0.1,0.1 0 0 1 0.1,-0.1 h 1.544 a 0.1,0.1 0 0 1 0.1,0.1 V 12.859 a 0.122,0.122 0 0 0 0.122,0.123 H 10.829 a 0.122,0.122 0 0 1 0.086,0.209 z" fill="#9cebff" id="icon-3-shape-10" />
+                    <path d="M 12.213,10.842 9.9130005,8.5420005 a 0.273,0.273 0 0 1 0,-0.387 l 2.2999995,-2.3 a 0.122,0.122 0 0 1 0.209,0.086 v 1.415 a 0.123,0.123 0 0 0 0.122,0.123 h 2.874 a 0.1,0.1 0 0 1 0.1,0.1 v 1.542 a 0.1,0.1 0 0 1 -0.1,0.1 h -2.874 a 0.122,0.122 0 0 0 -0.122,0.122 V 10.757 a 0.123,0.123 0 0 1 -0.209,0.085 z" fill="#f2f2f2" id="icon-3-shape-11" />
+                    <path d="m 4.4450005,5.8560005 2.3,2.3 a 0.273,0.273 0 0 1 0,0.387 l -2.3,2.2999995 a 0.123,0.123 0 0 1 -0.209,-0.087 V 9.3410005 a 0.122,0.122 0 0 0 -0.122,-0.122 h -2.874 a 0.1,0.1 0 0 1 -0.1,-0.1 v -1.543 a 0.1,0.1 0 0 1 0.1,-0.1 h 2.874 a 0.123,0.123 0 0 0 0.122,-0.123 v -1.411 a 0.122,0.122 0 0 1 0.209,-0.086 z" fill="#f2f2f2" id="icon-3-shape-12" />
+                  </svg>
+                </g>
+                <g>
+                  <g>
+                    <text x="1646" y="446" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1646" y="446">Routing Appliance</tspan>
+                      <tspan x="1646" y="468">ONE managed resource</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="customer-delivery">
+            <g>
+              <rect x="1171" y="1111" width="440" height="280" rx="8.4" ry="8.4" fill="#ffead1" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1183" y="1149" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="1183" y="1149">Delivery hub VNet</tspan>
+                  <tspan x="1183" y="1174">172.29.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="cd-subnet">
+              <g>
+                <rect x="1191" y="1186" width="300" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1203" y="1221" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">GatewaySubnet</text>
+                </g>
+              </g>
+              <g data-cell-id="cd">
+                <g>
+                  <use href="#mx-image-1j2vrc8" ns1:href="#mx-image-1j2vrc8" x="1331" y="1221" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="1371" y="1326" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="1371" y="1326">Customer delivery GW</tspan>
+                      <tspan x="1371" y="1348">ASN 65021</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="vnet-a">
+            <g>
+              <rect x="1921" y="251" width="280" height="280" rx="8.4" ry="8.4" fill="#ffead1" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1933" y="289" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="1933" y="289">Workload VNet-A</tspan>
+                  <tspan x="1933" y="314">10.151.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="subnet-a">
+              <g>
+                <rect x="1941" y="326" width="240" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1953" y="361" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Workload subnet /24</text>
+                </g>
+              </g>
+              <g data-cell-id="vm-a">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="2021" y="361" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="2061" y="466" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="2061" y="466">VM-A</tspan>
+                      <tspan x="2061" y="488">10.151.0.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-cell-id="vnet-b">
+            <g>
+              <rect x="1921" y="1131" width="280" height="280" rx="8.4" ry="8.4" fill="#ffead1" stroke="#aab8c2" stroke-width="4" pointer-events="all" style="fill: rgb(255, 234, 209); stroke: rgb(170, 184, 194);" />
+            </g>
+            <g>
+              <g>
+                <text x="1933" y="1169" fill="#243746" font-family="Arial" font-size="21px" style="fill: rgb(36, 55, 70);">
+                  <tspan x="1933" y="1169">Workload VNet-B</tspan>
+                  <tspan x="1933" y="1194">10.152.0.0/16</tspan>
+                </text>
+              </g>
+            </g>
+            <g data-cell-id="subnet-b">
+              <g>
+                <rect x="1941" y="1206" width="240" height="175" rx="5.25" ry="5.25" fill="#ffffff" stroke="#aab8c2" stroke-width="2" stroke-dasharray="16 16" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+              </g>
+              <g>
+                <g>
+                  <text x="1953" y="1241" fill="#243746" font-family="Arial" font-size="18px" style="fill: rgb(36, 55, 70);">Workload subnet /24</text>
+                </g>
+              </g>
+              <g data-cell-id="vm-b">
+                <g>
+                  <use href="#mx-image-1hhu9j8" ns1:href="#mx-image-1hhu9j8" x="2021" y="1241" width="80" height="80" />
+                </g>
+                <g>
+                  <g>
+                    <text x="2061" y="1346" fill="#243746" font-family="Arial" font-size="18px" text-anchor="middle" style="fill: rgb(36, 55, 70);">
+                      <tspan x="2061" y="1346">VM-B</tspan>
+                      <tspan x="2061" y="1368">10.152.0.4</tspan>
+                    </text>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="a-ingress">
+          <g>
+            <path d="M 2021 401 L 1887 401 Q 1881 401 1881 395 L 1881 387 Q 1881 381 1875 381 L 1696.24 381" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+            <path d="M 1688.24 381 L 1696.24 377 L 1696.24 385 Z" fill="#0078d4" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="1754" y="371" width="219" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1863" y="389">1a | ingress peering + UDR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="b-ingress">
+          <g>
+            <path d="M 2101 1281 L 2215 1281 Q 2221 1281 2221 1275 L 2221 222 Q 2221 216 2215 216 L 1827 216 Q 1821 216 1821 222 L 1821 355 Q 1821 361 1815 361 L 1696.24 361" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+            <path d="M 1688.24 361 L 1696.24 357 L 1696.24 365 Z" fill="#0078d4" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="2112" y="458" width="219" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="2221" y="476">1b | ingress peering + UDR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="ra-to-ci">
+          <g>
+            <path d="M 1606 381 L 1421.24 381" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 1413.24 381 L 1421.24 377 L 1421.24 385 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="1488" y="371" width="41" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1508" y="389">UDR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="tunnel-1">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 1331 381 L 873.35 381" fill="none" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(255, 140, 0);" />
+            <path d="M 864.35 381 L 873.35 376.5 L 873.35 385.5 Z" fill="#ff8c00" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(255, 140, 0); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g fill="#ff8c00" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(255, 140, 0);">
+              <rect fill="#ffffff" stroke="none" x="963" y="371" width="267" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1096" y="389">2 | IPsec ingress / UDP 500,4500</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="pi-to-lb">
+          <g>
+            <path d="M 781 381 L 147 381 Q 141 381 141 387 L 141 710 Q 141 716 147 716 L 160.76 716" fill="none" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="4 10" pointer-events="stroke" style="stroke: rgb(92, 45, 145);" />
+            <path d="M 168.76 716 L 160.76 720 L 160.76 712 Z" fill="#5c2d91" stroke="#5c2d91" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(92, 45, 145); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g fill="#5c2d91" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(92, 45, 145);">
+              <rect fill="#ffffff" stroke="none" x="156" y="360" width="245" height="44" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="278" y="378">3 | ingress peering</text>
+              <text x="278" y="400">Two fixed /16 UDRs → LB VIP</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="lb-to-fw">
+          <g>
+            <path d="M 211 740 L 470.76 740" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 478.76 740 L 470.76 744 L 470.76 736 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="315" y="730" width="64" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="346" y="748">4a | OR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="lb-to-fw2">
+          <g>
+            <path d="M 211 716 L 211 687 Q 211 681 217 681 L 265 681 Q 271 681 277 681 L 825 681 Q 831 681 831 687 L 831 705.76" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 831 713.76 L 827 705.76 L 835 705.76 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="490" y="671" width="64" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="521" y="689">4b | OR</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="fw-to-pd">
+          <g>
+            <path d="M 561 772 L 561 771.5 Q 561 771 567 771 L 665 771 Q 671 771 671 777 L 671 1075 Q 671 1081 677 1081 L 1055 1081 Q 1061 1081 1061 1087 L 1061 1175 Q 1061 1181 1055 1181 L 827 1181 Q 821 1181 821 1187 L 821 1210.76" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 821 1218.76 L 817 1210.76 L 825 1210.76 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+          <g>
+            <g fill="#00897b" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 137, 123);">
+              <rect fill="#ffffff" stroke="none" x="728" y="1071" width="237" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="846" y="1089">Gateway-propagated delivery</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="fw2-to-pd">
+          <g>
+            <path d="M 871 756 L 965 756 Q 971 756 971 762 L 971 1175 Q 971 1181 965 1181 L 827 1181 Q 821 1181 821 1187 L 821 1210.76" fill="none" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(0, 137, 123);" />
+            <path d="M 821 1218.76 L 817 1210.76 L 825 1210.76 Z" fill="#00897b" stroke="#00897b" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 137, 123); stroke: rgb(0, 137, 123);" />
+          </g>
+        </g>
+        <g data-cell-id="tunnel-2">
+          <g transform="translate(0.5,0.5)">
+            <path d="M 861 1261 L 1318.65 1261" fill="none" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke" style="stroke: rgb(255, 140, 0);" />
+            <path d="M 1327.65 1261 L 1318.65 1265.5 L 1318.65 1256.5 Z" fill="#ff8c00" stroke="#ff8c00" stroke-width="3" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(255, 140, 0); stroke: rgb(255, 140, 0);" />
+          </g>
+          <g>
+            <g fill="#ff8c00" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(255, 140, 0);">
+              <rect fill="#ffffff" stroke="none" x="948" y="1251" width="297" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1096" y="1269">5 | IPsec delivery T2 / UDP 500,4500</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="delivery-bgp">
+          <g>
+            <rect x="1191" y="951" width="650" height="110" rx="3.3" ry="3.3" fill="#f3e5f5" stroke="#5c2d91" stroke-width="2" pointer-events="all" style="fill: rgb(243, 229, 245); stroke: rgb(92, 45, 145);" />
+          </g>
+          <g>
+            <g>
+              <text x="1203" y="988" fill="#243746" font-family="Arial" font-size="20px" style="fill: rgb(36, 55, 70);">
+                <tspan x="1203" y="988">DELIVERY CONTROL PLANE (over T2)</tspan>
+                <tspan x="1203" y="1012">CD ASN 65021 ↔ PD ASN 65031 | BGP TCP/179</tspan>
+                <tspan x="1203" y="1036">Prefix add / withdrawal verified; not a data-plane hop.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="delivery-a">
+          <g>
+            <path d="M 1411 1241 L 1845 1241 Q 1851 1241 1851 1235 L 1851 577 Q 1851 571 1857 571 L 2035 571 Q 2041 571 2041 565 L 2041 447 Q 2041 441 2045.88 441 L 2050.76 441" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+            <path d="M 2058.76 441 L 2050.76 445 L 2050.76 437 Z" fill="#0078d4" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="1770" y="946" width="164" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1851" y="964">6a | delivery peering</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="delivery-b">
+          <g>
+            <path d="M 1411 1261 L 1845 1261 Q 1851 1261 1851 1267 L 1851 1275 Q 1851 1281 1857 1281 L 2010.76 1281" fill="none" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="16 10" pointer-events="stroke" style="stroke: rgb(0, 120, 212);" />
+            <path d="M 2018.76 1281 L 2010.76 1285 L 2010.76 1277 Z" fill="#0078d4" stroke="#0078d4" stroke-width="2" stroke-miterlimit="10" pointer-events="all" style="fill: rgb(0, 120, 212); stroke: rgb(0, 120, 212);" />
+          </g>
+          <g>
+            <g fill="#0078d4" font-family="Arial" text-anchor="middle" font-size="18px" style="fill: rgb(0, 120, 212);">
+              <rect fill="#ffffff" stroke="none" x="1645" y="1251" width="164" height="23" stroke-width="0" style="fill: rgb(255, 255, 255);" />
+              <text x="1726" y="1269">6b | delivery peering</text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="legend">
+          <g>
+            <rect x="1141" y="1481" width="1100" height="190" rx="5.7" ry="5.7" fill="#ffffff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+          </g>
+          <g>
+            <g>
+              <text x="1153" y="1518" fill="#243746" font-family="Arial" font-size="20px" style="fill: rgb(36, 55, 70);">
+                <tspan x="1153" y="1518">READING THE TOPOLOGY</tspan>
+                <tspan x="1153" y="1542">Blue dashed = customer peering; purple dotted = UDR steering.</tspan>
+                <tspan x="1153" y="1566">Orange = managed IPsec; teal = source-preserving forwarding.</tspan>
+                <tspan x="1153" y="1590">4 customer + 2 provider peerings, bidirectional; provider links use peering.</tspan>
+                <tspan x="1153" y="1614">No cross-side / direct A–B peering. Legacy jump omitted.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+        <g data-cell-id="evidence">
+          <g>
+            <rect x="1" y="1481" width="1100" height="190" rx="5.7" ry="5.7" fill="#ffffff" stroke="#aab8c2" stroke-width="2" pointer-events="all" style="fill: rgb(255, 255, 255); stroke: rgb(170, 184, 194);" />
+          </g>
+          <g>
+            <g>
+              <text x="13" y="1518" fill="#243746" font-family="Arial" font-size="20px" style="fill: rgb(36, 55, 70);">
+                <tspan x="13" y="1518">CURRENT BOUNDED EVIDENCE | EW-22 / EW-23 / EW-24</tspan>
+                <tspan x="13" y="1542">448 fresh TCP outcomes: 384 original-source passes + 64 expected denials.</tspan>
+                <tspan x="13" y="1566">Backend health withdrawal + sampled SYN symmetry passed.</tspan>
+                <tspan x="13" y="1590">Simulator: 2 Ubuntu VMs, NOT Check Point VMSS / stateful failover.</tspan>
+                <tspan x="13" y="1614">Ingress still fixed to two /16s — NOT full customer independence.</tspan>
+              </text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
