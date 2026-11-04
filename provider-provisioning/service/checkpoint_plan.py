@@ -105,6 +105,15 @@ def _reference(value: object, unknown: object, expected: str, creating: bool) ->
     return (unknown is None or unknown is False) and _same_id(value, expected)
 
 
+def _single_pool(values: object, unknown: object, expected: str, creating: bool) -> bool:
+    # AzureRM plans a conditionally selected pool list as wholly unknown on create.
+    if unknown is True:
+        return creating and values is None
+    return (isinstance(values, list) and len(values) == 1
+            and _reference(values[0], unknown[0] if isinstance(unknown, list) and len(unknown) == 1 else None,
+                           expected, creating))
+
+
 def _known(value: object, depth: int = 0) -> bool:
     if depth > 16:
         return False
@@ -211,15 +220,13 @@ def _validate_vmss_gateway(address: str, kind: str, change: dict, creating: bool
         backend = side == "backend"
         name = "backend-lb" if backend else app
         pool_ids, pool_unknown = after.get("backend_address_pool_ids"), unknown.get("backend_address_pool_ids")
-        pool_marker = pool_unknown[0] if isinstance(pool_unknown, list) and len(pool_unknown) == 1 else None
         if (after.get("name") != name or after.get("frontend_ip_configuration_name") != name
                 or after.get("protocol") != ("All" if backend else "Tcp")
                 or after.get("frontend_port") != (0 if backend else 80)
                 or after.get("backend_port") != (0 if backend else 80)
                 or after.get("floating_ip_enabled") is not True
                 or after.get("disable_outbound_snat") not in (None, False)
-                or not isinstance(pool_ids, list) or len(pool_ids) != 1
-                or not _reference(pool_ids[0], pool_marker, pools[side], creating)
+                or not _single_pool(pool_ids, pool_unknown, pools[side], creating)
                 or not _reference(after.get("loadbalancer_id"), unknown.get("loadbalancer_id"), lbs[side], creating)
                 or not _reference(after.get("probe_id"), unknown.get("probe_id"),
                                   lbs[side] + "/probes/" + name, creating)):
@@ -253,7 +260,8 @@ def _validate_vmss_gateway(address: str, kind: str, change: dict, creating: bool
                                              "publisher": "checkpoint"}),
             ("identity", lambda: after.get("identity") not in (None, []) or not _known(unknown.get("identity"))),
             ("extensions", lambda: after.get("extension") not in (None, []) or after.get("data_disk") not in (None, [])
-                or not _known(unknown.get("extension")) or not _known(unknown.get("data_disk"))),
+                or not (_known(unknown.get("extension")) or creating and unknown.get("extension") is True)
+                or not _known(unknown.get("data_disk"))),
             ("diagnostics", lambda: _single(after.get("boot_diagnostics")) is None
                 or after["boot_diagnostics"][0].get("storage_account_uri") not in (None, "")),
             ("os-disk", lambda: disk is None or disk.get("caching") != "ReadWrite"
@@ -291,10 +299,8 @@ def _validate_vmss_gateway(address: str, kind: str, change: dict, creating: bool
                 raise CheckpointPlanError("Invalid Check Point scale set network")
             pool_ids, pool_unknown = config.get("load_balancer_backend_address_pool_ids"), \
                 config_unknown.get("load_balancer_backend_address_pool_ids")
-            pool_marker = pool_unknown[0] if isinstance(pool_unknown, list) and len(pool_unknown) == 1 else None
             public = config.get("public_ip_address")
-            if (not isinstance(pool_ids, list) or len(pool_ids) != 1
-                    or not _reference(pool_ids[0], pool_marker, pools["backend" if backend else "frontend"], creating)
+            if (not _single_pool(pool_ids, pool_unknown, pools["backend" if backend else "frontend"], creating)
                     or (backend and public not in (None, []))
                     or (not backend and (_single(public) is None
                                          or public[0].get("name") != scale_set + "-public-ip"

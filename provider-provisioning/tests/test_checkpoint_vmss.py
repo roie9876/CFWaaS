@@ -196,6 +196,34 @@ def test_vmss_plan_guard_accepts_the_expected_create_plan():
     assert summary.creates == len(VMSS_EXPECTED) == 16 and summary.output_creates == 5
 
 
+def _live_azurerm_shapes(plan):
+    # Live AzureRM 4.73 plans: conditional pool lists are wholly unknown and VMSS extension is computed.
+    for suffix in ("standard[0]", "standard[1]"):
+        change = _find(plan, suffix)["change"]
+        del change["after"]["backend_address_pool_ids"]
+        change["after_unknown"]["backend_address_pool_ids"] = True
+    change = _find(plan, "vmss[0]")["change"]
+    del change["after"]["extension"]
+    change["after_unknown"]["extension"] = True
+    for nic, unknown in zip(change["after"]["network_interface"], change["after_unknown"]["network_interface"]):
+        del nic["ip_configuration"][0]["load_balancer_backend_address_pool_ids"]
+        unknown["ip_configuration"][0]["load_balancer_backend_address_pool_ids"] = True
+    return plan
+
+
+@pytest.mark.usefixtures("plan_bootstrap_pins")
+def test_vmss_plan_guard_accepts_live_azurerm_unknown_shapes_only_on_create():
+    assert validate(_live_azurerm_shapes(vmss_plan())).creates == 16
+    plan = _live_azurerm_shapes(vmss_plan())
+    _find(plan, "standard[1]")["change"]["after"]["backend_address_pool_ids"] = [f"{GROUP_ID}/other"]
+    with pytest.raises(CheckpointPlanError, match="rule"):
+        validate(plan)
+    plan = _live_azurerm_shapes(vmss_plan())
+    _find(plan, "vmss[0]")["change"]["after"]["extension"] = [{"name": "custom-script"}]
+    with pytest.raises(CheckpointPlanError, match="extensions"):
+        validate(plan)
+
+
 @pytest.mark.usefixtures("plan_bootstrap_pins")
 def test_topologies_do_not_accept_each_others_plans():
     with pytest.raises(CheckpointPlanError, match="Unexpected Check Point plan resources"):
