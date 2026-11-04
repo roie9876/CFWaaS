@@ -705,7 +705,7 @@ class BicepTests(unittest.TestCase):
                 if r["type"].lower() == kind.lower()]
 
     def test_all_bicep_files_compile(self):
-        self.assertEqual(len(self.compiled), 34)
+        self.assertEqual(len(self.compiled), 35)
 
     def test_checkpoint_foundation_is_isolated_and_does_not_deploy_a_firewall_vm(self):
         name = "provider-checkpoint-foundation.bicep"
@@ -713,7 +713,9 @@ class BicepTests(unittest.TestCase):
         self.assertEqual(set(template["parameters"]), {
             "location", "environmentId", "customerIngressPublicIp", "customerIngressBgpAddress",
             "customerIngressAsn", "customerDeliveryPublicIp", "customerDeliveryBgpAddress",
-            "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "adminAllowedSources"})
+            "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "adminAllowedSources",
+            "firewallTopology"})
+        self.assertEqual(template["parameters"]["firewallTopology"]["defaultValue"], "single")
         self.assertEqual(set(template["outputs"]), {"connectionManifest", "checkpointFoundation"})
         for key in ("ingressSharedKey", "deliverySharedKey"):
             self.assertEqual(template["parameters"][key]["type"].lower(), "securestring")
@@ -730,9 +732,18 @@ class BicepTests(unittest.TestCase):
         self.assertFalse(self.resources(name, "Microsoft.Authorization/roleAssignments"))
         self.assertEqual(len(self.resources(name, "Microsoft.Network/virtualHubs")), 1)
         peers = self.resources(name, "Microsoft.Network/virtualHubs/bgpConnections")
-        self.assertEqual(len(peers), 1)
-        self.assertEqual(peers[0]["properties"]["peerAsn"], 65050)
-        self.assertEqual(peers[0]["properties"]["peerIp"], "[parameters('peerIp')]")
+        self.assertEqual(len(peers), 2)
+        self.assertEqual({peer["name"] for peer in peers}, {"[format('{0}/{1}', parameters('name'), 'nva-primary')]",
+                                                            "[format('{0}/{1}', parameters('routeServerName'), "
+                                                            "'nva-secondary')]"})
+        self.assertTrue(all(peer["properties"]["peerAsn"] == 65050 for peer in peers))
+        self.assertEqual({peer["properties"]["peerIp"] for peer in peers}, {"[parameters('peerIp')]"})
+        secondary = next(resource for resource in template["resources"]
+                         if resource["type"] == "Microsoft.Resources/deployments"
+                         and "checkpoint-route-server-peer2-" in resource["name"])
+        self.assertEqual(secondary["condition"], "[equals(parameters('firewallTopology'), 'vmss')]")
+        self.assertEqual(template["variables"]["secondaryFirewallPrivateIp"],
+                         "[if(equals(parameters('firewallTopology'), 'vmss'), '172.22.10.5', '')]")
         route_server = next(resource for resource in template["resources"]
                             if resource["type"] == "Microsoft.Resources/deployments"
                             and "checkpoint-route-server-" in resource["name"])
@@ -956,7 +967,8 @@ class BicepTests(unittest.TestCase):
         rules = provider["variables"]["legacyManagementRules"]
         self.assertEqual([rule["properties"]["access"] for rule in rules], ["Allow", "Deny"])
         self.assertEqual(rules[0]["properties"]["sourceAddressPrefixes"],
-                         ["172.22.10.4/32", "172.22.20.4/32", "172.22.30.0/24", "172.22.40.0/23"])
+                         ["172.22.10.4/32", "172.22.10.5/32", "172.22.20.4/32", "172.22.30.0/24",
+                          "172.22.40.0/23"])
         self.assertEqual(rules[1]["properties"]["sourceAddressPrefix"], "*")
         self.assertLess(rules[0]["properties"]["priority"], rules[1]["properties"]["priority"])
 

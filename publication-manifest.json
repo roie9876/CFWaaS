@@ -159,6 +159,7 @@
     "provider-provisioning/infra/modules/provider-nva.bicep",
     "provider-provisioning/infra/modules/route-server.bicep",
     "provider-provisioning/infra/modules/route-server-peer.bicep",
+    "provider-provisioning/infra/modules/route-server-secondary-peer.bicep",
     "provider-provisioning/infra/modules/vm.bicep",
     "provider-provisioning/infra/modules/worker-role.bicep",
     "provider-provisioning/infra/cloud-init/nva.yaml",

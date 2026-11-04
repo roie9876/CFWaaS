@@ -24,6 +24,7 @@ class CheckpointFoundation:
     firewall_backend_ip: str
     route_server_asn: int
     route_server_peers: tuple[str, str]
+    firewall_topology: str = "single"
 
 
 def _output(outputs: dict, name: str) -> dict:
@@ -52,12 +53,13 @@ def validate_checkpoint_route_server_peers(peers: object) -> tuple[str, str]:
 
 def validate_checkpoint_foundation(
         outputs: dict, provider_subscription: str, group_name: str,
-        environment_id: str) -> CheckpointFoundation:
+        environment_id: str, firewall_topology: str = "single") -> CheckpointFoundation:
     try:
         uuid_text(provider_subscription)
         uuid_text(environment_id)
         if (not isinstance(group_name, str) or not group_name.startswith("rg-faas-env-")
-                or environment_resource_group_name(group_name.removeprefix("rg-faas-env-")) != group_name):
+                or environment_resource_group_name(group_name.removeprefix("rg-faas-env-")) != group_name
+                or firewall_topology not in ("single", "vmss")):
             raise ValueError()
     except (TypeError, ValueError, AttributeError):
         raise ValueError("Invalid Check Point provider scope") from None
@@ -93,7 +95,10 @@ def validate_checkpoint_foundation(
         "firewallFrontendPrivateIp": "172.22.10.4",
         "firewallBackendPrivateIp": "172.22.20.4",
     }
-    if (set(foundation) != set(expected) | {"routeServerAsn", "routeServerPeerAddresses"}
+    # Outputs from templates before the topology parameter carry no marker and are single-gateway.
+    reported = foundation.get("firewallTopology", "single")
+    if (set(foundation) - {"firewallTopology"} != set(expected) | {"routeServerAsn", "routeServerPeerAddresses"}
+            or reported != firewall_topology
             or any(not isinstance(foundation[key], str)
                    or foundation[key].lower() != value.lower() for key, value in expected.items())
             or type(foundation["routeServerAsn"]) is not int or foundation["routeServerAsn"] != 65515):
@@ -117,4 +122,5 @@ def validate_checkpoint_foundation(
         firewall_backend_ip=expected["firewallBackendPrivateIp"],
         route_server_asn=65515,
         route_server_peers=peers,
+        firewall_topology=firewall_topology,
     )

@@ -332,3 +332,50 @@ def test_vmss_destroy_guard_requires_the_full_vmss_resource_set():
 
 
 plan_bootstrap_pins = single.plan_bootstrap_pins
+
+
+def test_foundation_outputs_must_match_the_requested_topology():
+    import test_checkpoint_foundation as foundation_fixture
+    from service.checkpoint_foundation import validate_checkpoint_foundation
+
+    def run(value, topology):
+        return validate_checkpoint_foundation(value, foundation_fixture.SUBSCRIPTION, foundation_fixture.GROUP,
+                                              foundation_fixture.ENVIRONMENT, topology)
+
+    legacy = foundation_fixture.outputs()
+    assert run(legacy, "single").firewall_topology == "single"
+    with pytest.raises(ValueError):
+        run(legacy, "vmss")
+    marked = foundation_fixture.outputs()
+    marked["checkpointFoundation"]["value"]["firewallTopology"] = "vmss"
+    assert run(marked, "vmss").firewall_topology == "vmss"
+    with pytest.raises(ValueError):
+        run(marked, "single")
+    with pytest.raises(ValueError):
+        run(marked, "ha")
+
+
+def test_foundation_template_requires_exact_vmss_probe_rule_and_single_default():
+    import json
+    import subprocess
+    from service.templates import Templates
+
+    result = subprocess.run(["az", "bicep", "build", "--file",
+                             str(ROOT / "infra/provider-checkpoint-foundation.bicep"), "--stdout"],
+                            capture_output=True, text=True, check=False)
+    if result.returncode:
+        pytest.skip("Bicep CLI unavailable")
+    template = json.loads(result.stdout)
+    Templates.validate_checkpoint_foundation(copy.deepcopy(template))
+    probe_rule = next(item for item in template["resources"]
+                      if item["type"].endswith("/securityRules") and "copy" not in item)
+    for key, value in (("sourceAddressPrefix", "*"), ("priority", 4000)):
+        tampered = copy.deepcopy(template)
+        next(item for item in tampered["resources"] if item.get("name") == probe_rule["name"])[
+            "properties"][key] = value
+        with pytest.raises(ValueError):
+            Templates.validate_checkpoint_foundation(tampered)
+    tampered = copy.deepcopy(template)
+    tampered["parameters"]["firewallTopology"]["defaultValue"] = "vmss"
+    with pytest.raises(ValueError, match="single gateway"):
+        Templates.validate_checkpoint_foundation(tampered)

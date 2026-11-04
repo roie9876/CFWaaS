@@ -22,10 +22,14 @@ param ingressSharedKey string
 param deliverySharedKey string
 @maxLength(16)
 param adminAllowedSources array = []
+@allowed(['single', 'vmss'])
+param firewallTopology string = 'single'
 
 var suffix = take(environmentId, 8)
 var tags = { purpose: 'provider-provisioning-checkpoint-foundation', environmentId: environmentId }
 var firewallPrivateIp = '172.22.10.4'
+// The two scale set instances take the first free frontend addresses; the runner verifies them.
+var secondaryFirewallPrivateIp = firewallTopology == 'vmss' ? '172.22.10.5' : ''
 var securityVnetName = 'vnet-cp-security-${suffix}'
 var adminReturnRoutes = [for (source, i) in adminAllowedSources: {
   name: 'approved-admin-${i}'
@@ -102,7 +106,7 @@ var legacyManagementRules = [
       direction: 'Inbound'
       access: 'Allow'
       protocol: '*'
-      sourceAddressPrefixes: ['172.22.10.4/32', '172.22.20.4/32', '172.22.30.0/24', '172.22.40.0/23']
+      sourceAddressPrefixes: ['172.22.10.4/32', '172.22.10.5/32', '172.22.20.4/32', '172.22.30.0/24', '172.22.40.0/23']
       sourcePortRange: '*'
       destinationAddressPrefix: '*'
       destinationPortRange: '*'
@@ -163,9 +167,18 @@ resource managementAdminRules 'Microsoft.Network/networkSecurityGroups/securityR
   parent: managementNsg
   name: rule.name
   properties: union(rule.properties, i == 0 ? {
-    sourceAddressPrefixes: ['172.22.10.4/32', '172.22.20.4/32', '172.22.30.0/24', '172.22.40.0/23']
+    sourceAddressPrefixes: ['172.22.10.4/32', '172.22.10.5/32', '172.22.20.4/32', '172.22.30.0/24', '172.22.40.0/23']
   } : {}, i == 1 ? { destinationPortRanges: ['22', '443', '18190', '19009'] } : {})
 }]
+// Scale set health probes; without them the internal load balancer drops all inspected traffic.
+resource firewallProbeRule 'Microsoft.Network/networkSecurityGroups/securityRules@2025-05-01' = if (!empty(adminAllowedSources) && firewallTopology == 'vmss') {
+  parent: firewallNsg
+  name: 'allow-azure-load-balancer'
+  properties: {
+    priority: 120, direction: 'Inbound', access: 'Allow', protocol: '*'
+    sourceAddressPrefix: 'AzureLoadBalancer', sourcePortRange: '*', destinationAddressPrefix: '*', destinationPortRange: '*'
+  }
+}
 resource automationNsg 'Microsoft.Network/networkSecurityGroups@2025-05-01' = {
   name: 'nsg-cp-automation-${suffix}'
   location: location
@@ -309,6 +322,11 @@ module ingressRouteServer 'modules/route-server.bicep' = {
   }
   dependsOn: [peerings]
 }
+module secondaryRouteServerPeer 'modules/route-server-secondary-peer.bicep' = if (firewallTopology == 'vmss') {
+  name: 'checkpoint-route-server-peer2-${suffix}'
+  params: { routeServerName: 'rs-cp-pi-${suffix}', peerIp: secondaryFirewallPrivateIp }
+  dependsOn: [ingressRouteServer]
+}
 module ingressConnection 'modules/connection.bicep' = {
   name: 'checkpoint-ingress-connection-${suffix}'
   params: {
@@ -358,4 +376,5 @@ output checkpointFoundation object = {
   firewallBackendPrivateIp: '172.22.20.4'
   routeServerAsn: 65515
   routeServerPeerAddresses: ingressRouteServer.outputs.peerAddresses
+  firewallTopology: firewallTopology
 }

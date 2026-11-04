@@ -90,20 +90,29 @@ class Templates:
     def validate_checkpoint_foundation(template: dict) -> dict:
         admin_access = (isinstance(template, dict) and isinstance(template.get("parameters"), dict)
                         and "adminAllowedSources" in template["parameters"])
+        topology = (isinstance(template, dict) and isinstance(template.get("parameters"), dict)
+                    and "firewallTopology" in template["parameters"])
         parameters = {**CHECKPOINT_FOUNDATION_PARAMETERS}
         allowed = (RESOURCE_TYPES - {"Microsoft.Compute/virtualMachines", "Microsoft.Compute/availabilitySets"}
                    | {"Microsoft.Network/natGateways"})
         if admin_access:
             parameters["adminAllowedSources"] = "array"
             allowed.add("Microsoft.Network/networkSecurityGroups/securityRules")
+        if topology:
+            parameter = template["parameters"]["firewallTopology"]
+            if (not admin_access or not isinstance(parameter, dict) or parameter.get("defaultValue") != "single"
+                    or parameter.get("allowedValues") != ["single", "vmss"]):
+                raise ValueError("Check Point firewall topology must default to the single gateway")
+            parameters["firewallTopology"] = "string"
         Templates._validate_structure(template, True, 0, parameters, allowed)
         if admin_access:
-            Templates._validate_checkpoint_admin_access(template)
+            Templates._validate_checkpoint_admin_access(template, topology)
         outputs = template.get("outputs", {})
         if not isinstance(outputs, dict) or set(outputs) != {"connectionManifest", "checkpointFoundation"}:
             raise ValueError("Invalid Check Point foundation outputs")
         for name, expected in (("connectionManifest", {"providerIngress", "providerDelivery"}),
-                               ("checkpointFoundation", CHECKPOINT_FOUNDATION_OUTPUTS)):
+                               ("checkpointFoundation", CHECKPOINT_FOUNDATION_OUTPUTS
+                                | ({"firewallTopology"} if topology else set()))):
             output = outputs[name]
             if (not isinstance(output, dict) or output.get("type") != "object"
                     or not isinstance(output.get("value"), dict) or set(output["value"]) != expected):
@@ -199,7 +208,7 @@ class Templates:
         return template
 
     @staticmethod
-    def _validate_checkpoint_admin_access(template: dict) -> None:
+    def _validate_checkpoint_admin_access(template: dict, topology: bool = False) -> None:
         parameter = template["parameters"]["adminAllowedSources"]
         if parameter.get("defaultValue") != [] or parameter.get("maxLength") != 16:
             raise ValueError("Check Point admin sources must be optional and bounded")
@@ -228,12 +237,31 @@ class Templates:
                 "destinationAddressPrefix": "*", "destinationPortRange": "*"}},
         ]
         children = [item for item in template["resources"]
-                    if item["type"] == "Microsoft.Network/networkSecurityGroups/securityRules"]
+                    if item["type"] == "Microsoft.Network/networkSecurityGroups/securityRules"
+                    and "copy" in item]
+        probe_rules = [item for item in template["resources"]
+                       if item["type"] == "Microsoft.Network/networkSecurityGroups/securityRules"
+                       and "copy" not in item]
+        expected_probe = [{
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2025-05-01",
+            "name": "[format('{0}/{1}', format('nsg-cp-firewall-{0}', variables('suffix')), "
+                    "'allow-azure-load-balancer')]",
+            "condition": "[and(not(empty(parameters('adminAllowedSources'))), "
+                         "equals(parameters('firewallTopology'), 'vmss'))]",
+            "properties": {"priority": 120, "direction": "Inbound", "access": "Allow", "protocol": "*",
+                           "sourceAddressPrefix": "AzureLoadBalancer", "sourcePortRange": "*",
+                           "destinationAddressPrefix": "*", "destinationPortRange": "*"},
+            "dependsOn": ["[resourceId('Microsoft.Network/networkSecurityGroups', "
+                          "format('nsg-cp-firewall-{0}', variables('suffix')))]"],
+        }] if topology else []
+        gateway_sources = ("'172.22.10.4/32', '172.22.10.5/32', '172.22.20.4/32'" if topology
+                           else "'172.22.10.4/32', '172.22.20.4/32'")
         expected_child_properties = {
             "firewallAdminRules": "[variables('adminNsgRules')[copyIndex()].properties]",
             "managementAdminRules": (
                 "[union(variables('adminNsgRules')[copyIndex()].properties, if(equals(copyIndex(), 0), "
-                "createObject('sourceAddressPrefixes', createArray('172.22.10.4/32', '172.22.20.4/32', "
+                f"createObject('sourceAddressPrefixes', createArray({gateway_sources}, "
                 "'172.22.30.0/24', '172.22.40.0/23')), createObject()), if(equals(copyIndex(), 1), "
                 "createObject('destinationPortRanges', createArray('22', '443', '18190', '19009')), createObject()))]"),
         }
@@ -248,6 +276,7 @@ class Templates:
         if (not isinstance(copies, list) or [item for item in copies
                                            if isinstance(item, dict) and item.get("name") == "adminReturnRoutes"]
                 != [expected_copy] or rules != expected_rules or len(children) != 2
+                or probe_rules != expected_probe
                 or {item.get("copy", {}).get("name") for item in children}
                 != {"firewallAdminRules", "managementAdminRules"}
                 or any(item.get("condition") != "[not(empty(parameters('adminAllowedSources')))]"
