@@ -8,7 +8,8 @@ from azure.mgmt.resource.resources.models import Deployment, DeploymentPropertie
 
 from .azure_data import Vault, secret_names
 from .config import WorkerSettings
-from .models import ConnectionManifest, EnvironmentRequest, environment_resource_group_name
+from .models import (DEFAULT_PROVIDER_VPN_GATEWAY_SKU, ConnectionManifest, EnvironmentRequest,
+                     environment_resource_group_name)
 from .templates import Templates
 
 
@@ -95,6 +96,10 @@ class Provisioner:
                     if self.templates.network is None:
                         raise ProvisionError("NetworkTemplateNotConfigured", False, True)
                     template = self.templates.network
+                    gateway_sku = request.providerVpnGatewaySku
+                    if (gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU
+                            and "providerVpnGatewaySku" not in template.get("parameters", {})):
+                        raise ProvisionError("ProviderGatewaySkuUnavailable", False)
                     ingress, delivery = secret_names(environment_id)
                     if secret_versions:
                         if set(secret_versions) != {"ingress", "delivery"}:
@@ -124,6 +129,8 @@ class Provisioner:
                         "sshPublicKey": self.settings.ssh_public_key,
                         "parallelProviderNetworking": parallel_networking,
                     }
+                    if gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
+                        values["providerVpnGatewaySku"] = gateway_sku
                     parameters.update({key: {"value": value} for key, value in values.items()})
                 check()
                 arm.start(name, template, parameters)

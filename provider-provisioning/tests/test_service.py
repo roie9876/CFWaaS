@@ -403,6 +403,21 @@ def test_request_canonical_digest():
     assert EnvironmentRequest(firewallType="checkpoint-byol").digest() != default.digest()
 
 
+def test_provider_gateway_sku_default_keeps_stored_fields_and_digest():
+    network = EnvironmentRequest.model_validate(NETWORK)
+    explicit = EnvironmentRequest.model_validate({**NETWORK, "providerVpnGatewaySku": "VpnGw1AZ"})
+    assert network.providerVpnGatewaySku == "VpnGw1AZ"
+    assert "providerVpnGatewaySku" not in explicit.stored_fields()
+    assert explicit.canonical() == network.canonical() and explicit.digest() == network.digest()
+    sized = EnvironmentRequest.model_validate({**NETWORK, "providerVpnGatewaySku": "VpnGw5AZ"})
+    assert sized.stored_fields()["providerVpnGatewaySku"] == "VpnGw5AZ"
+    assert sized.digest() != network.digest()
+    assert parse_stored_environment_request(stored_environment_request(sized, False, True))[0] == sized
+    for body in ({**NETWORK, "providerVpnGatewaySku": "VpnGw1"}, {"providerVpnGatewaySku": "VpnGw2AZ"}):
+        with pytest.raises(ValidationError):
+            EnvironmentRequest.model_validate(body)
+
+
 def test_checkpoint_selection_is_authenticated_and_fails_before_reservation(api, store, signing_key, claims):
     client, _ = api
     headers = {"Authorization": "Bearer " + token(signing_key, claims), "Idempotency-Key": "checkpoint"}
@@ -1041,6 +1056,41 @@ def test_network_secrets_exactly_two_and_only_secure_arm_parameters(templates, t
     assert parameters["customerIngressAsn"] == {"value": 64512}
     assert parameters["parallelProviderNetworking"] == {"value": False}
     bind_versions.assert_called_once_with({"ingress": "version-one", "delivery": "version-two"})
+
+
+def test_network_provider_gateway_sku_passed_only_when_non_default_and_supported(templates, target):
+    network_templates(templates)
+    sized = EnvironmentRequest.model_validate({**NETWORK, "providerVpnGatewaySku": "VpnGw4AZ"})
+    arm, vault = FakeArm(), Mock(spec=Vault)
+    with pytest.raises(ProvisionError) as caught:
+        Provisioner(arm, vault, templates, target).provision(str(uuid4()), sized, lambda: None,
+                                                             bind_versions=Mock())
+    assert (caught.value.code, caught.value.retryable) == ("ProviderGatewaySkuUnavailable", False)
+    assert not arm.starts
+    vault.ensure.assert_not_called()
+    templates.network["parameters"]["providerVpnGatewaySku"] = {
+        "type": "string", "defaultValue": "VpnGw1AZ",
+        "allowedValues": ["VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ"]}
+    for request, expected in ((sized, {"value": "VpnGw4AZ"}), (EnvironmentRequest.model_validate(NETWORK), None)):
+        arm = FakeArm(outputs={"connectionManifest": {"type": "Object", "value": MANIFEST}})
+        vault = Mock(spec=Vault)
+        vault.ensure.side_effect = [SecretMaterial("i", "v1"), SecretMaterial("d", "v2")]
+        Provisioner(arm, vault, templates, target).provision(str(uuid4()), request, lambda: None,
+                                                             bind_versions=Mock())
+        assert arm.starts[0][2].get("providerVpnGatewaySku") == expected
+
+
+def test_network_template_validation_accepts_only_exact_provider_gateway_sku_parameter(templates):
+    template = network_templates(templates).network
+    template["parameters"]["providerVpnGatewaySku"] = {
+        "type": "string", "defaultValue": "VpnGw1AZ",
+        "allowedValues": ["VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ"]}
+    Templates.validate(template, True)
+    for change in ({"defaultValue": "VpnGw5AZ"}, {"allowedValues": ["VpnGw1AZ", "Basic"]}):
+        with pytest.raises(ValueError):
+            Templates.validate({**template, "parameters": {
+                **template["parameters"],
+                "providerVpnGatewaySku": {**template["parameters"]["providerVpnGatewaySku"], **change}}}, True)
 
 
 def test_network_retry_uses_pinned_versions_not_latest(templates, target):
@@ -3991,6 +4041,38 @@ def test_admin_sources_block_old_foundation_before_provider_changes(checkpoint_j
     fixture.groups.ensure.assert_not_called()
     fixture.vault.ensure.assert_not_called()
     assert not fixture.arm.starts and not fixture.puts
+
+
+def test_provider_gateway_sku_blocks_old_checkpoint_foundation(checkpoint_journal):
+    store, _, lease, _ = checkpoint_journal
+    fixture = checkpoint_provisioner_fixture(store, lease, [None])
+    operation = store.operation(lease)
+    request, _, _ = parse_stored_environment_request(operation["request"])
+    request.providerVpnGatewaySku = "VpnGw5AZ"
+    with pytest.raises(ProvisionError) as error:
+        fixture.provisioner.provision(lease, store, operation, request, lambda: None)
+    assert (error.value.code, error.value.retryable) == ("CheckpointDeploymentUnavailable", False)
+    fixture.groups.ensure.assert_not_called()
+    assert not fixture.arm.starts and not fixture.puts
+
+
+@pytest.mark.parametrize("sku", ["VpnGw1AZ", "VpnGw3AZ"])
+def test_checkpoint_foundation_receives_provider_gateway_sku_only_when_non_default(checkpoint_journal, sku):
+    store, backend, lease, _ = checkpoint_journal
+    row = store.owned(OWNER, lease.environment_id)
+    request, _, _ = parse_stored_environment_request(row["request"])
+    request.providerVpnGatewaySku = sku
+    row["request"] = stored_environment_request(request, False, True)
+    backend.transact([Change(row, str(row["_etag"]))])
+    fixture = checkpoint_provisioner_fixture(store, lease, [None, ("Running",), ("Terminated", 0)])
+    fixture.provisioner.settings.foundation_template["parameters"] = {
+        "providerVpnGatewaySku": {"type": "string", "defaultValue": "VpnGw1AZ"}}
+    assert run_checkpoint(fixture, store, lease) == fixture.foundation["connectionManifest"]["value"]
+    parameters = fixture.arm.starts[0][2]
+    if sku == "VpnGw1AZ":
+        assert "providerVpnGatewaySku" not in parameters
+    else:
+        assert parameters["providerVpnGatewaySku"] == {"value": sku}
 
 
 def test_checkpoint_scale_set_requires_separate_provider_opt_in(settings, backend, store, auth, signing_key,

@@ -167,7 +167,7 @@
               "type": "Microsoft.Common.DropDown",
               "label": "Customer ingress VPN gateway SKU",
               "defaultValue": "VpnGw1AZ (lowest-cost compatible)",
-              "toolTip": "Customer resources only. Provider gateway sizing is unchanged. Larger customer gateways do not guarantee higher end-to-end throughput.",
+              "toolTip": "Customer resources only; provider gateways are sized separately below. Larger customer gateways do not guarantee higher end-to-end throughput.",
               "multiselect": false,
               "constraints": {
                 "required": true,
@@ -186,6 +186,24 @@
               "label": "Customer delivery VPN gateway SKU",
               "defaultValue": "VpnGw1AZ (lowest-cost compatible)",
               "toolTip": "Delivery requires BGP, so Basic is not offered. Review Azure costs before choosing a larger size.",
+              "multiselect": false,
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "VpnGw1AZ (lowest-cost compatible)", "value": "VpnGw1AZ"},
+                  {"label": "VpnGw2AZ", "value": "VpnGw2AZ"},
+                  {"label": "VpnGw3AZ", "value": "VpnGw3AZ"},
+                  {"label": "VpnGw4AZ", "value": "VpnGw4AZ"},
+                  {"label": "VpnGw5AZ", "value": "VpnGw5AZ"}
+                ]
+              }
+            },
+            {
+              "name": "providerVpnGatewaySku",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Provider VPN gateway SKU (both provider gateways)",
+              "defaultValue": "VpnGw1AZ (lowest-cost compatible)",
+              "toolTip": "Sizes both provider VPN gateways (ingress and delivery). Per-tunnel throughput is about 650 Mbps on VpnGw1AZ and up to about 2.3 Gbps on VpnGw4AZ/VpnGw5AZ (GCMAES256); the aggregate benchmark reaches 10 Gbps only on VpnGw5AZ. Larger SKUs cost significantly more per hour.",
               "multiselect": false,
               "constraints": {
                 "required": true,
@@ -229,6 +247,7 @@
         "routingApplianceBandwidthGbps": "[steps('sizing').routingApplianceBandwidthGbps]",
         "customerIngressVpnGatewaySku": "[steps('sizing').customerIngressVpnGatewaySku]",
         "customerDeliveryVpnGatewaySku": "[steps('sizing').customerDeliveryVpnGatewaySku]",
+        "providerVpnGatewaySku": "[steps('sizing').providerVpnGatewaySku]",
         "workloadVmProfile": "[steps('sizing').workloadVmProfile]",
         "approveDeploymentScriptBackingException": "[steps('basics').approveDeploymentScriptBackingException]"
       },

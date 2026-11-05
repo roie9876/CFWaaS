@@ -24,6 +24,9 @@ param deliverySharedKey string
 param adminAllowedSources array = []
 @allowed(['single', 'vmss'])
 param firewallTopology string = 'single'
+@description('SKU of both provider VPN gateways (ingress and delivery).')
+@allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
+param providerVpnGatewaySku string = 'VpnGw1AZ'
 
 var suffix = take(environmentId, 8)
 var tags = { purpose: 'provider-provisioning-checkpoint-foundation', environmentId: environmentId }
@@ -303,6 +306,7 @@ module gateways 'modules/gateway.bicep' = [for i in range(0, 2): {
     asn: i == 0 ? 65515 : 65031
     activeActive: i == 0
     defaultSiteId: i == 1 ? deliveryLocalGateway.id : ''
+    sku: providerVpnGatewaySku
     tags: tags
   }
 }]

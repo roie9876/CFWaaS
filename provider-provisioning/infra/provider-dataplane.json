@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "8455028280635586393"
+      "templateHash": "16169610634380335441"
     }
   },
   "parameters": {
@@ -57,6 +57,20 @@
       "defaultValue": false,
       "metadata": {
         "description": "Experimental: provision the ingress Route Server concurrently with provider gateways."
+      }
+    },
+    "providerVpnGatewaySku": {
+      "type": "string",
+      "defaultValue": "VpnGw1AZ",
+      "allowedValues": [
+        "VpnGw1AZ",
+        "VpnGw2AZ",
+        "VpnGw3AZ",
+        "VpnGw4AZ",
+        "VpnGw5AZ"
+      ],
+      "metadata": {
+        "description": "SKU of both provider VPN gateways (ingress and delivery)."
       }
     }
   },
@@ -380,6 +394,9 @@
             "value": "[equals(range(0, 2)[copyIndex()], 0)]"
           },
           "defaultSiteId": "[if(equals(range(0, 2)[copyIndex()], 1), createObject('value', resourceId('Microsoft.Network/localNetworkGateways', format('lng-pd-{0}', variables('suffix')))), createObject('value', ''))]",
+          "sku": {
+            "value": "[parameters('providerVpnGatewaySku')]"
+          },
           "tags": {
             "value": "[variables('tags')]"
           }
@@ -974,7 +991,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17660088376674188276"
+              "templateHash": "3564993384540971094"
             }
           },
           "parameters": {
@@ -1061,7 +1078,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.44.1.10279",
-                      "templateHash": "17425623576154094200"
+                      "templateHash": "3792051325769776009"
                     }
                   },
                   "parameters": {
@@ -1102,6 +1119,21 @@
                       "type": "string",
                       "defaultValue": "Standard_B1ms"
                     },
+                    "acceleratedNetworking": {
+                      "type": "bool",
+                      "defaultValue": false
+                    },
+                    "diskControllerType": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "allowedValues": [
+                        "",
+                        "NVMe"
+                      ],
+                      "metadata": {
+                        "description": "Empty keeps the platform default; v6 sizes such as Standard_D8s_v6 accept NVMe only."
+                      }
+                    },
                     "adminUsername": {
                       "type": "string",
                       "defaultValue": "labuser",
@@ -1119,6 +1151,7 @@
                       "tags": "[parameters('tags')]",
                       "properties": {
                         "enableIPForwarding": "[parameters('forwarding')]",
+                        "enableAcceleratedNetworking": "[parameters('acceleratedNetworking')]",
                         "ipConfigurations": [
                           {
                             "name": "primary",
@@ -1148,22 +1181,7 @@
                             "vTpmEnabled": true
                           }
                         },
-                        "storageProfile": {
-                          "imageReference": {
-                            "publisher": "Canonical",
-                            "offer": "ubuntu-24_04-lts",
-                            "sku": "server",
-                            "version": "24.04.202609040"
-                          },
-                          "osDisk": {
-                            "name": "[format('os-{0}', parameters('name'))]",
-                            "createOption": "FromImage",
-                            "deleteOption": "Delete",
-                            "managedDisk": {
-                              "storageAccountType": "StandardSSD_LRS"
-                            }
-                          }
-                        },
+                        "storageProfile": "[union(if(empty(parameters('diskControllerType')), createObject(), createObject('diskControllerType', parameters('diskControllerType'))), createObject('imageReference', createObject('publisher', 'Canonical', 'offer', 'ubuntu-24_04-lts', 'sku', 'server', 'version', '24.04.202609040'), 'osDisk', createObject('name', format('os-{0}', parameters('name')), 'createOption', 'FromImage', 'deleteOption', 'Delete', 'managedDisk', createObject('storageAccountType', 'StandardSSD_LRS'))))]",
                         "osProfile": {
                           "computerName": "[take(parameters('name'), 64)]",
                           "adminUsername": "[parameters('adminUsername')]",

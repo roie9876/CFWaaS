@@ -21,6 +21,9 @@ param deliverySharedKey string
 param sshPublicKey string
 @description('Experimental: provision the ingress Route Server concurrently with provider gateways.')
 param parallelProviderNetworking bool = false
+@description('SKU of both provider VPN gateways (ingress and delivery).')
+@allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
+param providerVpnGatewaySku string = 'VpnGw1AZ'
 
 var tags = { purpose: 'provider-provisioning-dataplane', environmentId: environmentId }
 var suffix = take(environmentId, 8)
@@ -173,6 +176,7 @@ module gateways 'modules/gateway.bicep' = [for i in range(0, 2): {
     asn: i == 0 ? 65515 : 65031
     activeActive: i == 0
     defaultSiteId: i == 1 ? deliveryLocalGateway.id : ''
+    sku: providerVpnGatewaySku
     tags: tags
   }
 }]

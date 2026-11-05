@@ -120,11 +120,12 @@ class ScopeTests(unittest.TestCase):
             "routingApplianceBandwidthGbps": 10,
             "customerIngressVpnGatewaySku": "VpnGw1AZ",
             "customerDeliveryVpnGatewaySku": "VpnGw1AZ",
+            "providerVpnGatewaySku": "VpnGw1AZ",
             "workloadVmProfile": "standard",
         })
         self.assertEqual(common.customer_sizing({"workloadVmProfile": "high-performance"})["workloadVmProfile"],
                          "high-performance")
-        for field in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku"):
+        for field in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku", "providerVpnGatewaySku"):
             for sku in common.CUSTOMER_VPN_GATEWAY_SKUS:
                 with self.subTest(field=field, sku=sku):
                     self.assertEqual(common.customer_sizing({field: sku})[field], sku)
@@ -136,6 +137,7 @@ class ScopeTests(unittest.TestCase):
             ("customerIngressVpnGatewaySku", "Basic"),
             ("customerDeliveryVpnGatewaySku", "VpnGw1"),
             ("customerDeliveryVpnGatewaySku", []),
+            ("providerVpnGatewaySku", "VpnGw1"),
             ("workloadVmProfile", "Standard_D8s_v6"),
             ("workloadVmProfile", None),
         ):
@@ -147,14 +149,15 @@ class ScopeTests(unittest.TestCase):
     def test_customer_sizing_updates_preserve_ownership_binding(self):
         config, _ = fixture()
         changed = {**config, "customerIngressVpnGatewaySku": "VpnGw2AZ",
-                   "customerDeliveryVpnGatewaySku": "VpnGw5AZ",
+                   "customerDeliveryVpnGatewaySku": "VpnGw5AZ", "providerVpnGatewaySku": "VpnGw4AZ",
                    "routingApplianceBandwidthGbps": 10, "workloadVmProfile": "high-performance"}
         self.assertEqual(common.config_digest(config), common.config_digest(changed))
 
     def test_customer_foundation_forwards_only_customer_sizing(self):
         config, _ = fixture()
         config.update(workloadSshPublicKey="fixture-public-key", customerIngressVpnGatewaySku="VpnGw2AZ",
-                      customerDeliveryVpnGatewaySku="VpnGw5AZ", workloadVmProfile="high-performance")
+                      customerDeliveryVpnGatewaySku="VpnGw5AZ", workloadVmProfile="high-performance",
+                      providerVpnGatewaySku="VpnGw3AZ")
         journal = {"proof": {"status": "Ready"}}
         with patch.object(bootstrap, "verify_account"), patch.object(bootstrap, "encryption_preflight"), \
                 patch.object(bootstrap, "save_private"), patch.object(bootstrap, "deploy", return_value={
@@ -167,6 +170,28 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(parameters["customerIngressVpnGatewaySku"], "VpnGw2AZ")
         self.assertEqual(parameters["customerDeliveryVpnGatewaySku"], "VpnGw5AZ")
         self.assertEqual(parameters["workloadVmProfile"], "high-performance")
+        # customer-foundation.bicep has no provider gateway parameter; customer-network carries it.
+        self.assertNotIn("providerVpnGatewaySku", parameters)
+
+    def test_customer_network_phase_forwards_provider_gateway_sku(self):
+        config, _ = fixture()
+        config["providerVpnGatewaySku"] = "VpnGw5AZ"
+        journal = {"proof": {"status": "Ready"}, "customerFoundation": {"customerEndpoints": {}},
+                   "customerIdentity": {"identityId": "id", "clientId": uid(9)},
+                   "customerConnectorScope": common.group_id(
+                       config["customer"]["subscriptionId"], config["customer"]["dataPlaneResourceGroup"]),
+                   "controlPlane": {"apiUrl": "https://api.example.invalid"}}
+        identity = {"apiResource": "api://" + uid(8), "configDigest": common.config_digest(config)}
+        with patch.object(bootstrap, "verify_account"), patch.object(bootstrap, "save_private"), \
+                patch.object(bootstrap, "load_private",
+                             side_effect=lambda path: identity if "identity" in str(path) else {}), \
+                patch.object(bootstrap, "validate_connection_template"), \
+                patch.object(bootstrap, "connector_result", return_value={}), \
+                patch.object(bootstrap, "deploy", return_value={
+                    "properties": {"outputs": {"networkResult": {"value": {}}}}}) as deploy:
+            bootstrap.run_phase(config, "customer-network", journal, ROOT / ".local/unused.json", None)
+        self.assertEqual(deploy.call_args.args[2], "customer-network.bicep")
+        self.assertEqual(deploy.call_args.args[3]["providerVpnGatewaySku"], "VpnGw5AZ")
 
     def test_scope_fingerprint_allows_only_explicit_mutable_runtime_inputs(self):
         config, _ = fixture()
@@ -476,6 +501,17 @@ class ConnectorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             customer_connector.request_body("proof", firewall_type="unknown")
 
+    def test_provider_gateway_sku_is_sent_only_when_non_default(self):
+        endpoints = json.loads(connector_env()["FAAS_CUSTOMER_ENDPOINTS"])
+        default = customer_connector.request_body("network", endpoints)
+        self.assertEqual(default, customer_connector.request_body("network", endpoints, "ubuntu", [], "VpnGw1AZ"))
+        self.assertNotIn("providerVpnGatewaySku", default)
+        sized = customer_connector.request_body("network", endpoints, "ubuntu", [], "VpnGw5AZ")
+        self.assertEqual(sized, {**default, "providerVpnGatewaySku": "VpnGw5AZ"})
+        for args in (("network", endpoints, "ubuntu", [], "VpnGw1"), ("proof", None, "ubuntu", [], "VpnGw2AZ")):
+            with self.assertRaises(ValueError):
+                customer_connector.request_body(*args)
+
     def test_checkpoint_scale_set_uses_its_own_readiness_and_request_type(self):
         endpoints = json.loads(connector_env()["FAAS_CUSTOMER_ENDPOINTS"])
         body = customer_connector.request_body("network", endpoints, "checkpoint-vmss", ["8.8.8.8"])
@@ -734,7 +770,7 @@ class BicepTests(unittest.TestCase):
             "location", "environmentId", "customerIngressPublicIp", "customerIngressBgpAddress",
             "customerIngressAsn", "customerDeliveryPublicIp", "customerDeliveryBgpAddress",
             "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "adminAllowedSources",
-            "firewallTopology"})
+            "firewallTopology", "providerVpnGatewaySku"})
         self.assertEqual(template["parameters"]["firewallTopology"]["defaultValue"], "single")
         self.assertEqual(set(template["outputs"]), {"connectionManifest", "checkpointFoundation"})
         for key in ("ingressSharedKey", "deliverySharedKey"):
@@ -1243,7 +1279,7 @@ class BicepTests(unittest.TestCase):
         expected = {"location", "environmentId", "customerIngressPublicIp", "customerIngressBgpAddress",
                     "customerIngressAsn", "customerDeliveryPublicIp", "customerDeliveryBgpAddress",
                     "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "sshPublicKey",
-                    "parallelProviderNetworking"}
+                    "parallelProviderNetworking", "providerVpnGatewaySku"}
         self.assertEqual(set(template["parameters"]), expected)
         self.assertFalse(template["parameters"]["parallelProviderNetworking"]["defaultValue"])
         self.assertEqual(template["parameters"]["ingressSharedKey"]["type"].lower(), "securestring")
@@ -1337,9 +1373,16 @@ class BicepTests(unittest.TestCase):
             self.assertEqual(parameters[name]["defaultValue"], default)
             self.assertEqual(outputs[name], f"[steps('sizing').{name}]")
         self.assertIs(type(fields["routingApplianceBandwidthGbps"]["constraints"]["allowedValues"][0]["value"]), int)
-        for name in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku"):
+        for name in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku", "providerVpnGatewaySku"):
             self.assertEqual(parameters[name]["allowedValues"], list(common.CUSTOMER_VPN_GATEWAY_SKUS))
-        self.assertFalse(any("provider" in name.lower() for name in fields))
+        # The provider gateway SKU is the only provider-facing wizard choice.
+        self.assertEqual([name for name in fields if "provider" in name.lower()], ["providerVpnGatewaySku"])
+        provider_field = fields["providerVpnGatewaySku"]
+        self.assertEqual(provider_field["label"], "Provider VPN gateway SKU (both provider gateways)")
+        self.assertEqual(provider_field["constraints"]["allowedValues"],
+                         fields["customerIngressVpnGatewaySku"]["constraints"]["allowedValues"])
+        sizing = next(step for step in form["view"]["properties"]["steps"] if step["name"] == "sizing")
+        self.assertIn(provider_field, sizing["elements"])
         self.assertEqual(fields["approveDeploymentScriptBackingException"]["type"], "Microsoft.Common.CheckBox")
         self.assertNotIn("defaultValue", fields["approveDeploymentScriptBackingException"])
         self.assertTrue(fields["approveDeploymentScriptBackingException"]["constraints"]["required"])
@@ -1423,7 +1466,7 @@ class BicepTests(unittest.TestCase):
         variables = {item["name"]: item for item in source["resources"][0]["properties"]["environmentVariables"]}
         self.assertEqual(variables["FAAS_CUSTOMER_LOCATION"]["value"], "[parameters('location')]")
 
-    def test_customer_sizing_reaches_resources_without_changing_provider_sizing(self):
+    def test_customer_sizing_reaches_resources_and_provider_gateway_sku_reaches_both_provider_gateways(self):
         foundation = self.compiled["customer-foundation.bicep"]
         appliance = self.resources("customer-foundation.bicep", "Microsoft.Network/virtualNetworkAppliances")[0]
         self.assertEqual(appliance["properties"]["bandwidthInGbps"],
@@ -1433,12 +1476,31 @@ class BicepTests(unittest.TestCase):
             module = next(resource for resource in foundation["resources"]
                           if resource["name"] == "customer-" + suffix + "-gateway")
             self.assertEqual(module["properties"]["parameters"]["sku"]["value"], f"[parameters('{parameter}')]")
-        provider = self.compiled["provider-dataplane.bicep"]
-        self.assertFalse(set(common.customer_sizing({})) & set(provider["parameters"]))
-        gateways = next(resource for resource in provider["resources"]
-                        if resource.get("copy", {}).get("name") == "gateways")
-        self.assertNotIn("sku", gateways["properties"]["parameters"])
-        self.assertEqual(gateways["properties"]["template"]["parameters"]["sku"]["defaultValue"], "VpnGw1AZ")
+        sku_values = list(common.CUSTOMER_VPN_GATEWAY_SKUS)
+        for name in ("provider-dataplane.bicep", "provider-checkpoint-foundation.bicep"):
+            with self.subTest(template=name):
+                provider = self.compiled[name]
+                self.assertEqual(set(common.customer_sizing({})) & set(provider["parameters"]),
+                                 {"providerVpnGatewaySku"})
+                self.assertEqual(provider["parameters"]["providerVpnGatewaySku"]["allowedValues"], sku_values)
+                self.assertEqual(provider["parameters"]["providerVpnGatewaySku"]["defaultValue"], "VpnGw1AZ")
+                gateways = next(resource for resource in provider["resources"]
+                                if resource.get("copy", {}).get("name") == "gateways")
+                # One copy loop deploys both provider gateways (ingress i=0, delivery i=1).
+                self.assertEqual(gateways["copy"]["count"], "[length(range(0, 2))]")
+                self.assertEqual(gateways["properties"]["parameters"]["sku"],
+                                 {"value": "[parameters('providerVpnGatewaySku')]"})
+                self.assertEqual(gateways["properties"]["template"]["parameters"]["sku"]["defaultValue"], "VpnGw1AZ")
+        network = self.compiled["customer-network.bicep"]
+        self.assertNotIn("providerVpnGatewaySku", foundation["parameters"])
+        variables = {item["name"]: item for item in network["resources"][0]["properties"]["environmentVariables"]}
+        self.assertEqual(variables["FAAS_PROVIDER_VPN_GATEWAY_SKU"]["value"], "[parameters('providerVpnGatewaySku')]")
+        deployment = self.compiled["customer-deployment.bicep"]
+        module = next(r for r in deployment["resources"] if r.get("name") == "customer-provider-connection")
+        self.assertEqual(module["properties"]["parameters"]["providerVpnGatewaySku"],
+                         {"value": "[parameters('providerVpnGatewaySku')]"})
+        proof = next(r for r in deployment["resources"] if r.get("name") == "customer-authorization-proof")
+        self.assertNotIn("providerVpnGatewaySku", proof["properties"]["parameters"])
 
     def test_four_vms_no_guest_vpn_or_cloudinit_secrets(self):
         for name, module_name in (("provider-dataplane.bicep", "nvas"), ("customer-foundation.bicep", "workloadVms")):

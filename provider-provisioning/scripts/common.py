@@ -23,7 +23,7 @@ def customer_sizing(config: dict) -> dict:
     if type(bandwidth) is not int or bandwidth != 10:
         raise ValueError("Only the verified customer Routing Appliance bandwidth of 10 Gbps is supported")
     result = {"routingApplianceBandwidthGbps": bandwidth}
-    for key in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku"):
+    for key in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku", "providerVpnGatewaySku"):
         sku = config.get(key, "VpnGw1AZ")
         if not isinstance(sku, str) or sku not in CUSTOMER_VPN_GATEWAY_SKUS:
             raise ValueError(f"{key} must be a supported BGP-capable AZ SKU")
@@ -137,7 +137,7 @@ def config_digest(config: dict) -> str:
         "deploymentOperatorCidr", "nvaSshPublicKey", "workloadSshPublicKey",
         "maxEnvironments", "apiApplicationId", "consentRedirectUri", "cleanupOldLabRun",
         "routingApplianceBandwidthGbps", "customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku",
-        "workloadVmProfile",
+        "workloadVmProfile", "providerVpnGatewaySku",
     }
     return digest({key: value for key, value in config.items() if key not in mutable})
 

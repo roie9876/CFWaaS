@@ -1652,6 +1652,7 @@ customer region and sizing dropdowns, plus the native subscription/RG picker:
 | Routing Appliance bandwidth | 10 Gbps only, the existing verified option | 10 Gbps |
 | Customer ingress VPN gateway | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
 | Customer delivery VPN gateway | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
+| Provider VPN gateway (both provider gateways) | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
 | Test workload VMs | Standard (`Standard_B1ms`), High performance (`Standard_D8s_v6`) | Standard |
 
 High performance deploys both test VMs (10.211.0.4 and 10.212.0.4) as
@@ -1680,11 +1681,19 @@ Its public API does not provide a verified size/price catalog, so no cheaper
 size or price is invented. The bandwidth dropdown is ready for additional
 verified sizes later.
 
-These choices affect **customer resources only**. Provider gateways retain
-their provider-controlled VpnGw1AZ default; sizing fields are not forwarded to
-the provider API. A larger customer SKU does not remove a provider-side
-throughput limit. Availability, quota and policy still need live verification,
-and arbitrary resizing of existing gateways is not qualified.
+All choices except the provider VPN gateway affect **customer resources only**.
+`providerVpnGatewaySku` is the one field forwarded to the provider: the
+customer-network connector adds it to the API request only when it is not
+VpnGw1AZ, and the worker passes it to both provider gateways (ingress and
+delivery) in `provider-dataplane.bicep` or `provider-checkpoint-foundation.bicep`.
+A worker whose pinned template lacks the parameter fails the request with
+`ProviderGatewaySkuUnavailable` (Ubuntu) or `CheckpointDeploymentUnavailable`
+(Check Point). Per-tunnel throughput is about 650 Mbps on VpnGw1AZ and up to
+about 2.3 Gbps on VpnGw4AZ/VpnGw5AZ (GCMAES256); the aggregate benchmark
+reaches 10 Gbps only on VpnGw5AZ, and larger SKUs cost significantly more per
+hour. A larger customer SKU alone does not remove the
+provider-side limit. Availability, quota and policy still need live
+verification, and arbitrary resizing of existing gateways is not qualified.
 
 Region options are checked against Azure's provider-advertised Routing
 Appliance/gateway locations and three-zone public-IP support. They are a

@@ -19,6 +19,9 @@ param routingApplianceBandwidthGbps int = 10
 param customerIngressVpnGatewaySku string = 'VpnGw1AZ'
 @allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
 param customerDeliveryVpnGatewaySku string = 'VpnGw1AZ'
+@description('Sizes both provider VPN gateways; sent to the provider API only when not VpnGw1AZ.')
+@allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
+param providerVpnGatewaySku string = 'VpnGw1AZ'
 @allowed(['standard', 'high-performance'])
 param workloadVmProfile string = 'standard'
 param enrolledCustomerResourceGroupId string = ''
@@ -137,6 +140,7 @@ module network 'customer-network.bicep' = if (deploymentMode == 'network') {
     approveDeploymentScriptBackingException: approveDeploymentScriptBackingException
     firewallType: firewallType
     adminAllowedSources: adminAllowedSources
+    providerVpnGatewaySku: providerVpnGatewaySku
   }
 }
 

@@ -51,6 +51,9 @@ class RoutingAddress(StrictModel):
 
 
 CHECKPOINT_TOPOLOGIES = {"checkpoint-byol": "single", "checkpoint-vmss": "vmss"}
+# Mirrors scripts/common.py CUSTOMER_VPN_GATEWAY_SKUS; the service must not import scripts.
+PROVIDER_VPN_GATEWAY_SKUS = ("VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ")
+DEFAULT_PROVIDER_VPN_GATEWAY_SKU = "VpnGw1AZ"
 
 
 class EnvironmentRequest(StrictModel):
@@ -61,6 +64,7 @@ class EnvironmentRequest(StrictModel):
     customerDelivery: Endpoint | None = None
     firewallType: Literal["ubuntu", "checkpoint-byol", "checkpoint-vmss"] = "ubuntu"
     adminAllowedSources: list[str] = Field(default_factory=list, max_length=16)
+    providerVpnGatewaySku: Literal["VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ"] = "VpnGw1AZ"
 
     @field_validator("adminAllowedSources", mode="before")
     @classmethod
@@ -71,6 +75,8 @@ class EnvironmentRequest(StrictModel):
     def endpoints_required(self) -> "EnvironmentRequest":
         if self.adminAllowedSources and self.firewallType not in CHECKPOINT_TOPOLOGIES:
             raise ValueError("Public admin sources require Check Point")
+        if self.providerVpnGatewaySku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU and self.mode != "network":
+            raise ValueError("Provider VPN gateway sizing requires network mode")
         if bool(self.customerIngress) != bool(self.customerDelivery):
             raise ValueError("Both customer endpoints are required together")
         if self.mode == "network" and not self.customerIngress:
@@ -81,6 +87,9 @@ class EnvironmentRequest(StrictModel):
         excluded = {"firewallType"} if self.firewallType == "ubuntu" else set()
         if not self.adminAllowedSources:
             excluded.add("adminAllowedSources")
+        # Omitting the default keeps digests of requests stored before this field existed.
+        if self.providerVpnGatewaySku == DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
+            excluded.add("providerVpnGatewaySku")
         return self.model_dump(exclude=excluded)
 
     def canonical(self) -> str:

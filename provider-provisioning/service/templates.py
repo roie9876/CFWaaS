@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec, ed25519
 
 from .checkpoint_private_data import CHECKPOINT_PRIVATE_DATA_OUTPUTS
 from .config import WorkerSettings
+from .models import DEFAULT_PROVIDER_VPN_GATEWAY_SKU, PROVIDER_VPN_GATEWAY_SKUS
 
 NETWORK_PARAMETERS = {
     "location": "string", "environmentId": "string",
@@ -74,8 +75,23 @@ class Templates:
                 raise ValueError("SSH RSA key is too small")
 
     @staticmethod
+    def _gateway_sku_parameter(template: dict) -> bool:
+        """Optional provider gateway SKU: present only with the exact default and SKU list."""
+        parameters = template.get("parameters") if isinstance(template, dict) else None
+        if not isinstance(parameters, dict) or "providerVpnGatewaySku" not in parameters:
+            return False
+        parameter = parameters["providerVpnGatewaySku"]
+        if (not isinstance(parameter, dict) or parameter.get("defaultValue") != DEFAULT_PROVIDER_VPN_GATEWAY_SKU
+                or parameter.get("allowedValues") != list(PROVIDER_VPN_GATEWAY_SKUS)):
+            raise ValueError("Provider VPN gateway SKU must default to VpnGw1AZ")
+        return True
+
+    @staticmethod
     def validate(template: dict, network: bool) -> dict:
-        Templates._validate_structure(template, network, 0)
+        root = NETWORK_PARAMETERS if network else PROOF_PARAMETERS
+        if network and Templates._gateway_sku_parameter(template):
+            root = {**root, "providerVpnGatewaySku": "string"}
+        Templates._validate_structure(template, network, 0, root)
         outputs = template.get("outputs", {})
         if network:
             if (not isinstance(outputs, dict) or set(outputs) != {"connectionManifest"}
@@ -104,6 +120,8 @@ class Templates:
                     or parameter.get("allowedValues") != ["single", "vmss"]):
                 raise ValueError("Check Point firewall topology must default to the single gateway")
             parameters["firewallTopology"] = "string"
+        if Templates._gateway_sku_parameter(template):
+            parameters["providerVpnGatewaySku"] = "string"
         Templates._validate_structure(template, True, 0, parameters, allowed)
         if admin_access:
             Templates._validate_checkpoint_admin_access(template, topology)

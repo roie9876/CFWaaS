@@ -184,9 +184,12 @@ def run_phase(config: dict, phase: str, journal: dict, path: Path, args) -> None
         if journal.get("proof", {}).get("status") != "Ready":
             raise ValueError("Customer managed-identity proof must complete before expensive networking")
         encryption_preflight(config)
+        sizing = customer_sizing(config)
+        # The provider gateway SKU reaches the provider through the customer-network connector.
+        sizing.pop("providerVpnGatewaySku")
         result = deploy(customer, customer["dataPlaneResourceGroup"], "customer-foundation.bicep",
                         {"runId": config["runId"], "sshPublicKey": config["workloadSshPublicKey"],
-                         **customer_sizing(config)}, config["runId"])
+                         **sizing}, config["runId"])
         journal["customerFoundation"] = outputs(result)
     elif phase == "customer-connector-role":
         deploy(customer, customer["dataPlaneResourceGroup"], "customer-connector-role.bicep",
@@ -208,6 +211,7 @@ def run_phase(config: dict, phase: str, journal: dict, path: Path, args) -> None
             "customerEndpoints": journal["customerFoundation"]["customerEndpoints"],
             "customerConnectionsTemplate": template,
             "apiUrl": journal["controlPlane"]["apiUrl"], "apiResource": identity_journal["apiResource"],
+            "providerVpnGatewaySku": customer_sizing(config)["providerVpnGatewaySku"],
             "approveDeploymentScriptBackingException": True,
         }, config["runId"])
         journal["networkResult"] = connector_result(outputs(result)["networkResult"])

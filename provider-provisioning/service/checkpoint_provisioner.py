@@ -23,7 +23,7 @@ from .checkpoint_runner import (
 from .checkpoint_runner_config import CheckpointRunnerSettings
 from .checkpoint_runner_journal import CheckpointRunnerJournal, CheckpointRunnerStateError
 from .config import CheckpointWorkerSettings
-from .models import CHECKPOINT_TOPOLOGIES, ConnectionManifest, EnvironmentRequest
+from .models import CHECKPOINT_TOPOLOGIES, DEFAULT_PROVIDER_VPN_GATEWAY_SKU, ConnectionManifest, EnvironmentRequest
 from .provisioner import Arm, ProvisionError
 from .store import Lease, Store
 
@@ -167,6 +167,10 @@ class CheckpointProvisioner:
         topology = CHECKPOINT_TOPOLOGIES[request.firewallType]
         if topology == "vmss" and "firewallTopology" not in self.settings.foundation_template.get("parameters", {}):
             raise ProvisionError("CheckpointDeploymentUnavailable", False)
+        gateway_sku = request.providerVpnGatewaySku
+        if (gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU
+                and "providerVpnGatewaySku" not in self.settings.foundation_template.get("parameters", {})):
+            raise ProvisionError("CheckpointDeploymentUnavailable", False)
         if request.adminAllowedSources:
             parameter = self.settings.foundation_template.get("parameters", {}).get("adminAllowedSources", {})
             if parameter.get("type") != "array" or parameter.get("maxLength") != 16:
@@ -193,6 +197,8 @@ class CheckpointProvisioner:
                 parameters["adminAllowedSources"] = {"value": request.adminAllowedSources}
             if topology == "vmss":
                 parameters["firewallTopology"] = {"value": "vmss"}
+            if gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
+                parameters["providerVpnGatewaySku"] = {"value": gateway_sku}
             foundation_outputs = self._deploy(arm, "faas-cp-foundation-" + environment_id,
                                               self.settings.foundation_template, parameters, check)
             foundation_outputs = self._current_route_server_peers(foundation_outputs, group, environment_id)

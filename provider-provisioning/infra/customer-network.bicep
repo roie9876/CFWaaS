@@ -16,6 +16,8 @@ param enrolledCustomerResourceGroupId string = ''
 param firewallType string = 'ubuntu'
 @maxLength(16)
 param adminAllowedSources array = []
+@allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
+param providerVpnGatewaySku string = 'VpnGw1AZ'
 param customerEndpoints object
 param customerRoutingApplianceIp string = ''
 @description('Locally compiled trusted customer-connections.bicep; no shared keys are included.')
@@ -52,6 +54,7 @@ resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
       { name: 'FAAS_CONNECTOR_MODE', value: 'network' }
       { name: 'FAAS_FIREWALL_TYPE', value: firewallType }
       { name: 'FAAS_ADMIN_ALLOWED_SOURCES', value: string(adminAllowedSources) }
+      { name: 'FAAS_PROVIDER_VPN_GATEWAY_SKU', value: providerVpnGatewaySku }
       { name: 'FAAS_API_URL', value: apiUrl }
       { name: 'FAAS_API_RESOURCE', value: apiResource }
       { name: 'FAAS_AUTH_MODE', value: apiAuthMode }

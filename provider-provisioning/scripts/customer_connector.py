@@ -23,6 +23,7 @@ TRANSIENT = {408, 429, 500, 502, 503, 504}
 TERMINAL = {"Ready", "Failed", "NeedsAttention"}
 CHECKPOINT_READINESS = "/v1/firewall-types/checkpoint-byol/readiness"
 CHECKPOINT_TYPES = ("checkpoint-byol", "checkpoint-vmss")
+PROVIDER_VPN_GATEWAY_SKUS = ("VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ")
 
 
 class FirewallUnavailable(RuntimeError):
@@ -155,11 +156,15 @@ def admin_sources(value: object) -> list[str]:
 
 
 def request_body(mode: str, endpoints: dict | None = None, firewall_type: str = "ubuntu",
-                 admin_allowed_sources: object = None) -> dict:
+                 admin_allowed_sources: object = None, provider_gateway_sku: str = "VpnGw1AZ") -> dict:
     if mode not in {"proof", "network"}:
         raise ValueError("Invalid mode")
     if firewall_type not in {"ubuntu", *CHECKPOINT_TYPES}:
         raise ValueError("Invalid firewall type")
+    if provider_gateway_sku not in PROVIDER_VPN_GATEWAY_SKUS:
+        raise ValueError("Invalid provider VPN gateway SKU")
+    if provider_gateway_sku != "VpnGw1AZ" and mode != "network":
+        raise ValueError("Provider VPN gateway sizing requires network mode")
     sources = admin_sources([] if admin_allowed_sources is None else admin_allowed_sources)
     if sources and firewall_type not in CHECKPOINT_TYPES:
         raise ValueError("Public admin sources require Check Point")
@@ -172,6 +177,9 @@ def request_body(mode: str, endpoints: dict | None = None, firewall_type: str = 
             body["firewallType"] = firewall_type
         if sources:
             body["adminAllowedSources"] = sources
+        # Omitted at the default so older provider APIs keep accepting the request.
+        if provider_gateway_sku != "VpnGw1AZ":
+            body["providerVpnGatewaySku"] = provider_gateway_sku
     return body
 
 
@@ -389,7 +397,8 @@ def run(env: dict) -> dict:
                           env["FAAS_API_CLIENT_SECRET"]) if auth_mode == "provider-api-client" else None)
     firewall_type = env.get("FAAS_FIREWALL_TYPE", "ubuntu")
     body = request_body(mode, json.loads(env["FAAS_CUSTOMER_ENDPOINTS"]) if mode == "network" else None,
-                        firewall_type, admin_sources(json.loads(env.get("FAAS_ADMIN_ALLOWED_SOURCES", "[]"))))
+                        firewall_type, admin_sources(json.loads(env.get("FAAS_ADMIN_ALLOWED_SOURCES", "[]"))),
+                        env.get("FAAS_PROVIDER_VPN_GATEWAY_SKU", "VpnGw1AZ"))
     template = json.loads(env["FAAS_CONNECTIONS_TEMPLATE"]) if mode == "network" else None
     if template is not None:
         validate_connection_template(template)
