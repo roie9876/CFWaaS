@@ -129,7 +129,8 @@ def test_admin_policy_is_bounded_additive_idempotent_and_keeps_private_managemen
     assert len([command for command, _ in api.requests if command.startswith("add-")]) == before
     admin = api.saved[gaia.ADMIN_RULE]
     assert len(admin["source"]) == 2 and admin["destination"] == [runner.gateway]
-    assert admin["service"] == ["faas-admin-ssh", "faas-admin-https"]
+    assert admin["service"] == ["ssh", "https"]
+    assert not any(command == "add-service-tcp" for command, _ in api.requests)
     assert not any(command in ("delete-simple-gateway", "set-access-rule") for command, _ in api.requests)
     assert api.host["ipv4-address"] == gaia.MANAGEMENT_IP
     script = next(body for command, body in api.requests

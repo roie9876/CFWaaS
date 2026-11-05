@@ -400,18 +400,12 @@ class CheckpointConfigurator:
                 self.api.call("add-network", body)
             elif any(found.get(key) != value for key, value in body.items()):
                 raise CheckpointGaiaError("Admin source object conflicts with existing configuration")
-        for name, port in (("faas-admin-ssh", "22"), ("faas-admin-https", "443")):
-            found = self.api.call("show-service-tcp", {"name": name},
-                                  allowed=("generic_err_object_not_found",))
-            if found.get("code") == "generic_err_object_not_found":
-                self.api.call("add-service-tcp", {"name": name, "port": port})
-            elif found.get("port") != port:
-                raise CheckpointGaiaError("Admin service object conflicts with existing configuration")
         body = {
             "layer": ACCESS_LAYER, "position": "top", "name": ADMIN_RULE,
             "source": ["faas-admin-" + hashlib.sha256(source.encode()).hexdigest()[:16]
                        for source in self.admin_sources],
-            "destination": self.gateway_names, "service": ["faas-admin-ssh", "faas-admin-https"],
+            # Built-in services: management rejects new TCP services that reuse ports 22/443.
+            "destination": self.gateway_names, "service": ["ssh", "https"],
             "action": "Accept", "track": {"type": "Log"}, "install-on": self._install_on(), "enabled": True,
             "source-negate": False, "destination-negate": False, "service-negate": False,
         }
@@ -440,7 +434,8 @@ class CheckpointConfigurator:
         if not self.scale_set:
             return
         self._ensure("show-host", "add-host", {"name": AZURE_PROBE_HOST, "ip-address": AZURE_PROBE_IP})
-        self._ensure("show-service-tcp", "add-service-tcp", {"name": AZURE_PROBE_SERVICE, "port": "8117"})
+        self._ensure("show-service-tcp", "add-service-tcp",
+                     {"name": AZURE_PROBE_SERVICE, "port": "8117", "ignore-warnings": True})
         self._ensure("show-access-rule", "add-access-rule", {
             "layer": ACCESS_LAYER, "position": "top", "name": HEALTH_PROBE_RULE,
             "source": [AZURE_PROBE_HOST], "destination": self.gateway_names, "service": [AZURE_PROBE_SERVICE],
