@@ -2189,6 +2189,17 @@ def test_checkpoint_runner_observation_distinguishes_job_status(checkpoint_journ
     assert result.state == expected and result.exit_code == exit_code
 
 
+@pytest.mark.parametrize("provisioning", ["Pending", "Creating", "Updating"])
+def test_checkpoint_runner_starting_aci_is_pending(checkpoint_journal, provisioning):
+    store, _, lease, _ = checkpoint_journal
+    spec = build_runner_fixture(store, lease)
+    resource = runner_resource(spec)
+    resource["properties"]["provisioningState"] = provisioning
+    resource["properties"].pop("ipAddress", None)
+    resource["properties"]["containers"][0]["properties"].pop("instanceView", None)
+    assert validate_checkpoint_runner_observation(resource, spec).state == "pending"
+
+
 @pytest.mark.parametrize("exit_code", [0, 40, 137])
 def test_checkpoint_runner_accepts_terminated_aci_after_private_ip_release(checkpoint_journal, exit_code):
     store, _, lease, _ = checkpoint_journal

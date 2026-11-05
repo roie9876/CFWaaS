@@ -238,7 +238,8 @@ def validate_checkpoint_runner_observation(resource: dict, spec: CheckpointRunne
             raise CheckpointRunnerError("Invalid Check Point runner network")
         has_private_ip = True
     provisioning = props.get("provisioningState")
-    if provisioning in ("Creating", "Updating"):
+    # ACI reports Pending for the first seconds after creation.
+    if provisioning in ("Pending", "Creating", "Updating"):
         return CheckpointRunnerObservation("pending")
     if provisioning == "Failed":
         return CheckpointRunnerObservation("provisioning_failed")
