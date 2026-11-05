@@ -212,6 +212,32 @@ def test_decommissioning_blocks_group_retry_and_claims(world):
             world.environment_id, "Deleting", 1)
 
 
+@pytest.mark.parametrize("firewall", ["checkpoint-byol", "checkpoint-vmss"])
+def test_checkpoint_environments_decommission_through_checkpoint_groups(world, firewall):
+    key = ("registry:" + AUTHORITY, "op:" + world.environment_id)
+    stored = json.loads(world.operations.rows[key]["request"])
+    world.operations.rows[key]["request"] = json.dumps({**stored, "firewallType": firewall})
+    groups, checkpoint = Mock(), SimpleNamespace(groups=Mock())
+    checkpoint.groups.decommission.return_value = True
+    world.service.request(CUSTOMER, world.environment_id, ADMIN)
+    RegistryWorker(world.stores, Mock(), groups, Mock(), checkpoint).decommission()
+    groups.decommission.assert_not_called()
+    checkpoint.groups.decommission.assert_called_once()
+    assert world.service.environments(CUSTOMER)[0]["decommissionState"] == "Decommissioned"
+
+
+def test_checkpoint_decommission_without_checkpoint_groups_fails_closed(world):
+    key = ("registry:" + AUTHORITY, "op:" + world.environment_id)
+    stored = json.loads(world.operations.rows[key]["request"])
+    world.operations.rows[key]["request"] = json.dumps({**stored, "firewallType": "checkpoint-byol"})
+    groups = Mock()
+    world.service.request(CUSTOMER, world.environment_id, ADMIN)
+    worker(world, groups).decommission()
+    groups.decommission.assert_not_called()
+    [view] = world.service.environments(CUSTOMER)
+    assert (view["decommissionState"], view["decommissionError"]) == ("Failed", "GroupOwnershipError")
+
+
 def test_managed_group_decommission_deletes_only_the_bound_application(fixture):
     fixture.objects[APP_ID], fixture.groups[GROUP] = fixture.app, fixture.group
     deleted = []

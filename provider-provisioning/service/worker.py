@@ -202,9 +202,19 @@ class RegistryWorker:
                     or operation.get("providerGroupName") != request.get("providerGroupName")):
                 continue
             try:
+                # Check Point environments are owned by their own definition and publisher.
+                owner = groups
+                try:
+                    request, _, _ = parse_stored_environment_request(str(operation["request"]))
+                except (KeyError, ValueError, InvalidStoredNetworkingMode):
+                    raise GroupOwnershipError() from None
+                if request.firewallType != "ubuntu":
+                    if self.checkpoint is None:
+                        raise GroupOwnershipError()
+                    owner = self.checkpoint.groups
                 if operation.get("decommissionState") != "Deleting":
                     store.mark_decommission(environment_id, "Deleting", attempt)
-                if groups.decommission(operation, self._stopping):
+                if owner.decommission(operation, self._stopping):
                     store.finish_decommission(environment_id)
                     logger.info("operation=%s state=Decommissioned", environment_id)
             except (GroupOwnershipError, GroupCreationUncertain) as exc:
