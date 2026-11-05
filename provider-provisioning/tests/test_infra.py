@@ -120,7 +120,10 @@ class ScopeTests(unittest.TestCase):
             "routingApplianceBandwidthGbps": 10,
             "customerIngressVpnGatewaySku": "VpnGw1AZ",
             "customerDeliveryVpnGatewaySku": "VpnGw1AZ",
+            "workloadVmProfile": "standard",
         })
+        self.assertEqual(common.customer_sizing({"workloadVmProfile": "high-performance"})["workloadVmProfile"],
+                         "high-performance")
         for field in ("customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku"):
             for sku in common.CUSTOMER_VPN_GATEWAY_SKUS:
                 with self.subTest(field=field, sku=sku):
@@ -133,6 +136,8 @@ class ScopeTests(unittest.TestCase):
             ("customerIngressVpnGatewaySku", "Basic"),
             ("customerDeliveryVpnGatewaySku", "VpnGw1"),
             ("customerDeliveryVpnGatewaySku", []),
+            ("workloadVmProfile", "Standard_D8s_v6"),
+            ("workloadVmProfile", None),
         ):
             config, plan = fixture()
             config[field] = value
@@ -143,13 +148,13 @@ class ScopeTests(unittest.TestCase):
         config, _ = fixture()
         changed = {**config, "customerIngressVpnGatewaySku": "VpnGw2AZ",
                    "customerDeliveryVpnGatewaySku": "VpnGw5AZ",
-                   "routingApplianceBandwidthGbps": 10}
+                   "routingApplianceBandwidthGbps": 10, "workloadVmProfile": "high-performance"}
         self.assertEqual(common.config_digest(config), common.config_digest(changed))
 
     def test_customer_foundation_forwards_only_customer_sizing(self):
         config, _ = fixture()
         config.update(workloadSshPublicKey="fixture-public-key", customerIngressVpnGatewaySku="VpnGw2AZ",
-                      customerDeliveryVpnGatewaySku="VpnGw5AZ")
+                      customerDeliveryVpnGatewaySku="VpnGw5AZ", workloadVmProfile="high-performance")
         journal = {"proof": {"status": "Ready"}}
         with patch.object(bootstrap, "verify_account"), patch.object(bootstrap, "encryption_preflight"), \
                 patch.object(bootstrap, "save_private"), patch.object(bootstrap, "deploy", return_value={
@@ -161,6 +166,7 @@ class ScopeTests(unittest.TestCase):
         self.assertEqual(parameters["routingApplianceBandwidthGbps"], 10)
         self.assertEqual(parameters["customerIngressVpnGatewaySku"], "VpnGw2AZ")
         self.assertEqual(parameters["customerDeliveryVpnGatewaySku"], "VpnGw5AZ")
+        self.assertEqual(parameters["workloadVmProfile"], "high-performance")
 
     def test_scope_fingerprint_allows_only_explicit_mutable_runtime_inputs(self):
         config, _ = fixture()
@@ -1450,6 +1456,31 @@ class BicepTests(unittest.TestCase):
         self.assertNotIn("SNAT --", cloudinit)
         self.assertNotIn("PRIVATE KEY", cloudinit)
         self.assertIn("User=labuser", cloudinit)
+
+    def test_high_performance_workload_vms_use_d8s_v6_jumbo_frames_and_iperf3(self):
+        module = self.compiled["modules/vm.bicep"]
+        self.assertEqual(module["parameters"]["size"]["defaultValue"], "Standard_B1ms")
+        self.assertFalse(module["parameters"]["acceleratedNetworking"]["defaultValue"])
+        self.assertEqual(module["parameters"]["diskControllerType"]["allowedValues"], ["", "NVMe"])
+        nic = next(r for r in module["resources"] if r["type"] == "Microsoft.Network/networkInterfaces")
+        self.assertEqual(nic["properties"]["enableAcceleratedNetworking"], "[parameters('acceleratedNetworking')]")
+        foundation = self.compiled["customer-foundation.bicep"]
+        self.assertEqual(foundation["parameters"]["workloadVmProfile"]["allowedValues"],
+                         list(common.WORKLOAD_VM_PROFILES))
+        vms = next(r for r in foundation["resources"] if r.get("copy", {}).get("name") == "workloadVms")
+        params = json.dumps(vms["properties"]["parameters"])
+        for expected in ("Standard_D8s_v6", "Standard_B1ms", "NVMe", "acceleratedNetworking"):
+            self.assertIn(expected, params)
+        cloudinit = (ROOT / "infra/cloud-init/workload-performance.yaml").read_text()
+        self.assertTrue(cloudinit.startswith("#cloud-config\n"))
+        self.assertIn("  - path: /etc/netplan/90-faas-jumbo.yaml\n    permissions: '0600'\n", cloudinit)
+        self.assertIn("        ethernets:\n          eth0:\n            mtu: 9000\n", cloudinit)
+        self.assertIn("apt-get install -y iperf3", cloudinit)
+        self.assertIn("ExecStart=/usr/bin/iperf3 --server --port 5201", cloudinit)
+        self.assertIn("runcmd:\n  - netplan apply\n", cloudinit)
+        receiver = (ROOT / "infra/cloud-init/workload.yaml").read_text().split("runcmd:")[0]
+        self.assertTrue(cloudinit.startswith(receiver))
+        self.assertNotIn("PRIVATE KEY", cloudinit)
 
     def test_proof_before_network_and_separate_backing_exception(self):
         proof = self.compiled["customer-proof.bicep"]

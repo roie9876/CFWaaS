@@ -20,6 +20,10 @@ param customerIngressVpnGatewaySku string = 'VpnGw1AZ'
 @description('Customer delivery VPN gateway SKU. Basic is excluded because delivery requires BGP.')
 @allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
 param customerDeliveryVpnGatewaySku string = 'VpnGw1AZ'
+@description('standard: Standard_B1ms test VMs. high-performance: Standard_D8s_v6 with accelerated networking, MTU 9000 and an iperf3 server.')
+@allowed(['standard', 'high-performance'])
+param workloadVmProfile string = 'standard'
+var highPerformance = workloadVmProfile == 'high-performance'
 var tags = { purpose: 'provider-provisioning-customer', labRun: runId }
 var workloadPrefixes = ['10.211.0.0/16', '10.212.0.0/16']
 var ingressWorkloadRoutes = [for (prefix, i) in workloadPrefixes: {
@@ -238,7 +242,10 @@ module workloadVms 'modules/vm.bicep' = [for (prefix, i) in workloadPrefixes: {
     privateIp: i == 0 ? '10.211.0.4' : '10.212.0.4'
     sshPublicKey: sshPublicKey
     publicIpId: empty(adminSources) ? '' : workloadPublicIps[i].id
-    cloudInit: loadTextContent('cloud-init/workload.yaml')
+    size: highPerformance ? 'Standard_D8s_v6' : 'Standard_B1ms'
+    acceleratedNetworking: highPerformance
+    diskControllerType: highPerformance ? 'NVMe' : ''
+    cloudInit: highPerformance ? loadTextContent('cloud-init/workload-performance.yaml') : loadTextContent('cloud-init/workload.yaml')
   }
 }]
 output customerEndpoints object = {

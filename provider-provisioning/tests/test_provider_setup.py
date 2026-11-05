@@ -449,7 +449,7 @@ class PortalTests(unittest.TestCase):
         self.defaults = ("runId", "apiAuthorityTenantId", "apiClientId", "enrolledCustomerResourceGroupId",
                          "expectedCustomerTenantId", "expectedCustomerSubscriptionId", "apiUrl", "apiResource",
                          "customerConnectionsTemplateBase64", "deploymentMode", "routingApplianceBandwidthGbps",
-                         "customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku")
+                         "customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku", "workloadVmProfile")
         self.template = {"parameters": {key: {"type": "string"} for key in self.defaults},
                          "outputs": {"operationId": {}, "status": {}}}
         self.template["parameters"].update(apiClientSecret={"type": "secureString"},

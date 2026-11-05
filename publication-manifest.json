@@ -165,6 +165,7 @@
     "provider-provisioning/infra/modules/worker-role.bicep",
     "provider-provisioning/infra/cloud-init/nva.yaml",
     "provider-provisioning/infra/cloud-init/workload.yaml",
+    "provider-provisioning/infra/cloud-init/workload-performance.yaml",
     "provider-provisioning/infra/cloud-init/publish-provider.py",
     "provider-provisioning/scripts/bootstrap.py",
     "provider-provisioning/scripts/bootstrap_identity.py",

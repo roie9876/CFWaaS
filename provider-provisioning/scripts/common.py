@@ -14,6 +14,7 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = ROOT / ".azure/infrastructure-plan.json"
 CUSTOMER_VPN_GATEWAY_SKUS = ("VpnGw1AZ", "VpnGw2AZ", "VpnGw3AZ", "VpnGw4AZ", "VpnGw5AZ")
+WORKLOAD_VM_PROFILES = ("standard", "high-performance")
 logger = logging.getLogger("faas.scripts")
 
 
@@ -27,6 +28,10 @@ def customer_sizing(config: dict) -> dict:
         if not isinstance(sku, str) or sku not in CUSTOMER_VPN_GATEWAY_SKUS:
             raise ValueError(f"{key} must be a supported BGP-capable AZ SKU")
         result[key] = sku
+    profile = config.get("workloadVmProfile", "standard")
+    if profile not in WORKLOAD_VM_PROFILES:
+        raise ValueError("workloadVmProfile must be standard or high-performance")
+    result["workloadVmProfile"] = profile
     return result
 
 
@@ -132,6 +137,7 @@ def config_digest(config: dict) -> str:
         "deploymentOperatorCidr", "nvaSshPublicKey", "workloadSshPublicKey",
         "maxEnvironments", "apiApplicationId", "consentRedirectUri", "cleanupOldLabRun",
         "routingApplianceBandwidthGbps", "customerIngressVpnGatewaySku", "customerDeliveryVpnGatewaySku",
+        "workloadVmProfile",
     }
     return digest({key: value for key, value in config.items() if key not in mutable})
 

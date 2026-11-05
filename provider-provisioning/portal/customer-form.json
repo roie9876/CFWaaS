@@ -197,6 +197,21 @@
                   {"label": "VpnGw5AZ", "value": "VpnGw5AZ"}
                 ]
               }
+            },
+            {
+              "name": "workloadVmProfile",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Test workload VMs",
+              "defaultValue": "Standard (Standard_B1ms)",
+              "toolTip": "High performance deploys two Standard_D8s_v6 VMs (16 vCPUs, Dsv6 quota required) with accelerated networking, MTU 9000 and an iperf3 server on port 5201. Azure carries MTU above 1500 only inside a virtual network or direct same-region peering; routed paths through VPN gateways and firewalls fragment or drop larger packets.",
+              "multiselect": false,
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "Standard (Standard_B1ms)", "value": "standard"},
+                  {"label": "High performance (Standard_D8s_v6, MTU 9000, iperf3)", "value": "high-performance"}
+                ]
+              }
             }
           ]
         }
@@ -214,6 +229,7 @@
         "routingApplianceBandwidthGbps": "[steps('sizing').routingApplianceBandwidthGbps]",
         "customerIngressVpnGatewaySku": "[steps('sizing').customerIngressVpnGatewaySku]",
         "customerDeliveryVpnGatewaySku": "[steps('sizing').customerDeliveryVpnGatewaySku]",
+        "workloadVmProfile": "[steps('sizing').workloadVmProfile]",
         "approveDeploymentScriptBackingException": "[steps('basics').approveDeploymentScriptBackingException]"
       },
       "kind": "ResourceGroup",

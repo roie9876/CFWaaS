@@ -1652,6 +1652,22 @@ customer region and sizing dropdowns, plus the native subscription/RG picker:
 | Routing Appliance bandwidth | 10 Gbps only, the existing verified option | 10 Gbps |
 | Customer ingress VPN gateway | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
 | Customer delivery VPN gateway | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
+| Test workload VMs | Standard (`Standard_B1ms`), High performance (`Standard_D8s_v6`) | Standard |
+
+High performance deploys both test VMs (10.211.0.4 and 10.212.0.4) as
+`Standard_D8s_v6` with accelerated networking (MANA, required by the size) and
+the NVMe disk controller (the only controller Dsv6 accepts). Cloud-init sets
+`eth0` to MTU 9000 through `/etc/netplan/90-faas-jumbo.yaml` and installs an
+`iperf3` server on TCP 5201. The install retries every two minutes because the
+workload subnets have no default outbound access until the managed service
+provides egress. The option needs 16 Dsv6 vCPUs in the customer region; the
+lab customer subscription currently has 10 regional and 10 Dsv6 cores.
+
+Azure carries packets above 1,500 bytes only inside one virtual network or
+across direct same-region peering. The east-west and north-south test paths
+cross VPN gateways and the firewall, so jumbo frames do not survive them: rely
+on TCP MSS and path MTU discovery there, and use `iperf3 -M`/`ping -M do` to
+measure the effective path MTU rather than assuming 9000.
 
 The gateway default is the lowest-priced **compatible new-deployment** SKU, not
 the cheapest SKU regardless of features. Basic is excluded because it does not

@@ -19,6 +19,8 @@ param routingApplianceBandwidthGbps int = 10
 param customerIngressVpnGatewaySku string = 'VpnGw1AZ'
 @allowed(['VpnGw1AZ', 'VpnGw2AZ', 'VpnGw3AZ', 'VpnGw4AZ', 'VpnGw5AZ'])
 param customerDeliveryVpnGatewaySku string = 'VpnGw1AZ'
+@allowed(['standard', 'high-performance'])
+param workloadVmProfile string = 'standard'
 param enrolledCustomerResourceGroupId string = ''
 param expectedCustomerSubscriptionId string
 param expectedCustomerTenantId string
@@ -103,6 +105,7 @@ module foundation 'customer-foundation.bicep' = if (deploymentMode == 'network')
     routingApplianceBandwidthGbps: routingApplianceBandwidthGbps
     customerIngressVpnGatewaySku: customerIngressVpnGatewaySku
     customerDeliveryVpnGatewaySku: customerDeliveryVpnGatewaySku
+    workloadVmProfile: workloadVmProfile
     adminAllowedSources: firewallType != 'ubuntu' ? adminAllowedSources : []
   }
   dependsOn: [proof, enrollmentTags]

@@ -9,6 +9,10 @@ param publicIpId string = ''
 param backendPoolId string = ''
 param cloudInit string
 param size string = 'Standard_B1ms'
+param acceleratedNetworking bool = false
+@description('Empty keeps the platform default; v6 sizes such as Standard_D8s_v6 accept NVMe only.')
+@allowed(['', 'NVMe'])
+param diskControllerType string = ''
 @allowed(['labuser'])
 param adminUsername string = 'labuser'
 resource nic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
@@ -17,6 +21,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2025-05-01' = {
   tags: tags
   properties: {
     enableIPForwarding: forwarding
+    enableAcceleratedNetworking: acceleratedNetworking
     ipConfigurations: [{
       name: 'primary'
       properties: union({
@@ -41,7 +46,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
       securityType: 'TrustedLaunch'
       uefiSettings: { secureBootEnabled: true, vTpmEnabled: true }
     }
-    storageProfile: {
+    storageProfile: union(empty(diskControllerType) ? {} : { diskControllerType: diskControllerType }, {
       imageReference: { publisher: 'Canonical', offer: 'ubuntu-24_04-lts', sku: 'server', version: '24.04.202609040' }
       osDisk: {
         name: 'os-${name}'
@@ -49,7 +54,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2025-04-01' = {
         deleteOption: 'Delete'
         managedDisk: { storageAccountType: 'StandardSSD_LRS' }
       }
-    }
+    })
     osProfile: {
       computerName: take(name, 64)
       adminUsername: adminUsername

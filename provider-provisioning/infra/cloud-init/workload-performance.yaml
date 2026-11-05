@@ -1,0 +1,71 @@
+#cloud-config
+write_files:
+  - path: /opt/faas-receiver.py
+    permissions: '0644'
+    content: |
+      from http.server import BaseHTTPRequestHandler, HTTPServer
+      import json
+      class Receiver(BaseHTTPRequestHandler):
+          def do_GET(self):
+              body = json.dumps({"sourceIp": self.client_address[0], "path": self.path}).encode()
+              self.send_response(200)
+              self.send_header("Content-Type", "application/json")
+              self.end_headers()
+              self.wfile.write(body)
+      HTTPServer(("0.0.0.0", 8080), Receiver).serve_forever()
+  - path: /etc/systemd/system/faas-receiver.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      User=labuser
+      ExecStart=/usr/bin/python3 /opt/faas-receiver.py
+      Restart=always
+      [Install]
+      WantedBy=multi-user.target
+  # Merges into the cloud-init eth0 definition; hv_netvsc propagates the MTU to the MANA VF.
+  - path: /etc/netplan/90-faas-jumbo.yaml
+    permissions: '0600'
+    content: |
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            mtu: 9000
+  # Egress reaches the package mirror only after the managed service is connected, so retry until it is.
+  - path: /etc/systemd/system/faas-iperf3-install.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=network-online.target
+      Wants=network-online.target
+      ConditionPathExists=!/usr/bin/iperf3
+      StartLimitIntervalSec=0
+      [Service]
+      Type=oneshot
+      Environment=DEBIAN_FRONTEND=noninteractive
+      ExecStart=/bin/sh -c 'apt-get update && apt-get install -y iperf3'
+      ExecStartPost=/bin/systemctl enable --now faas-iperf3.service
+      Restart=on-failure
+      RestartSec=120
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/systemd/system/faas-iperf3.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      User=labuser
+      ExecStart=/usr/bin/iperf3 --server --port 5201
+      Restart=always
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - netplan apply
+  - systemctl daemon-reload
+  - systemctl enable --now faas-receiver.service
+  - systemctl enable --now faas-iperf3-install.service
