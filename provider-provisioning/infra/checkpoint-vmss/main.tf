@@ -87,7 +87,7 @@ module "management" {
   storage_account_deployment_mode = "None"
 }
 
-# Two fixed PAYG gateways: public LB (eth0) and internal HA-ports LB at 172.22.20.4 (eth1).
+# Two fixed BYOL gateways: public LB (eth0) and internal HA-ports LB at 172.22.20.4 (eth1).
 module "gateway" {
   source = "./modules/vmss"
 
@@ -103,7 +103,7 @@ module "gateway" {
   sic_key                         = var.sic_key
   vm_size                         = var.gateway_vm_size
   os_version                      = "R82"
-  vm_os_sku                       = "sg-ngtp"
+  vm_os_sku                       = "sg-byol"
   vm_os_offer                     = "check-point-cg-r82"
   allow_upload_download           = false
   enable_custom_metrics           = false

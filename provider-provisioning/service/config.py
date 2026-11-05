@@ -105,7 +105,7 @@ class Settings:
         checkpoint = os.getenv("FAAS_CHECKPOINT_ENABLED", "false").strip().lower()
         if checkpoint not in ("true", "false"):
             raise ValueError("Invalid Check Point enablement setting")
-        # PAYG scale sets need separate Marketplace terms, so the provider opts in explicitly.
+        # The scale set adds two gateways and load balancers, so the provider opts in explicitly.
         checkpoint_vmss = os.getenv("FAAS_CHECKPOINT_VMSS_ENABLED", "false").strip().lower()
         if checkpoint_vmss not in ("true", "false") or (checkpoint_vmss == "true" and checkpoint != "true"):
             raise ValueError("Invalid Check Point scale set enablement setting")

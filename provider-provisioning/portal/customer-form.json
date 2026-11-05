@@ -37,14 +37,14 @@
               "name": "firewallType",
               "type": "Microsoft.Common.DropDown",
               "label": "Provider firewall",
-              "defaultValue": "Check Point CloudGuard scale set, 2 PAYG gateways (lab preview)",
-              "toolTip": "The Check Point scale set is the default: two pay-as-you-go gateways behind internal and public load balancers. Check Point options are lab previews that the provider must enable; choose Ubuntu simulator for the lightweight lab path.",
+              "defaultValue": "Check Point CloudGuard scale set, 2 BYOL gateways (lab preview)",
+              "toolTip": "The Check Point scale set is the default: two BYOL gateways behind internal and public load balancers. Check Point options are lab previews that the provider must enable; choose Ubuntu simulator for the lightweight lab path.",
               "constraints": {
                 "required": true,
                 "allowedValues": [
                   {"label": "Ubuntu simulator", "value": "ubuntu"},
                   {"label": "Check Point CloudGuard BYOL (lab preview)", "value": "checkpoint-byol"},
-                  {"label": "Check Point CloudGuard scale set, 2 PAYG gateways (lab preview)", "value": "checkpoint-vmss"}
+                  {"label": "Check Point CloudGuard scale set, 2 BYOL gateways (lab preview)", "value": "checkpoint-vmss"}
                 ]
               }
             },
@@ -66,7 +66,7 @@
               "type": "Microsoft.Common.TextBlock",
               "visible": "[not(equals(steps('basics').firewallType, 'ubuntu'))]",
               "options": {
-                "text": "Check Point lab preview: the provider deploys real CloudGuard gateways (one BYOL gateway, or a two-instance PAYG scale set with load balancers) and a management server, which takes about 90 minutes. The scale set adds Check Point pay-as-you-go charges. The deployment stops before any change if the selected option is not available from the provider."
+                "text": "Check Point lab preview: the provider deploys real CloudGuard gateways (one BYOL gateway, or a two-instance BYOL scale set with load balancers) and a management server, which takes about 90 minutes. The deployment stops before any change if the selected option is not available from the provider."
               }
             },
             {

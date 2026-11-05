@@ -105,9 +105,9 @@ PORT=8000
 # Application.Read.All and AppRoleAssignment.ReadWrite.All. These are privileged
 # provider-directory permissions; require explicit security-admin consent.
 
-# Optional Check Point two-instance PAYG scale set (customer type checkpoint-vmss).
+# Optional Check Point two-instance BYOL scale set (customer type checkpoint-vmss).
 # Requires FAAS_CHECKPOINT_ENABLED=true, accepted Marketplace terms for
-# checkpoint/check-point-cg-r82/sg-ngtp in the provider subscription, a runner
+# checkpoint/check-point-cg-r82/sg-byol (the same plan as the single gateway), a runner
 # image that contains /opt/faas/checkpoint-vmss and a foundation template with
 # the firewallTopology parameter. Set on the API app; the worker needs no change.
 # FAAS_CHECKPOINT_VMSS_ENABLED=false

@@ -253,7 +253,7 @@ See the [Managed Applications overview](https://learn.microsoft.com/azure/azure-
 - [ ] Check Point CloudGuard VMSS behind load balancers. **Implemented and
   offline-tested; not live-qualified.** Customer type `checkpoint-vmss`, gated
   by `FAAS_CHECKPOINT_VMSS_ENABLED`. Pinned upstream `modules/vmss` (Uniform,
-  PAYG `sg-ngtp`, fixed two instances, autoscale removed), public Standard LB on
+  BYOL `sg-byol`, fixed two instances, autoscale removed), public Standard LB on
   eth0 and internal HA-ports Standard LB at `172.22.20.4` on eth1, TCP 8117
   probes. The foundation adds a second Route Server peer (`172.22.10.5`) and an
   `AzureLoadBalancer` NSG allow when admin sources are set. The runner discovers

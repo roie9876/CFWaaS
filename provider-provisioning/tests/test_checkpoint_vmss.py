@@ -68,9 +68,9 @@ def test_preparation_rejects_unknown_topology(upstream_vmss):
     assert not (local / "other").exists()
 
 
-def test_vmss_root_pins_paygo_two_instance_standard_load_balancers():
+def test_vmss_root_pins_byol_two_instance_standard_load_balancers():
     main = (ROOT / "infra/checkpoint-vmss/main.tf").read_text()
-    for line in ('vm_os_sku                       = "sg-ngtp"', 'deployment_mode                 = "Standard"',
+    for line in ('vm_os_sku                       = "sg-byol"', 'deployment_mode                 = "Standard"',
                  'number_of_vm_instances          = "2"', 'minimum_number_of_vm_instances  = "2"',
                  'maximum_number_of_vm_instances  = "2"', "backend_lb_IP_address           = 4",
                  "enable_custom_metrics           = false", 'storage_account_deployment_mode = "None"'):
@@ -147,8 +147,8 @@ def vmss_plan():
                       "sku": "Standard_D4ds_v5", "instances": 2, "overprovision": False, "upgrade_mode": "Manual",
                       "source_image_id": None, "identity": [], "extension": [], "data_disk": [],
                       "source_image_reference": [{"publisher": "checkpoint", "offer": "check-point-cg-r82",
-                                                  "sku": "sg-ngtp", "version": "1.2.3"}],
-                      "plan": [{"name": "sg-ngtp", "product": "check-point-cg-r82", "publisher": "checkpoint"}],
+                                                  "sku": "sg-byol", "version": "1.2.3"}],
+                      "plan": [{"name": "sg-byol", "product": "check-point-cg-r82", "publisher": "checkpoint"}],
                       "boot_diagnostics": [{"storage_account_uri": ""}],
                       "os_disk": [{"caching": "ReadWrite", "storage_account_type": "StandardSSD_LRS",
                                    "disk_size_gb": 100}],
@@ -238,7 +238,7 @@ def test_topologies_do_not_accept_each_others_plans():
 @pytest.mark.parametrize("path, value, reason", [
     (("vmss[0]", "instances"), 3, "scale set"),
     (("vmss[0]", "sku"), "Standard_D2s_v5", "scale set"),
-    (("vmss[0]", "plan"), [{"name": "sg-byol", "product": "check-point-cg-r82", "publisher": "checkpoint"}],
+    (("vmss[0]", "plan"), [{"name": "sg-ngtp", "product": "check-point-cg-r82", "publisher": "checkpoint"}],
      "scale set"),
     (("vmss[0]", "identity"), [{"type": "SystemAssigned"}], "scale set"),
     (("vmss[0]", "custom_data"), base64.b64encode(b"other").decode(), "bootstrap"),

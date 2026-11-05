@@ -184,10 +184,11 @@ engineering task; the initial provider wizard does not yet do all of it.
 1. Accept Marketplace terms for the pinned gateway/management image plans.
    See [the technical Check Point guidance](../provider-provisioning/README.md).
    For the optional two-instance scale set (`checkpoint-vmss`, lab preview, not
-   yet live-qualified), also accept the PAYG gateway plan
-   (`az vm image terms accept --publisher checkpoint --offer check-point-cg-r82 --plan sg-ngtp`)
-   and set `FAAS_CHECKPOINT_VMSS_ENABLED=true` on the API app. The scale set adds
-   Check Point hourly charges for two gateways and uses a gateway VM size that
+   yet live-qualified), the gateways use the same BYOL plan (`sg-byol`) as the
+   single gateway, because PAYG Marketplace plans cannot be purchased on many
+   enterprise and internal subscriptions. Set `FAAS_CHECKPOINT_VMSS_ENABLED=true`
+   on the API app. Without a Check Point license the gateways run on the trial
+   license. The scale set adds a second gateway and uses a gateway VM size that
    supports accelerated networking.
 2. Put the runner image in your provider Azure Container Registry. The runner
    only pulls from an Azure registry with its managed identity, so copy the
@@ -246,7 +247,7 @@ IDs or disabling checks.
 2. Open the deployment link. Confirm tenant/subscription and use a new dedicated
    customer resource group.
 3. Choose the firewall. The wizard defaults to the **Check Point CloudGuard
-   scale set** (2 PAYG gateways; the provider must enable it); choose
+   scale set** (2 BYOL gateways; the provider must enable it); choose
    **Ubuntu simulator** or **Check Point BYOL** explicitly when requested.
 4. Supply the customer API credential and workload SSH **public** key. For
    Check Point, review/edit the public administrator IP/CIDR allowlist.

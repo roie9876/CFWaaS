@@ -67,7 +67,7 @@ VMSS_EXPECTED = {
 VMSS_OUTPUTS = {"gatewayScaleSetId", "internalLoadBalancerIp", "managementPrivateIp", "managementVmId",
                 "publicLoadBalancerIp"}
 VMSS_INSTANCES = 2
-VMSS_SKU = "sg-ngtp"
+VMSS_SKU = "sg-byol"
 VMSS_INTERNAL_LB_IP = "172.22.20.4"
 VMSS_BOOTSTRAP_SHA256 = "0d7066622c0e93da84b0f7111ab068215cb569fd10fbd51eeb63cedb6a708eff"
 VMSS_BOOTSTRAP_TEMPLATE = '#!/usr/bin/python3 /etc/cloud_config.py\n\ninstallationType="vmss"\nallowUploadDownload="false"\nosVersion="R82"\ntemplateName="vmss_terraform_registry"\ntemplateVersion="1.0.9"\ntemplateType="terraform"\nisBlink="true"\nbootstrapScript64=""\nlocation="eastus2"\nsicKey="<REDACTED>"\nvnet="172.22.10.0/24"\ncustomMetrics="no"\nadminShell="/etc/cli.sh"\npasswordHash=""\nMaintenanceModePassword=""\nsetHealthProbe="false"\n'

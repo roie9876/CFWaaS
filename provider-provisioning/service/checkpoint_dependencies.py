@@ -56,7 +56,7 @@ for parent in ("gateway", "management"):
         f"{parent}.vnet": ("../common/vnet", "modules/common/vnet"),
     })
 VMSS_EXPECTED_MODULES = {**EXPECTED_MODULES, "gateway": ("./modules/vmss", "modules/vmss")}
-VMSS_ARTIFACT_SHA256 = "0b23dd8fed59393768c3c964b8de6da08a8365250b93331568b07a65959f70fe"
+VMSS_ARTIFACT_SHA256 = "eb03655f0db506e019ed6594038bf0021a87599b6027edf72b8cf754b8de858d"
 
 
 def _topology(topology: str) -> bool:
