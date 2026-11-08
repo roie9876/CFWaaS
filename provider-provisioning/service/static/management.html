@@ -203,42 +203,6 @@ let peeringReleaseEnabled = false;
 let peeringActiveCount = 0;
 let secretTimer;
 let revealGeneration = 0;
-let providerLabScope = null;
-let separateScope = null;
-const scopeMode = document.getElementById("scope-mode");
-const onboarding = document.getElementById("onboard");
-function updateScopeFields() {
-  const lab = scopeMode.value === "provider-lab";
-  const tenant = onboarding.elements.namedItem("tenantId");
-  const subscription = onboarding.elements.namedItem("subscriptionId");
-  const acknowledgement = onboarding.elements.namedItem("providerLabAcknowledged");
-  if (lab) {
-    if (!providerLabScope || !providerLabScope.available) throw new Error("ProviderScopeNotConfigured");
-    if (separateScope === null) separateScope = {tenant: tenant.value, subscription: subscription.value};
-    tenant.value = providerLabScope.tenantId;
-    subscription.value = providerLabScope.subscriptionId;
-  } else if (separateScope !== null) {
-    tenant.value = separateScope.tenant;
-    subscription.value = separateScope.subscription;
-    separateScope = null;
-  }
-  tenant.readOnly = lab;
-  subscription.readOnly = lab;
-  acknowledgement.required = lab;
-  acknowledgement.checked = false;
-  document.getElementById("provider-lab-approval").hidden = !lab;
-  document.getElementById("scope-warning").hidden = !lab;
-}
-async function loadDeploymentScopes() {
-  const result = await request("/admin/deployment-scopes");
-  providerLabScope = result.providerLab;
-  scopeMode.querySelector('[value="provider-lab"]').disabled = !providerLabScope.available;
-  if (!providerLabScope.available) message("Provider-only lab is unavailable: " + providerLabScope.reason, "error");
-}
-scopeMode.addEventListener("change", () => {
-  try { updateScopeFields(); }
-  catch (error) { message(error.message, "error"); }
-});
 function message(text, kind = "") { notice.textContent = text; notice.className = kind; }
 function clearSecret() {
   revealGeneration += 1;
@@ -682,6 +646,42 @@ document.getElementById("peering-create").addEventListener("submit", async event
     await refreshPeeringLabs();
   } catch (error) { message(error.message, "error"); }
   finally { updatePeeringCreateState(); }
+});
+let providerLabScope = null;
+let separateScope = null;
+const scopeMode = document.getElementById("scope-mode");
+const onboarding = document.getElementById("onboard");
+function updateScopeFields() {
+  const lab = scopeMode.value === "provider-lab";
+  const tenant = onboarding.elements.namedItem("tenantId");
+  const subscription = onboarding.elements.namedItem("subscriptionId");
+  const acknowledgement = onboarding.elements.namedItem("providerLabAcknowledged");
+  if (lab) {
+    if (!providerLabScope || !providerLabScope.available) throw new Error("ProviderScopeNotConfigured");
+    if (separateScope === null) separateScope = {tenant: tenant.value, subscription: subscription.value};
+    tenant.value = providerLabScope.tenantId;
+    subscription.value = providerLabScope.subscriptionId;
+  } else if (separateScope !== null) {
+    tenant.value = separateScope.tenant;
+    subscription.value = separateScope.subscription;
+    separateScope = null;
+  }
+  tenant.readOnly = lab;
+  subscription.readOnly = lab;
+  acknowledgement.required = lab;
+  acknowledgement.checked = false;
+  document.getElementById("provider-lab-approval").hidden = !lab;
+  document.getElementById("scope-warning").hidden = !lab;
+}
+async function loadDeploymentScopes() {
+  const result = await request("/admin/deployment-scopes");
+  providerLabScope = result.providerLab;
+  scopeMode.querySelector('[value="provider-lab"]').disabled = !providerLabScope.available;
+  if (!providerLabScope.available) message("Provider-only lab is unavailable: " + providerLabScope.reason, "error");
+}
+scopeMode.addEventListener("change", () => {
+  try { updateScopeFields(); }
+  catch (error) { message(error.message, "error"); }
 });
 document.getElementById("onboard").addEventListener("submit", async event => {
   event.preventDefault(); clearSecret();

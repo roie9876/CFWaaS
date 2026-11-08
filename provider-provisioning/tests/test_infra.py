@@ -1415,7 +1415,8 @@ class BicepTests(unittest.TestCase):
         modules = {resource["name"]: resource for resource in template["resources"]
                    if resource["type"] == "Microsoft.Resources/deployments"}
         self.assertEqual(set(modules), {
-            "customer-authorization-proof", "customer-foundation", "customer-provider-connection"})
+            "customer-enrollment-scope-check", "customer-authorization-proof", "customer-foundation",
+            "customer-provider-connection"})
         self.assertIn("customer-authorization-proof", json.dumps(modules["customer-foundation"]["dependsOn"]))
         self.assertIn("customer-foundation", json.dumps(modules["customer-provider-connection"]["dependsOn"]))
         proof = modules["customer-authorization-proof"]["properties"]["parameters"]
