@@ -30,6 +30,8 @@ from .management_auth import Administrator, ManagementAuthenticator, ProviderRel
 from .models import RoutingAddress
 from .admin_access import normalize_admin_sources
 from .profiles import ProfilePublisher
+from .deployment_scope import ProviderScope, ScopeSelectionError
+from .peering_lab import PeeringLabRequest, PeeringLabSettings, PeeringLabs
 
 logger = logging.getLogger("faas.management")
 
@@ -51,6 +53,7 @@ class ManagementSettings:
     checkpoint_relay_client_id: str = ""
     checkpoint_relay_principal_id: str = ""
     checkpoint_relay_identity_id: str = ""
+    provider_scope: ProviderScope | None = None
 
     @classmethod
     def from_env(cls) -> "ManagementSettings":
@@ -60,6 +63,15 @@ class ManagementSettings:
         secret = os.environ["FAAS_MANAGEMENT_CLIENT_SECRET"]
         if not secret or secret.startswith("@Microsoft.KeyVault("):
             raise ValueError("Management credential is unavailable")
+        provider_subscription = os.getenv("FAAS_PROVIDER_SUBSCRIPTION_ID", "")
+        protected_groups = json.loads(os.getenv("FAAS_PROVIDER_PROTECTED_RESOURCE_GROUP_IDS", "[]"))
+        if not isinstance(protected_groups, list) or not all(isinstance(group, str) for group in protected_groups):
+            raise ValueError("Invalid provider protected resource groups")
+        provider_scope = None
+        if provider_subscription or protected_groups:
+            provider_scope = ProviderScope(
+                uuid_text(os.environ["FAAS_MANAGEMENT_TENANT_ID"]),
+                uuid_text(provider_subscription), tuple(protected_groups))
         return cls(
             uuid_text(os.environ["FAAS_MANAGEMENT_TENANT_ID"]),
             uuid_text(os.environ["FAAS_MANAGEMENT_CLIENT_ID"]),
@@ -76,6 +88,7 @@ class ManagementSettings:
             os.getenv("FAAS_CHECKPOINT_RELAY_CLIENT_ID", ""),
             os.getenv("FAAS_CHECKPOINT_RELAY_PRINCIPAL_ID", ""),
             os.getenv("FAAS_CHECKPOINT_RELAY_IDENTITY_ID", ""),
+            provider_scope,
         )
 
 
@@ -135,7 +148,9 @@ def create_app(service: EnrollmentService | None = None,
                authenticator: ManagementAuthenticator | None = None,
                decommissions: EnvironmentDecommissions | None = None,
                connection_details: ConnectionDetails | None = None,
-               relay_authenticator: ProviderRelayAuthenticator | None = None) -> FastAPI:
+               relay_authenticator: ProviderRelayAuthenticator | None = None,
+               peering_labs: PeeringLabs | None = None,
+               provider_scope: ProviderScope | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if service is not None:
@@ -147,9 +162,12 @@ def create_app(service: EnrollmentService | None = None,
             app.state.connection_details = connection_details
             app.state.relay_auth = relay_authenticator
             app.state.service_lock = threading.Lock()
+            app.state.peering_labs = peering_labs
+            app.state.provider_scope = provider_scope
             yield
             return
         configured = ManagementSettings.from_env()
+        app.state.provider_scope = configured.provider_scope
         identity = ManagedIdentityCredential(logging_enable=False)
         backend = TableBackend(configured.table_endpoint, identity, "Customers")
         operations = TableBackend(configured.table_endpoint, identity, "Operations")
@@ -158,6 +176,16 @@ def create_app(service: EnrollmentService | None = None,
         keys = TrustedKeys(configured.tenant)
         registry = EnrollmentRegistry(backend)
         resources = []
+        peering_enabled = os.getenv("FAAS_PEERING_LAB_ENABLED", "false").strip().lower()
+        if peering_enabled not in ("true", "false"):
+            raise ValueError("Invalid peering lab enablement")
+        app.state.peering_labs = None
+        if peering_enabled == "true":
+            app.state.peering_labs = PeeringLabs(
+                PeeringLabSettings.from_env(configured.tenant), registry, secrets)
+            resources.append(app.state.peering_labs)
+        peering_stop = threading.Event()
+        peering_thread = None
         app.state.service = None
         app.state.registry = registry
         app.state.decommissions = EnvironmentDecommissions(registry, operations, configured.tenant)
@@ -174,7 +202,8 @@ def create_app(service: EnrollmentService | None = None,
             try:
                 publisher = ProfilePublisher(identity, configured.artifact_url, configured.api_url,
                                              "api://" + configured.api_application, configured.tenant,
-                                             admin_allowed_sources=configured.admin_allowed_sources)
+                                             admin_allowed_sources=configured.admin_allowed_sources,
+                                             provider_scope=configured.provider_scope)
             except Exception:
                 graph.close()
                 raise
@@ -183,9 +212,16 @@ def create_app(service: EnrollmentService | None = None,
         app.state.initialize = initialize
         app.state.auth = ManagementAuthenticator(configured.tenant, configured.client_id,
                                                set(configured.administrators), configured.origin, keys)
+        if app.state.peering_labs is not None:
+            peering_thread = threading.Thread(
+                target=app.state.peering_labs.run, args=(peering_stop,), name="faas-peering-labs", daemon=False)
+            peering_thread.start()
         try:
             yield
         finally:
+            peering_stop.set()
+            if peering_thread is not None:
+                peering_thread.join()
             for resource in reversed(resources):
                 resource.close()
             keys.close()
@@ -270,6 +306,51 @@ def create_app(service: EnrollmentService | None = None,
     def session(admin: Administrator = Depends(administrator)):
         return {"name": admin.name, "objectId": admin.oid}
 
+    @app.get("/admin/deployment-scopes")
+    def deployment_scopes(admin: Administrator = Depends(administrator)):
+        scope = app.state.provider_scope
+        return {"providerLab": scope.public() if scope is not None else {
+            "available": False, "reason": "ProviderScopeNotConfigured"}}
+
+    @app.get("/admin/peering-labs")
+    def peering_list(admin: Administrator = Depends(administrator)):
+        labs = app.state.peering_labs
+        return {"enabled": labs is not None, "labs": labs.list(admin.oid) if labs else []}
+
+    def peering_service() -> PeeringLabs:
+        if app.state.peering_labs is None:
+            raise EnrollmentError(409, "PeeringLabReleaseNotConfigured")
+        return app.state.peering_labs
+
+    @app.post("/admin/peering-labs", status_code=202)
+    def peering_create(body: PeeringLabRequest, admin: Administrator = Depends(administrator),
+                       key: str = Header(alias="Idempotency-Key", min_length=1, max_length=128)):
+        return peering_service().create(body, admin.oid, key)
+
+    @app.post("/admin/peering-labs/{environment}/{side}/signin")
+    def peering_signin(environment: UUID, side: str, admin: Administrator = Depends(administrator)):
+        return peering_service().signin(str(environment), admin.oid, side)
+
+    @app.post("/admin/peering-labs/{environment}/{side}/poll")
+    def peering_poll(environment: UUID, side: str, admin: Administrator = Depends(administrator)):
+        return peering_service().poll_signin(str(environment), admin.oid, side)
+
+    @app.post("/admin/peering-labs/{environment}/advance")
+    def peering_advance(environment: UUID, admin: Administrator = Depends(administrator)):
+        return peering_service().advance(str(environment), admin.oid)
+
+    @app.post("/admin/peering-labs/{environment}/resume")
+    def peering_resume(environment: UUID, admin: Administrator = Depends(administrator)):
+        return peering_service().resume(str(environment), admin.oid)
+
+    @app.post("/admin/peering-labs/{environment}/cancel")
+    def peering_cancel(environment: UUID, admin: Administrator = Depends(administrator)):
+        return peering_service().cancel(str(environment), admin.oid)
+
+    @app.post("/admin/peering-labs/{environment}/remove")
+    def peering_remove(environment: UUID, admin: Administrator = Depends(administrator)):
+        return peering_service().remove(str(environment), admin.oid)
+
     @app.get("/admin/readiness")
     def readiness(admin: Administrator = Depends(administrator)):
         app.state.registry.list_customers()
@@ -283,6 +364,14 @@ def create_app(service: EnrollmentService | None = None,
     @app.post("/admin/customers")
     def onboard(body: EnrollmentRequest, admin: Administrator = Depends(administrator),
                 key: str = Header(alias="Idempotency-Key", min_length=1, max_length=128)):
+        scope = app.state.provider_scope
+        if scope is None and body.scopeMode == "provider-lab":
+            raise EnrollmentError(503, "ProviderScopeNotConfigured")
+        if scope is not None:
+            try:
+                scope.validate(body.scopeMode, body.providerLabAcknowledged, body.tenantId, body.subscriptionId)
+            except ScopeSelectionError as error:
+                raise EnrollmentError(422, str(error)) from None
         return enrollment_service().onboard(body, admin.oid, key)
 
     def customer_id(value: str) -> str:

@@ -235,7 +235,8 @@ class CheckpointWorkerSettings:
     management_relay_client_id: str = ""
 
     @classmethod
-    def from_env(cls, worker: WorkerSettings) -> "CheckpointWorkerSettings | None":
+    def from_env(cls, worker: WorkerSettings | None = None, *,
+                 provider_subscription: str = "", ssh_public_key: str = "") -> "CheckpointWorkerSettings | None":
         import re
 
         enabled = os.getenv("FAAS_CHECKPOINT_ENABLED", "false").strip().lower()
@@ -243,8 +244,13 @@ class CheckpointWorkerSettings:
             raise ValueError("Invalid Check Point enablement setting")
         if enabled == "false":
             return None
-        if not worker.managed_host_group or not worker.managed_host_allow_azure_condition:
-            raise ValueError("Check Point requires the approved managed host configuration")
+        if worker is not None:
+            if not worker.managed_host_group or not worker.managed_host_allow_azure_condition:
+                raise ValueError("Check Point requires the approved managed host configuration")
+            provider_subscription, ssh_public_key = worker.group_subscription, worker.ssh_public_key
+        elif not ssh_public_key:
+            raise ValueError("Owner-authorized Check Point requires a provider SSH public key")
+        provider_subscription = uuid_text(provider_subscription)
         values = {name: os.environ[f"FAAS_CHECKPOINT_{name.upper()}"].strip() for name in (
             "client_id", "principal_id", "control_group", "identity_name", "definition", "registry_server",
             "image_sha256", "gateway_image_version", "management_image_version",
@@ -273,12 +279,12 @@ class CheckpointWorkerSettings:
             relay_client = uuid_text(relay_client)
         return cls(
             uuid_text(values["client_id"]), uuid_text(values["principal_id"]),
-            f"/subscriptions/{worker.group_subscription}/resourceGroups/{control}"
+            f"/subscriptions/{provider_subscription}/resourceGroups/{control}"
             f"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{values['identity_name']}",
             control, values["definition"], values["registry_server"], values["image_sha256"],
             values["gateway_image_version"], values["management_image_version"],
             values["gateway_vm_size"], values["management_vm_size"],
-            worker.ssh_public_key,
+            ssh_public_key,
             Path(os.getenv("FAAS_CHECKPOINT_FOUNDATION_TEMPLATE_PATH", str(templates / "checkpoint-foundation.json"))),
             hashes["foundation"],
             Path(os.getenv("FAAS_CHECKPOINT_PRIVATE_TEMPLATE_PATH", str(templates / "checkpoint-private-data.json"))),

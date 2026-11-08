@@ -24,7 +24,7 @@ param enrollCustomerScope bool = false
 param firewallType string = 'ubuntu'
 @maxLength(16)
 param adminAllowedSources array = []
-@description('Separate exception: Azure deploymentScripts auto-creates temporary ACI + shared-key supporting storage. It never uses the private operations account. Requires explicit approval.')
+@description('Separate exception: dedicated customer-owned shared-key Azure Files backing storage for deploymentScripts. It never uses the private operations account. Requires explicit approval.')
 @allowed([true])
 param approveDeploymentScriptBackingException bool
 @minValue(60)
@@ -32,6 +32,7 @@ param approveDeploymentScriptBackingException bool
 param waitSeconds int = 600
 @description('A new bounded retry reruns the script while the API idempotency key remains the run ID.')
 param proofAttemptTag string = utcNow()
+var backingAccountName = 'stfaasds${uniqueString(resourceGroup().id, runId, 'proof')}'
 resource proof 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'customer-api-proof'
   location: location
@@ -44,6 +45,10 @@ resource proof 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     cleanupPreference: 'Always'
     retentionInterval: 'P1D'
     forceUpdateTag: proofAttemptTag
+    storageAccountSettings: {
+      storageAccountName: backing.name
+      storageAccountKey: backing.listKeys().keys[0].value
+    }
     environmentVariables: [
       { name: 'FAAS_API_URL', value: apiUrl }
       { name: 'FAAS_API_RESOURCE', value: apiResource }
@@ -69,6 +74,25 @@ resource proof 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     ]
     // HOME is container-local, not the deploymentScripts input/output Azure Files mount.
     scriptContent: 'set -euo pipefail\ncd "$HOME"\npython3 - <<\'FAAS_CONNECTOR_PY\'\n${loadTextContent('../scripts/customer_connector.py')}\nFAAS_CONNECTOR_PY\n'
+  }
+}
+resource backing 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  //checkov:skip=CKV_AZURE_35:Approved deployment-script Azure Files backing storage requires public routing; Operations stays private.
+  //checkov:skip=CKV_AZURE_59:Only this dedicated, approved backing account permits shared keys; anonymous access remains disabled.
+  //checkov:skip=CKV_AZURE_43:stfaasds plus uniqueString is a valid lowercase alphanumeric account name.
+  //checkov:skip=CKV_AZURE_206:Disposable script backing storage uses LRS, not production state storage.
+  name: backingAccountName
+  location: location
+  tags: { purpose: 'provider-provisioning-customer-auth', labRun: runId, SecurityControl: 'Ignore' }
+  kind: 'StorageV2'
+  sku: { name: 'Standard_LRS' }
+  properties: {
+    allowSharedKeyAccess: approveDeploymentScriptBackingException
+    allowBlobPublicAccess: false
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    publicNetworkAccess: 'Enabled'
+    networkAcls: { defaultAction: 'Allow', bypass: 'None' }
   }
 }
 output proofResult object = {

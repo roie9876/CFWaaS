@@ -88,6 +88,7 @@ def configure_checkpoint(inputs: CheckpointRuntimeInputs) -> None:
             inputs.credentials.management_password, config.routeServerPeers, config.routeServerAsn, _log,
             admin_allowed_sources=config.adminAllowedSources, gateways=gateways,
             internal_load_balancer_ip=next_hop,
+            connectivity_mode=config.connectivityMode,
         ).run()
         if config.managementRelayUrl:
             from .checkpoint_access_relay import publish_checkpoint_access

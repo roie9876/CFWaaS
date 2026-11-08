@@ -56,7 +56,8 @@ def build_checkpoint_runner_spec(
         foundation_outputs: dict, private_outputs: dict, provider_subscription: str, provider_tenant: str,
         group_name: str, environment_id: str, control_group: str, identity: dict,
         registry_server: str, image_sha256: str, settings: CheckpointRunnerSettings,
-        admin_allowed_sources: list[str] | None = None, firewall_topology: str = "single") -> CheckpointRunnerSpec:
+        admin_allowed_sources: list[str] | None = None, firewall_topology: str = "single",
+        connectivity_mode: str = "vpn") -> CheckpointRunnerSpec:
     """Bind provider release/identity evidence and narrowly validated public admin sources."""
     try:
         uuid_text(provider_subscription)
@@ -72,7 +73,7 @@ def build_checkpoint_runner_spec(
     except (TypeError, ValueError, AttributeError):
         raise CheckpointRunnerError("Invalid Check Point runner configuration") from None
     foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id,
-                                                firewall_topology)
+                                                firewall_topology, connectivity_mode)
     group_id = f"/subscriptions/{provider_subscription}/resourceGroups/{group_name}"
     if not isinstance(identity, dict) or not isinstance(identity.get("properties"), dict):
         raise CheckpointRunnerError("Invalid Check Point runner identity")
@@ -102,7 +103,7 @@ def build_checkpoint_runner_spec(
         client_id, settings.gateway_image_version, settings.management_image_version,
         settings.gateway_vm_size, settings.management_vm_size, settings.provider_ssh_public_key,
         admin_allowed_sources, settings.management_relay_url, settings.management_relay_client_id,
-        firewall_topology)
+        firewall_topology, connectivity_mode)
     environment = (("FAAS_CONFIG", config), ("FAAS_RUNNER_CLIENT_ID", client_id))
     return CheckpointRunnerSpec(
         job_id=checkpoint_runner_resource_id(group_id, environment_id),
@@ -141,11 +142,12 @@ def build_checkpoint_runner_request(
         group_name: str, environment_id: str, control_group: str, identity: dict,
         registry_server: str, image_sha256: str, settings: CheckpointRunnerSettings,
         admin_allowed_sources: list[str] | None = None,
-        firewall_topology: str = "single") -> tuple[CheckpointRunnerSpec, bytes]:
+        firewall_topology: str = "single", connectivity_mode: str = "vpn") -> tuple[CheckpointRunnerSpec, bytes]:
     """Prepare a secret-free request from validated provider inputs; do not launch or authorize it."""
     spec = build_checkpoint_runner_spec(
         foundation_outputs, private_outputs, provider_subscription, provider_tenant, group_name, environment_id,
-        control_group, identity, registry_server, image_sha256, settings, admin_allowed_sources, firewall_topology)
+        control_group, identity, registry_server, image_sha256, settings, admin_allowed_sources,
+        firewall_topology, connectivity_mode)
     body = json.dumps(_checkpoint_runner_request(spec), sort_keys=True, separators=(",", ":")).encode()
     return spec, body
 
@@ -224,10 +226,15 @@ def validate_checkpoint_runner_observation(resource: dict, spec: CheckpointRunne
         raise CheckpointRunnerError("Invalid Check Point runner environment")
 
     address = props.get("ipAddress")
+    provisioning = props.get("provisioningState")
+    starting = provisioning in ("Pending", "Creating", "Updating")
     has_private_ip = False
     if address is not None:
         if not isinstance(address, dict) or address.get("type") != "Private" or address.get("ports") not in (None, []):
             raise CheckpointRunnerError("Invalid Check Point runner network")
+        if starting and address.get("ip") is None:
+            # ACI can publish the private address shape before assigning its IP.
+            return CheckpointRunnerObservation("pending")
         try:
             ip = ipaddress.IPv4Address(address["ip"])
         except (KeyError, TypeError, ipaddress.AddressValueError):
@@ -237,9 +244,8 @@ def validate_checkpoint_runner_observation(resource: dict, spec: CheckpointRunne
         if ip not in subnet or ip in reserved:
             raise CheckpointRunnerError("Invalid Check Point runner network")
         has_private_ip = True
-    provisioning = props.get("provisioningState")
     # ACI reports Pending for the first seconds after creation.
-    if provisioning in ("Pending", "Creating", "Updating"):
+    if starting:
         return CheckpointRunnerObservation("pending")
     if provisioning == "Failed":
         return CheckpointRunnerObservation("provisioning_failed")

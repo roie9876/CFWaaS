@@ -21,6 +21,9 @@ login details, routing and verification in plain language.
 | Ubuntu simulator (default) | Two simulator VMs and a load balancer | Lab routing experiments only; not proof of real Check Point behavior. |
 
 - Provider and customer use **separate tenants and subscriptions**.
+  This remains the default. An explicitly acknowledged **provider-only lab**
+  can share the provider tenant/subscription using separate groups and VNets;
+  it is not a cross-tenant isolation qualification.
 - Neither organization grants the other Azure management permissions.
 - Managed Azure VPN gateways, Routing Appliance and Route Server provide
   connectivity; no custom VM VPN/BGP relay substitutes for them.
@@ -31,6 +34,17 @@ login details, routing and verification in plain language.
   needed. The real Check Point lifecycle path remains to be qualified.
 
 ## Administrator experience
+
+An additional **opt-in peering lab** is available in the provider portal's
+**Deployment options** selector. It automatically deploys two customer VNets,
+two `Standard_D8s_v6` workload VMs, and the existing Check Point VMSS/LB/management
+release in separate customer/provider tenants. Each tenant authorizes its
+appropriate administrator; provider managed identities never deploy customer
+resources. Peering and static UDRs replace VPN, Route Server, Routing Appliance
+and BGP for this option only. Actual MANA hardware/driver and original-source
+connectivity are deployment verification gates, not assumed from a NIC flag.
+See [peering setup and qualification](docs/getting-started.md#optional-automated-peering-lab).
+This option is prepared and offline-tested, not live-qualified or production-ready.
 
 1. **Provider platform administrator:** prepares a provider-owned release,
    approves Azure/Entra permissions and installs the control plane.

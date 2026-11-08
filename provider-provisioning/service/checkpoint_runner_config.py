@@ -53,12 +53,13 @@ class CheckpointRuntimeConfig(StrictModel):
     stateContainer: str
     firewallFrontendIp: str
     firewallBackendIp: str
-    routeServerAsn: int
-    routeServerPeers: tuple[str, str]
+    routeServerAsn: int | None
+    routeServerPeers: tuple[str, str] | None
     adminAllowedSources: list[str] = Field(default_factory=list, max_length=16)
     managementRelayUrl: str = ""
     managementRelayClientId: str = ""
     firewallTopology: Literal["single", "vmss"] = "single"
+    connectivityMode: Literal["vpn", "peering"] = "vpn"
 
     @field_validator("adminAllowedSources", mode="before")
     @classmethod
@@ -118,10 +119,10 @@ def build_checkpoint_runner_config(
         gateway_image_version: str, management_image_version: str, gateway_vm_size: str, management_vm_size: str,
         provider_ssh_public_key: str, admin_allowed_sources: list[str] | None = None,
         management_relay_url: str = "", management_relay_client_id: str = "",
-        firewall_topology: str = "single") -> str:
+        firewall_topology: str = "single", connectivity_mode: str = "vpn") -> str:
     """Return compact, secret-free JSON from provider evidence/settings and validated admin sources."""
     foundation = validate_checkpoint_foundation(foundation_outputs, provider_subscription, group_name, environment_id,
-                                                firewall_topology)
+                                                firewall_topology, connectivity_mode)
     private = validate_checkpoint_private_data_outputs(private_outputs, provider_subscription, group_name, environment_id)
     _validate_settings(gateway_image_version, management_image_version, gateway_vm_size, management_vm_size)
     try:
@@ -147,7 +148,7 @@ def build_checkpoint_runner_config(
         "firewallFrontendIp": foundation.firewall_frontend_ip,
         "firewallBackendIp": foundation.firewall_backend_ip,
         "routeServerAsn": foundation.route_server_asn,
-        "routeServerPeers": list(foundation.route_server_peers),
+        "routeServerPeers": list(foundation.route_server_peers) if foundation.route_server_peers else None,
     }
     sources = normalize_admin_sources([] if admin_allowed_sources is None else admin_allowed_sources)
     if sources:
@@ -158,6 +159,8 @@ def build_checkpoint_runner_config(
     # Single-gateway configuration stays byte-identical to earlier releases.
     if foundation.firewall_topology == "vmss":
         config.update(schemaVersion=4, firewallTopology="vmss")
+    if connectivity_mode == "peering":
+        config.update(schemaVersion=5, connectivityMode="peering")
     text = json.dumps(config, sort_keys=True, separators=(",", ":"))
     load_checkpoint_runner_config({"FAAS_CONFIG": text, "FAAS_RUNNER_CLIENT_ID": runner_client_id})
     return text
@@ -180,7 +183,13 @@ def load_checkpoint_runner_config(environment: Mapping[str, str]) -> CheckpointR
         _validate_settings(config.gatewayImageVersion, config.managementImageVersion,
                            config.gatewayVmSize, config.managementVmSize)
         validate_checkpoint_public_key(config.providerSshPublicKey)
-        validate_checkpoint_route_server_peers(list(config.routeServerPeers))
+        if config.connectivityMode == "vpn":
+            if config.routeServerPeers is None:
+                raise ValueError()
+            validate_checkpoint_route_server_peers(list(config.routeServerPeers))
+        elif (config.firewallTopology != "vmss" or config.routeServerPeers is not None
+              or config.routeServerAsn is not None):
+            raise ValueError()
         relay = bool(config.managementRelayUrl or config.managementRelayClientId)
         if relay:
             if endpoint(config.managementRelayUrl, ".azurewebsites.net") != config.managementRelayUrl:
@@ -188,9 +197,9 @@ def load_checkpoint_runner_config(environment: Mapping[str, str]) -> CheckpointR
             uuid_text(config.managementRelayClientId)
         group = config.group_name
         storage = re.fullmatch(r"https://(stcp[a-z0-9]{13})\.blob\.core\.windows\.net/", config.stateBlobEndpoint)
-        expected_schema = (4 if config.firewallTopology == "vmss" else 3 if relay
+        expected_schema = (5 if config.connectivityMode == "peering" else 4 if config.firewallTopology == "vmss" else 3 if relay
                            else 2 if config.adminAllowedSources else 1)
-        if (config.schemaVersion not in (1, 2, 3, 4)
+        if (config.schemaVersion not in (1, 2, 3, 4, 5)
                 or config.schemaVersion != expected_schema
                 or config.runnerClientId != client
                 or not group.startswith("rg-faas-env-")
@@ -200,7 +209,7 @@ def load_checkpoint_runner_config(environment: Mapping[str, str]) -> CheckpointR
                 or config.credentialVaultUri != f"https://kvcp{storage.group(1)[4:]}.vault.azure.net/"
                 or config.stateContainer != "terraform-state"
                 or config.firewallFrontendIp != "172.22.10.4" or config.firewallBackendIp != "172.22.20.4"
-                or config.routeServerAsn != 65515):
+                or config.connectivityMode == "vpn" and config.routeServerAsn != 65515):
             raise ValueError()
         return config
     except (KeyError, TypeError, ValueError, AttributeError):

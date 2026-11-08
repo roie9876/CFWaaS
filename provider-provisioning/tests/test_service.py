@@ -2250,6 +2250,32 @@ def test_checkpoint_runner_starting_aci_is_pending(checkpoint_journal, provision
     assert validate_checkpoint_runner_observation(resource, spec).state == "pending"
 
 
+@pytest.mark.parametrize("provisioning", ["Pending", "Creating", "Updating"])
+def test_checkpoint_runner_starting_aci_without_assigned_ip_is_pending(checkpoint_journal, provisioning):
+    store, _, lease, _ = checkpoint_journal
+    spec = build_runner_fixture(store, lease)
+    resource = runner_resource(spec)
+    resource["properties"]["provisioningState"] = provisioning
+    resource["properties"]["ipAddress"] = {"type": "Private", "ports": []}
+    assert validate_checkpoint_runner_observation(resource, spec).state == "pending"
+
+
+def test_checkpoint_runner_rejects_missing_ip_after_creation_or_public_while_starting(checkpoint_journal):
+    store, _, lease, _ = checkpoint_journal
+    spec = build_runner_fixture(store, lease)
+    resource = runner_resource(spec)
+    resource["properties"]["ipAddress"] = {"type": "Private", "ports": []}
+    with pytest.raises(CheckpointRunnerError, match="Invalid Check Point runner network"):
+        validate_checkpoint_runner_observation(resource, spec)
+    resource["properties"]["provisioningState"] = "Creating"
+    resource["properties"]["ipAddress"] = {"type": "Public", "ports": []}
+    with pytest.raises(CheckpointRunnerError, match="Invalid Check Point runner network"):
+        validate_checkpoint_runner_observation(resource, spec)
+    resource["properties"]["ipAddress"] = {"type": "Private", "ip": "172.22.10.4", "ports": []}
+    with pytest.raises(CheckpointRunnerError, match="Invalid Check Point runner network"):
+        validate_checkpoint_runner_observation(resource, spec)
+
+
 @pytest.mark.parametrize("exit_code", [0, 40, 137])
 def test_checkpoint_runner_accepts_terminated_aci_after_private_ip_release(checkpoint_journal, exit_code):
     store, _, lease, _ = checkpoint_journal

@@ -81,6 +81,9 @@ main { max-width: 1248px; margin: auto; padding: 24px; }
 label { display: block; font-weight: 600; margin-bottom: 16px; }
 input, button, select { font: inherit; border-radius: 0.625rem; }
 input, select { display: block; width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--cp-border-strong); background: var(--cp-bg-elevated); color: var(--cp-text); }
+input[type="checkbox"] { display: inline-block; width: auto; margin: 0 8px 0 0; }
+#provider-lab-approval[hidden] { display: none; }
+input[type="checkbox"] { display: inline; width: auto; margin-right: 8px; }
 input:focus, button:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 3px; }
 button { padding: 9px 14px; border: 1px solid var(--cp-border-strong); background: var(--cp-surface-soft); color: var(--cp-text); cursor: pointer; }
 button:hover { border-color: var(--cp-accent); } button:disabled { opacity: .55; cursor: wait; }
@@ -114,8 +117,14 @@ a { color: var(--cp-link); }
         <h2>Onboard a customer</h2>
         <form id="onboard">
           <label>Customer name<input name="name" required maxlength="80" autocomplete="organization"></label>
+          <label>Deployment scope<select id="scope-mode" name="scopeMode">
+            <option value="customer">Customer tenant/subscription (separate)</option>
+            <option value="provider-lab" disabled>Provider tenant/subscription (lab only)</option>
+          </select></label>
           <label>Customer tenant ID<input name="tenantId" required placeholder="Entra tenant UUID" spellcheck="false"></label>
           <label>Customer subscription ID<input name="subscriptionId" required placeholder="Approved subscription UUID" spellcheck="false"></label>
+          <p id="scope-warning" class="muted" hidden>Provider-only lab: use a separate customer resource group and VNets. This does not test cross-tenant organizational isolation. Existing enrollments are not rebound. Use the VPN deployment wizard; automated peering remains a separate-tenant workflow.</p>
+          <label id="provider-lab-approval" hidden><input name="providerLabAcknowledged" type="checkbox">I acknowledge this is a co-located provider-only lab, not a two-organization isolation test.</label>
           <label>Credential lifetime in hours<input name="credentialHours" type="number" min="1" max="8760" step="1" value="24" required></label>
           <p><small>1 to 8,760 hours (365 days); subject to provider tenant policy.</small></p>
           <button class="primary" type="submit">Create onboarding</button>
@@ -131,6 +140,35 @@ a { color: var(--cp-link); }
       </section>
     </aside>
     <section>
+      <section class="card">
+        <h2>Deployment options</h2>
+        <label>Connectivity<select id="deployment-option">
+          <option value="vpn">Existing VPN / Route Server deployment</option>
+          <option value="peering">Cross vNet Peering Check Point VMSS</option>
+        </select></label>
+        <p id="vpn-option-guidance">Use a customer's Deployment link below for the existing VPN-based wizard.</p>
+        <div id="peering-option" hidden>
+          <p>Two customer VNets, one MANA-verified test VM in each, and the existing Check Point VMSS,
+            load balancers and management. Static UDRs inspect E-W and Internet outbound traffic.
+            No VPN, Route Server, routing appliance or BGP.</p>
+          <p>Authorize the provider tenant with your portal administrator account and the customer tenant
+            with its authorized administrator. Azure checks permissions in both tenants.
+            Customer resources are never deployed by a provider managed identity.</p>
+          <p id="peering-release-status" class="muted">Checking peering release readiness...</p>
+          <form id="peering-create">
+            <label>Enrolled customer<select id="peering-customer" name="customerId" required></select></label>
+            <label>Workload SSH public key<input name="workloadSshPublicKey" required placeholder="ssh-ed25519 ..."></label>
+            <label>Approved Check Point administrator public IPv4 hosts/CIDRs<input name="adminAllowedSources" required placeholder="Comma-separated hosts or CIDRs"></label>
+            <label><input type="checkbox" name="approveLabCosts" required>Approve deployment costs in both subscriptions.</label>
+            <label><input type="checkbox" name="approveCrossTenantPeering" required>Approve cross-tenant peering for this dedicated lab.</label>
+            <button id="peering-submit" class="primary" type="submit" disabled>Create peering lab</button>
+          </form>
+          <p><small>Workload VMs have no public IPs. Deployment continues if this page closes and resumes after
+            server restarts while authorization remains valid. Failed labs are retained for diagnosis, not automatically deleted.</small></p>
+          <p id="peering-create-guidance" class="muted" role="status"></p>
+          <div id="peering-labs" aria-live="polite"></div>
+        </div>
+      </section>
       <section id="deployment-panel" class="card" hidden>
         <h2>Customer deployment link</h2>
         <p>Recovery-enabled release. Confirm the Azure Portal wizard shows
@@ -159,8 +197,48 @@ a { color: var(--cp-link); }
 <script>
 "use strict";
 const notice = document.getElementById("notice");
+let peeringTimer;
+const peeringSignInTimers = new Map();
+let peeringReleaseEnabled = false;
+let peeringActiveCount = 0;
 let secretTimer;
 let revealGeneration = 0;
+let providerLabScope = null;
+let separateScope = null;
+const scopeMode = document.getElementById("scope-mode");
+const onboarding = document.getElementById("onboard");
+function updateScopeFields() {
+  const lab = scopeMode.value === "provider-lab";
+  const tenant = onboarding.elements.namedItem("tenantId");
+  const subscription = onboarding.elements.namedItem("subscriptionId");
+  const acknowledgement = onboarding.elements.namedItem("providerLabAcknowledged");
+  if (lab) {
+    if (!providerLabScope || !providerLabScope.available) throw new Error("ProviderScopeNotConfigured");
+    if (separateScope === null) separateScope = {tenant: tenant.value, subscription: subscription.value};
+    tenant.value = providerLabScope.tenantId;
+    subscription.value = providerLabScope.subscriptionId;
+  } else if (separateScope !== null) {
+    tenant.value = separateScope.tenant;
+    subscription.value = separateScope.subscription;
+    separateScope = null;
+  }
+  tenant.readOnly = lab;
+  subscription.readOnly = lab;
+  acknowledgement.required = lab;
+  acknowledgement.checked = false;
+  document.getElementById("provider-lab-approval").hidden = !lab;
+  document.getElementById("scope-warning").hidden = !lab;
+}
+async function loadDeploymentScopes() {
+  const result = await request("/admin/deployment-scopes");
+  providerLabScope = result.providerLab;
+  scopeMode.querySelector('[value="provider-lab"]').disabled = !providerLabScope.available;
+  if (!providerLabScope.available) message("Provider-only lab is unavailable: " + providerLabScope.reason, "error");
+}
+scopeMode.addEventListener("change", () => {
+  try { updateScopeFields(); }
+  catch (error) { message(error.message, "error"); }
+});
 function message(text, kind = "") { notice.textContent = text; notice.className = kind; }
 function clearSecret() {
   revealGeneration += 1;
@@ -302,6 +380,7 @@ async function refresh() {
   const response = await request("/admin/customers");
   const records = Array.isArray(response) ? response : response.customers;
   if (!Array.isArray(records)) throw new Error("InvalidCustomerResponse");
+  updatePeeringCustomers(records);
   const container = document.getElementById("customers");
   container.replaceChildren();
   if (!records.length) { container.textContent = "No customers enrolled. Create the first onboarding."; return; }
@@ -312,6 +391,10 @@ async function refresh() {
     const name = document.createElement("h3"); name.textContent = customer.name;
     const status = document.createElement("span"); status.className = "status"; status.textContent = customer.status;
     heading.append(name, status);
+    if (customer.scopeMode === "provider-lab") {
+      const scope = document.createElement("span"); scope.className = "status";
+      scope.textContent = "Provider-only lab"; heading.append(scope);
+    }
     const details = document.createElement("p"); details.className = "details";
     details.textContent = "Tenant: " + field(customer, "tenantId", "tenant") + "\nSubscription: " +
       field(customer, "subscriptionId", "subscription") + "\nClient: " + field(customer, "clientId", "client") +
@@ -338,6 +421,15 @@ async function refresh() {
         document.getElementById("deployment-expiry").textContent = "Expires " + result.expiresAt;
         document.getElementById("deployment-panel").hidden = false;
         message("Read-only deployment link issued; expires " + result.expiresAt, "success");
+      }),
+      button("Deploy peering lab", async () => {
+        if (customer.scopeMode === "provider-lab") {
+          throw new Error("Provider-only labs use the VPN deployment link; peering requires separate scopes.");
+        }
+        document.getElementById("deployment-option").value = "peering";
+        showDeploymentOption();
+        document.getElementById("peering-customer").value = id;
+        document.getElementById("peering-option").scrollIntoView({behavior: "smooth"});
       }),
       button("Reveal credential", async () => {
         const generation = revealGeneration;
@@ -415,15 +507,197 @@ async function showEnvironments(id, container) {
     container.append(row);
   }
 }
+function showDeploymentOption() {
+  const peering = document.getElementById("deployment-option").value === "peering";
+  document.getElementById("peering-option").hidden = !peering;
+  document.getElementById("vpn-option-guidance").hidden = peering;
+}
+async function authorizePeering(environment, side, container) {
+  const base = "/admin/peering-labs/" + environment + "/" + side;
+  const key = environment + ":" + side;
+  if (peeringSignInTimers.has(key)) throw new Error("Authorization is already in progress for this tenant.");
+  peeringSignInTimers.set(key, null);
+  let challenge;
+  try { challenge = await request(base + "/signin", "POST"); }
+  catch (error) { peeringSignInTimers.delete(key); throw error; }
+  if (!["https://microsoft.com/devicelogin", "https://login.microsoft.com/device"].includes(challenge.verificationUri)) {
+    peeringSignInTimers.delete(key);
+    throw new Error("InvalidPeeringSignInOrigin");
+  }
+  const code = document.createElement("p");
+  code.textContent = side + " authorization code: " + challenge.userCode + " (expires in " + challenge.expiresIn + " seconds)";
+  const link = document.createElement("a");
+  link.href = challenge.verificationUri; link.textContent = "Open Microsoft sign-in";
+  link.target = "_blank"; link.rel = "noopener noreferrer";
+  container.append(code, link);
+  const expires = Date.now() + challenge.expiresIn * 1000;
+  return new Promise((resolve, reject) => {
+  async function poll() {
+    try {
+      if (Date.now() >= expires) throw new Error("Peering sign-in expired. Authorize again.");
+      const result = await request(base + "/poll", "POST");
+      if (result.status === "pending") {
+        peeringSignInTimers.set(key, setTimeout(poll, 5000));
+      } else if (result.status === "authorized") {
+        code.remove(); link.remove(); peeringSignInTimers.delete(key);
+        await refreshPeeringLabs();
+        resolve();
+      } else throw new Error("InvalidPeeringAuthorizationResponse");
+    } catch (error) {
+      if (error.message === "PeeringLabBusy") {
+        peeringSignInTimers.set(key, setTimeout(poll, 5000));
+        return;
+      }
+      code.remove(); link.remove(); peeringSignInTimers.delete(key);
+      reject(error);
+    }
+  }
+  clearTimeout(peeringSignInTimers.get(key));
+  peeringSignInTimers.set(key, setTimeout(poll, 5000));
+  });
+}
+function updatePeeringCreateState() {
+  const hasCustomer = document.getElementById("peering-customer").options.length > 0;
+  document.getElementById("peering-submit").disabled = !peeringReleaseEnabled || !hasCustomer || peeringActiveCount >= 3;
+  document.getElementById("peering-create-guidance").textContent = !hasCustomer
+    ? "Complete customer onboarding first, then refresh to select a Ready customer."
+    : peeringActiveCount >= 3
+      ? "Three labs are already pending. Resume an existing lab below or cancel an unused attempt to free a slot."
+      : peeringActiveCount > 0
+        ? "A lab is already pending. Complete its authorization or use Resume / retry below; do not create another lab to retry sign-in."
+        : "";
+}
+function updatePeeringCustomers(customers) {
+  if (!Array.isArray(customers)) throw new Error("InvalidCustomerResponse");
+  const select = document.getElementById("peering-customer");
+  const selected = select.value;
+  select.replaceChildren();
+  for (const customer of customers) {
+    if (customer.status !== "Ready" || customer.scopeMode === "provider-lab") continue;
+    const option = document.createElement("option");
+    option.value = customer.customerId; option.textContent = customer.name;
+    select.append(option);
+  }
+  if (selected) select.value = selected;
+  updatePeeringCreateState();
+}
+async function refreshPeeringLabs() {
+  clearTimeout(peeringTimer);
+  const response = await request("/admin/peering-labs");
+  if (typeof response.enabled !== "boolean" || !Array.isArray(response.labs)) throw new Error("InvalidPeeringLabResponse");
+  peeringReleaseEnabled = response.enabled;
+  peeringActiveCount = response.labs.filter(lab => !["Ready", "Failed"].includes(lab.status) &&
+    lab.expiresAt * 1000 > Date.now()).length;
+  updatePeeringCreateState();
+  document.getElementById("peering-release-status").textContent = response.enabled
+    ? "Pinned peering/VMSS release configured. New resource groups are created in both enrolled subscriptions."
+    : "This server has not enabled the peering release. Configure and publish it before deployment.";
+  const container = document.getElementById("peering-labs");
+  if (peeringSignInTimers.size === 0) {
+    container.replaceChildren();
+    for (const lab of response.labs) {
+      const section = document.createElement("section"); section.className = "customer";
+      const text = document.createElement("p"); text.className = "details"; text.style.whiteSpace = "pre-line";
+      text.textContent = lab.environmentId + "\n" + lab.status + ": " + lab.phase +
+        "\nProvider: " + lab.providerGroupId + "\nCustomer: " + lab.customerGroupId +
+        (lab.errorCode ? "\nAction required: " + lab.errorCode : "");
+      section.append(text);
+      if (!["Ready", "Failed"].includes(lab.status)) {
+        for (const side of ["provider", "customer"]) {
+          const authorization = document.createElement("p");
+          authorization.textContent = side + " authorization: " + (lab[side + "Authorized"] ? "completed" : "required");
+          section.append(authorization);
+          if (!lab[side + "Authorized"]) {
+            const authorize = button("Authorize " + side + " tenant", async () => {
+              await authorizePeering(lab.environmentId, side, section);
+              authorization.textContent = side + " authorization: completed";
+              authorize.remove();
+            });
+            section.append(authorize);
+          }
+        }
+        if (lab.status === "NeedsAttention" || lab.status === "AwaitingAuthorization") {
+          section.append(button("Resume / retry existing lab", async () => {
+            await request("/admin/peering-labs/" + lab.environmentId + "/resume", "POST");
+            await refreshPeeringLabs();
+          }));
+        }
+        section.append(button("Cancel pending lab", async () => {
+          if (!window.confirm("Stop this pending attempt and free its active-lab slot? Existing Azure resources are NOT deleted. An ARM operation already running may still finish.")) return;
+          await request("/admin/peering-labs/" + lab.environmentId + "/cancel", "POST");
+          await refreshPeeringLabs();
+        }, true));
+        if (lab.status === "NeedsAttention") {
+          const guidance = document.createElement("p");
+          guidance.textContent = "Completed sign-ins are retained. Resolve the reported Azure permission/access issue, then use Resume / retry existing lab.";
+          section.append(guidance);
+        }
+      } else if (lab.status === "Failed" && lab.retryable === true) {
+        const guidance = document.createElement("p");
+        guidance.textContent = "Check Point configuration failed after the network, peerings and firewall VMs were created. Retrying reuses them; authorize both tenants again after selecting Retry.";
+        section.append(guidance, button("Retry Check Point configuration", async () => {
+          await request("/admin/peering-labs/" + lab.environmentId + "/resume", "POST");
+          await refreshPeeringLabs();
+        }));
+      } else if (lab.status === "Ready") {
+        const qualification = document.createElement("p");
+        qualification.textContent = "MANA, original-source E-W connectivity and Internet egress verified on both VMs. Firewall-log correlation, failover and production qualification are not claimed.";
+        section.append(qualification);
+      }
+      if (lab.status === "Failed") {
+        section.append(button("Remove from list", async () => {
+          if (!window.confirm("Remove this failed lab from the portal list? This does NOT delete its Azure resource groups; delete those separately in Azure.")) return;
+          await request("/admin/peering-labs/" + lab.environmentId + "/remove", "POST");
+          await refreshPeeringLabs();
+        }, true));
+      }
+      container.append(section);
+    }
+  }
+  const active = response.labs.filter(lab => !["Ready", "Failed", "NeedsAttention"].includes(lab.status) &&
+    lab.providerAuthorized && lab.customerAuthorized);
+  if (active.length) {
+    peeringTimer = setTimeout(async () => {
+      try {
+        for (const lab of active) await request("/admin/peering-labs/" + lab.environmentId + "/advance", "POST");
+        await refreshPeeringLabs();
+      } catch (error) {
+        message(error.message, "error");
+        peeringTimer = setTimeout(() => refreshPeeringLabs().catch(error => message(error.message, "error")), 15000);
+      }
+    }, 5000);
+  }
+}
+document.getElementById("deployment-option").addEventListener("change", showDeploymentOption);
+document.getElementById("peering-create").addEventListener("submit", async event => {
+  event.preventDefault(); clearSecret();
+  const submit = document.getElementById("peering-submit"); submit.disabled = true;
+  const values = Object.fromEntries(new FormData(event.target));
+  values.adminAllowedSources = values.adminAllowedSources.split(",").map(value => value.trim()).filter(Boolean);
+  values.approveLabCosts = values.approveLabCosts === "on";
+  values.approveCrossTenantPeering = values.approveCrossTenantPeering === "on";
+  try {
+    await request("/admin/peering-labs", "POST", values);
+    message("Peering lab reserved. Authorize both tenants below to start deployment.", "success");
+    await refreshPeeringLabs();
+  } catch (error) { message(error.message, "error"); }
+  finally { updatePeeringCreateState(); }
+});
 document.getElementById("onboard").addEventListener("submit", async event => {
   event.preventDefault(); clearSecret();
   const submit = event.target.querySelector("button");
   submit.disabled = true; message("Creating Entra client, securing its credential and publishing customer artifacts...");
   const values = Object.fromEntries(new FormData(event.target));
   values.credentialHours = Number(values.credentialHours);
+  if (values.scopeMode === "provider-lab") {
+    values.providerLabAcknowledged = values.providerLabAcknowledged === "on";
+  } else {
+    delete values.scopeMode; delete values.providerLabAcknowledged;
+  }
   try {
     await request("/admin/customers", "POST", values);
-    event.target.reset(); message("Customer onboarding completed.", "success"); await refresh();
+    event.target.reset(); separateScope = null; updateScopeFields();
+    message("Customer onboarding completed.", "success"); await refresh();
   } catch (error) {
     message(error.message, "error");
     try { await refresh(); } catch (refreshError) {
@@ -456,12 +730,19 @@ document.getElementById("readiness").addEventListener("click", async () => {
   } catch (error) { message(error.message, "error"); }
 });
 window.addEventListener("pagehide", clearSecret);
+window.addEventListener("pagehide", () => {
+  clearTimeout(peeringTimer);
+  for (const timer of peeringSignInTimers.values()) clearTimeout(timer);
+  peeringSignInTimers.clear();
+});
 document.addEventListener("visibilitychange", () => { if (document.hidden) clearSecret(); });
 (async () => {
   try {
     const session = await request("/admin/session");
     document.getElementById("identity").textContent = session.name;
     await refresh();
+    await refreshPeeringLabs();
+    await loadDeploymentScopes();
   } catch (error) {
     message(error.message + ". Sign in using the provider administrator account.", "error");
     document.getElementById("identity").textContent = "Access not established";

@@ -243,12 +243,12 @@ def parse_bgp_peers(output: str, peers: tuple[str, str]) -> BgpStatus:
 
 class CheckpointConfigurator:
     def __init__(self, api: ManagementApi, environment_id: str, sic_key: str, management_password: str,
-                 route_server_peers: tuple[str, str], route_server_asn: int,
+                 route_server_peers: tuple[str, str] | None, route_server_asn: int | None,
                  log: Callable[[str], None], sleep: Callable[[float], None] = time.sleep,
                  clock: Callable[[], float] = time.monotonic,
                  admin_allowed_sources: list[str] | None = None,
                  gateways: list[CheckpointGateway] | None = None,
-                 internal_load_balancer_ip: str | None = None) -> None:
+                 internal_load_balancer_ip: str | None = None, connectivity_mode: str = "vpn") -> None:
         self.api, self.sleep, self.clock, self.log = api, sleep, clock, log
         default = CheckpointGateway("cp-gateway-" + environment_id[:8], GATEWAY_FRONTEND_IP, GATEWAY_BACKEND_IP)
         self.gateways = list(gateways) if gateways else [default]
@@ -264,6 +264,12 @@ class CheckpointConfigurator:
         self.management = "cp-management-" + environment_id[:8]
         self.sic_key, self.password = sic_key, management_password
         self.peers, self.peer_asn = route_server_peers, route_server_asn
+        if (connectivity_mode not in ("vpn", "peering")
+                or connectivity_mode == "peering" and (not self.scale_set or route_server_peers is not None
+                                                       or route_server_asn is not None)
+                or connectivity_mode == "vpn" and (route_server_peers is None or route_server_asn is None)):
+            raise CheckpointGaiaError("Invalid Check Point connectivity mode")
+        self.connectivity_mode = connectivity_mode
         self.admin_sources = normalize_admin_sources([] if admin_allowed_sources is None else admin_allowed_sources)
 
     def _deadline(self, seconds: float) -> float:
@@ -468,8 +474,14 @@ class CheckpointConfigurator:
         if not self.admin_sources:
             self.api.call("set-access-rule", {"layer": ACCESS_LAYER, "uid": rules[-1]["uid"],
                                               "action": "Drop", "track": {"type": "Log"}})
-        elif rules[-1].get("action", {}).get("name") != "Drop":
-            raise CheckpointGaiaError("Admin access requires an existing drop cleanup rule")
+        else:
+            # The rulebase API normally returns the action as a UID resolved through objects-dictionary.
+            action = rules[-1].get("action")
+            if isinstance(action, str):
+                action = next((item for item in rulebase.get("objects-dictionary", [])
+                               if isinstance(item, dict) and item.get("uid") == action), None)
+            if not isinstance(action, dict) or action.get("name") != "Drop":
+                raise CheckpointGaiaError("Admin access requires an existing drop cleanup rule")
         nat = self.api.call("show-nat-rulebase", {"package": POLICY_PACKAGE, "limit": 50})
         names = {rule.get("name") for rule in nat.get("rulebase", []) if isinstance(rule, dict)}
         if NO_NAT_RULE not in names:
@@ -517,6 +529,21 @@ class CheckpointConfigurator:
                 return status
             self.sleep(30)
 
+    def ensure_peering_routes(self) -> BgpStatus:
+        script = (
+            '#!/bin/bash\nset -euo pipefail\n'
+            'clish -c "set static-route default nexthop gateway address 172.22.10.1 on"\n'
+            'clish -c "set static-route 10.211.0.0/16 nexthop gateway address 172.22.20.1 on"\n'
+            'clish -c "set static-route 10.212.0.0/16 nexthop gateway address 172.22.20.1 on"\n'
+            'clish -c "save config"\necho faas-peering-routes-configured\n'
+        )
+        for gateway in self.gateways:
+            output = self._run_script("faas-peering-routes", script, target=gateway.name)
+            if "faas-peering-routes-configured" not in output.splitlines():
+                raise CheckpointGaiaError("Peering static route configuration failed")
+        self.log("peering-static-routes-configured")
+        return BgpStatus(0, 0)
+
     def run(self) -> BgpStatus:
         self.api.login(self.password, self._deadline(5400), self.sleep)
         self.log("management-ready")
@@ -524,6 +551,6 @@ class CheckpointConfigurator:
             self.ensure_gateway()
             self.ensure_management_logging()
             self.ensure_policy()
-            return self.ensure_bgp()
+            return self.ensure_peering_routes() if self.connectivity_mode == "peering" else self.ensure_bgp()
         finally:
             self.api.discard_and_logout()

@@ -195,6 +195,7 @@ def test_optional_checkpoint_package_includes_pinned_preview_only(upstream, monk
         "provider-dataplane.bicep": b'{"fixture":"ubuntu"}',
         "customer-connections.bicep": b'{}',
         "customer-deployment.bicep": b'{}',
+        "peering-customer.bicep": b'{"fixture":"peering"}',
         "provider-guided-installation.bicep": b'{}',
         "provider-checkpoint-foundation.bicep": b'{"fixture":"checkpoint"}',
         "provider-checkpoint-private-data.bicep": b'{"fixture":"checkpoint-private"}',
@@ -210,6 +211,7 @@ def test_optional_checkpoint_package_includes_pinned_preview_only(upstream, monk
             names = set(archive.namelist())
             assert archive.read("service/templates/checkpoint-foundation.json") == compiled["provider-checkpoint-foundation.bicep"]
             assert archive.read("service/templates/checkpoint-private-data.json") == compiled["provider-checkpoint-private-data.bicep"]
+            assert archive.read("service/templates/peering-customer.json") == compiled["peering-customer.bicep"]
             assert {"service/checkpoint_foundation.py",
                     "checkpoint/LICENSE", "checkpoint/FAAS-UPSTREAM-NOTICE.txt",
                     "checkpoint/main.tf", "checkpoint/variables.tf", "checkpoint/.terraform.lock.hcl",

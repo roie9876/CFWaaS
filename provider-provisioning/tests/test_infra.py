@@ -761,7 +761,8 @@ class BicepTests(unittest.TestCase):
                 if r["type"].lower() == kind.lower()]
 
     def test_all_bicep_files_compile(self):
-        self.assertEqual(len(self.compiled), 35)
+        self.assertEqual(len(self.compiled), 37)
+        self.assertIn("peering-customer.bicep", self.compiled)
 
     def test_checkpoint_foundation_is_isolated_and_does_not_deploy_a_firewall_vm(self):
         name = "provider-checkpoint-foundation.bicep"
@@ -1348,7 +1349,8 @@ class BicepTests(unittest.TestCase):
         outputs = form["view"]["outputs"]["parameters"]
         self.assertEqual(set(parameters) - set(outputs), {
             "apiAuthorityTenantId", "expectedCustomerTenantId", "expectedCustomerSubscriptionId", "enrolledCustomerResourceGroupId",
-            "apiUrl", "apiResource", "customerConnectionsTemplateBase64", "deploymentMode"})
+            "apiUrl", "apiResource", "customerConnectionsTemplateBase64", "deploymentMode",
+            "providerProtectedResourceGroupIds"})
         self.assertTrue(set(outputs) <= set(parameters))
         ssh = fields["sshCredentials"]
         self.assertEqual(ssh["type"], "Microsoft.Compute.CredentialsCombo")
@@ -1544,6 +1546,46 @@ class BicepTests(unittest.TestCase):
         self.assertTrue(cloudinit.startswith(receiver))
         self.assertNotIn("PRIVATE KEY", cloudinit)
 
+    def test_enrollment_scope_is_checked_before_identity_and_protected_provider_groups(self):
+        template = self.compiled["customer-deployment.bicep"]
+        self.assertEqual(template["parameters"]["scopeMode"]["allowedValues"], ["customer", "provider-lab"])
+        self.assertEqual(template["parameters"]["scopeMode"]["defaultValue"], "customer")
+        check = next(r for r in template["resources"] if r["name"] == "customer-enrollment-scope-check")
+        self.assertEqual(check["properties"]["template"]["parameters"]
+                         ["deploymentMatchesApprovedEnrollment"]["allowedValues"], [True])
+        condition = check["properties"]["parameters"]["deploymentMatchesApprovedEnrollment"]["value"]
+        for name in ("scopeMatches", "tagsMatch", "groupMatches"):
+            self.assertIn(name, condition)
+        caller = next(r for r in template["resources"] if r["type"] == "Microsoft.ManagedIdentity/userAssignedIdentities")
+        self.assertIn("customer-enrollment-scope-check", json.dumps(caller["dependsOn"]))
+        self.assertIn("protectedProviderGroups", template["variables"]["groupMatches"])
+
+    def test_publisher_restricts_scope_to_registered_lab_mode(self):
+        from service.deployment_scope import ProviderScope
+        from service.enrollment import CustomerBinding
+        from service.profiles import ProfilePublisher
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / "customer.json").write_text(json.dumps(self.compiled["customer-deployment.bicep"]))
+            (path / "customer-connections.json").write_text(json.dumps(self.compiled["customer-connections.bicep"]))
+            (path / "customer-form.json").write_text((ROOT / "portal/customer-form.json").read_text())
+            protected = f"/subscriptions/{uid(2)}/resourceGroups/provider-control"
+            scope = ProviderScope(uid(1), uid(2), (protected,))
+            with patch("service.profiles.BlobServiceClient"):
+                publisher = ProfilePublisher(unittest.mock.Mock(), "https://unit.blob.core.windows.net",
+                                             "https://unit.azurewebsites.net", "api://" + uid(6), uid(1), path,
+                                             provider_scope=scope)
+            customer = CustomerBinding(uid(10), "Provider lab", uid(1), uid(2), uid(3), uid(4), 1, "Ready",
+                                       scope_mode="provider-lab", provider_lab_acknowledged=True)
+            template, form = publisher.documents(customer)
+            self.assertEqual(template["parameters"]["scopeMode"]["allowedValues"], ["provider-lab"])
+            self.assertEqual(template["parameters"]["providerProtectedResourceGroupIds"]["defaultValue"], [protected])
+            fields = {item["name"]: item for step in form["view"]["properties"]["steps"] for item in step["elements"]}
+            self.assertEqual([item["value"] for item in fields["scopeMode"]["constraints"]["allowedValues"]],
+                             ["provider-lab"])
+            self.assertIn(uid(2), fields["deploymentScopeNotice"]["options"]["text"])
+            self.assertIn("does not test cross-tenant", fields["deploymentScopeNotice"]["options"]["text"])
+
     def test_proof_before_network_and_separate_backing_exception(self):
         proof = self.compiled["customer-proof.bicep"]
         self.assertEqual(proof["parameters"]["approveDeploymentScriptBackingException"]["allowedValues"], [True])
@@ -1555,7 +1597,37 @@ class BicepTests(unittest.TestCase):
         self.assertEqual(next(item["value"] for item in script["properties"]["environmentVariables"]
                               if item["name"] == "FAAS_CONNECTOR_MODE"), "proof")
         self.assertNotIn("Microsoft.Network/virtualNetworkGateways", json.dumps(proof))
-        self.assertEqual(len(proof["resources"]), 1)
+        self.assertEqual(len(proof["resources"]), 2)
+
+    def test_customer_script_storage_exception_is_explicit_and_limited(self):
+        for name, phase, location in (
+            ("customer-proof.bicep", "proof", "location"),
+            ("customer-network.bicep", "network", "executionLocation"),
+        ):
+            template = self.compiled[name]
+            self.assertEqual(template["parameters"]["approveDeploymentScriptBackingException"]["allowedValues"], [True])
+            storage = next(r for r in template["resources"] if r["type"] == "Microsoft.Storage/storageAccounts")
+            script = next(r for r in template["resources"] if r["type"] == "Microsoft.Resources/deploymentScripts")
+            self.assertIn(f"'{phase}'", template["variables"]["backingAccountName"])
+            self.assertEqual(storage["location"],
+                             f"[parameters('{location}')]")
+            self.assertEqual(storage["tags"]["SecurityControl"], "Ignore")
+            self.assertEqual(storage["properties"]["allowSharedKeyAccess"],
+                             "[parameters('approveDeploymentScriptBackingException')]")
+            self.assertFalse(storage["properties"]["allowBlobPublicAccess"])
+            self.assertTrue(storage["properties"]["supportsHttpsTrafficOnly"])
+            self.assertEqual(storage["properties"]["minimumTlsVersion"], "TLS1_2")
+            self.assertNotIn("SecurityControl", script["tags"])
+            settings = script["properties"]["storageAccountSettings"]
+            self.assertEqual(settings["storageAccountName"], storage["name"])
+            self.assertIn("listKeys(", settings["storageAccountKey"])
+            self.assertIn("Microsoft.Storage/storageAccounts", json.dumps(script["dependsOn"]))
+            self.assertNotIn("storageAccountKey", json.dumps(template["outputs"]))
+            self.assertNotIn("listKeys", json.dumps(template["outputs"]))
+        operations = self.resources("main.bicep", "Microsoft.Storage/storageAccounts")[0]
+        self.assertFalse(operations["properties"]["allowSharedKeyAccess"])
+        artifacts = self.compiled["provider-artifacts.bicep"]["resources"][0]
+        self.assertFalse(artifacts["properties"]["allowSharedKeyAccess"])
 
     def test_network_connector_same_implementation_and_nonsecret_output(self):
         proof = self.compiled["customer-proof.bicep"]["resources"][0]

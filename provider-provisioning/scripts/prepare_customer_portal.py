@@ -12,12 +12,16 @@ import argparse
 import base64
 import json
 from pathlib import Path
+import sys
 import urllib.parse
 
 from common import (ROOT, compile_bicep, config_digest, customer_sizing, digest,
                     group_id, load_private, public_key, save_private, validate_config)
 from customer_connector import admin_sources, api_origin, validate_connection_template
 from provider_setup import MODE, package_metadata, provider_feature_preflight, validate_identity
+
+sys.path.insert(0, str(ROOT))
+from service.deployment_scope import bind_scope
 
 
 def portal_link(template_uri: str, form_uri: str) -> str:
@@ -81,6 +85,7 @@ def prepare(config: dict, provider: dict, identity: dict, output: Path, proof_on
     form = json.loads((ROOT / "portal/customer-form.json").read_text())
     fields = {element["name"]: element for step in form["view"]["properties"]["steps"]
               for element in step["elements"]}
+    bind_scope(template["parameters"], fields, "customer", customer["tenantId"], customer["subscriptionId"])
     fields["adminAllowedSources"]["defaultValue"] = ", ".join(defaults["adminAllowedSources"])
     if proof_only:
         form["view"]["properties"]["title"] = "EW-18 customer API authorization proof (no VPN gateways)"

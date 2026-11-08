@@ -83,6 +83,18 @@ PORT=8000
 # FAAS_AUTHORITY_TENANT_ID=<provider-tenant-UUID>
 
 # Management app ONLY, isolated from the public provisioning API/worker.
+# Optional owner-authorized peering alternative; disabled unless its package,
+# rebuilt VMSS runner, and delegated ARM consent in both tenants are prepared.
+# FAAS_PEERING_LAB_ENABLED=false
+# FAAS_PEERING_OAUTH_CLIENT_ID=<approved-multitenant-public-client-UUID>
+# Secretless peering identity: multitenant app trusting the user-assigned identity below
+# through a federated credential; provisioned in both tenants. Both values set together.
+# FAAS_PEERING_NETWORK_CLIENT_ID=<peering-network-application-client-UUID>
+# FAAS_PEERING_NETWORK_IDENTITY_CLIENT_ID=<management-user-assigned-identity-client-UUID>
+# Peering also uses FAAS_PROVIDER_SUBSCRIPTION_ID, FAAS_NVA_SSH_PUBLIC_KEY,
+# and the existing complete FAAS_CHECKPOINT_* pinned release settings.
+# Its temporary OAuth caches stay in the private management vault. No provider
+# managed identity or customer API client receives cross-tenant deployment roles.
 # Its automation credential is an App Service Key Vault reference, not a local file.
 # FAAS_MANAGEMENT_TENANT_ID=<provider-tenant-UUID>
 # FAAS_MANAGEMENT_CLIENT_ID=<management-application-client-UUID>

@@ -7,7 +7,7 @@ from .models import ConnectionManifest, environment_resource_group_name
 
 @dataclass(frozen=True)
 class CheckpointFoundation:
-    connection_manifest: ConnectionManifest
+    connection_manifest: ConnectionManifest | None
     security_vnet_id: str
     security_vnet_name: str
     firewall_frontend_subnet_id: str
@@ -22,9 +22,10 @@ class CheckpointFoundation:
     management_nsg_id: str
     firewall_frontend_ip: str
     firewall_backend_ip: str
-    route_server_asn: int
-    route_server_peers: tuple[str, str]
+    route_server_asn: int | None
+    route_server_peers: tuple[str, str] | None
     firewall_topology: str = "single"
+    connectivity_mode: str = "vpn"
 
 
 def _output(outputs: dict, name: str) -> dict:
@@ -53,25 +54,30 @@ def validate_checkpoint_route_server_peers(peers: object) -> tuple[str, str]:
 
 def validate_checkpoint_foundation(
         outputs: dict, provider_subscription: str, group_name: str,
-        environment_id: str, firewall_topology: str = "single") -> CheckpointFoundation:
+        environment_id: str, firewall_topology: str = "single",
+        connectivity_mode: str = "vpn") -> CheckpointFoundation:
     try:
         uuid_text(provider_subscription)
         uuid_text(environment_id)
         if (not isinstance(group_name, str) or not group_name.startswith("rg-faas-env-")
                 or environment_resource_group_name(group_name.removeprefix("rg-faas-env-")) != group_name
-                or firewall_topology not in ("single", "vmss")):
+                or firewall_topology not in ("single", "vmss")
+                or connectivity_mode not in ("vpn", "peering")
+                or connectivity_mode == "peering" and firewall_topology != "vmss"):
             raise ValueError()
     except (TypeError, ValueError, AttributeError):
         raise ValueError("Invalid Check Point provider scope") from None
     if not isinstance(outputs, dict) or set(outputs) != {"connectionManifest", "checkpointFoundation"}:
         raise ValueError("Invalid Check Point deployment outputs")
     connection = _output(outputs, "connectionManifest")
-    if set(connection) != {"providerIngress", "providerDelivery"}:
-        raise ValueError("Invalid Check Point connection manifest")
-    try:
-        manifest = ConnectionManifest.model_validate(connection)
-    except (ValueError, TypeError):
-        raise ValueError("Invalid Check Point connection manifest") from None
+    manifest = None
+    if connectivity_mode == "vpn":
+        if set(connection) != {"providerIngress", "providerDelivery"}:
+            raise ValueError("Invalid Check Point connection manifest")
+        try:
+            manifest = ConnectionManifest.model_validate(connection)
+        except (ValueError, TypeError):
+            raise ValueError("Invalid Check Point connection manifest") from None
 
     foundation = _output(outputs, "checkpointFoundation")
     suffix = environment_id[:8]
@@ -97,13 +103,22 @@ def validate_checkpoint_foundation(
     }
     # Outputs from templates before the topology parameter carry no marker and are single-gateway.
     reported = foundation.get("firewallTopology", "single")
-    if (set(foundation) - {"firewallTopology"} != set(expected) | {"routeServerAsn", "routeServerPeerAddresses"}
+    routing_fields = ({"routeServerAsn", "routeServerPeerAddresses"} if connectivity_mode == "vpn"
+                      else {"connectivityMode"})
+    if (set(foundation) - {"firewallTopology"} != set(expected) | routing_fields
             or reported != firewall_topology
             or any(not isinstance(foundation[key], str)
-                   or foundation[key].lower() != value.lower() for key, value in expected.items())
-            or type(foundation["routeServerAsn"]) is not int or foundation["routeServerAsn"] != 65515):
+                   or foundation[key].lower() != value.lower() for key, value in expected.items())):
         raise ValueError("Check Point foundation does not match the provider scope")
-    peers = validate_checkpoint_route_server_peers(foundation["routeServerPeerAddresses"])
+    peers, asn = None, None
+    if connectivity_mode == "vpn":
+        if type(foundation["routeServerAsn"]) is not int or foundation["routeServerAsn"] != 65515:
+            raise ValueError("Invalid Check Point Route Server ASN")
+        peers, asn = validate_checkpoint_route_server_peers(foundation["routeServerPeerAddresses"]), 65515
+    elif (foundation["connectivityMode"] != "peering"
+          or connection != {"connectivityMode": "peering", "providerVnetId": vnet_id,
+                            "firewallVip": "172.22.20.4"}):
+        raise ValueError("Invalid Check Point peering manifest")
     return CheckpointFoundation(
         connection_manifest=manifest,
         security_vnet_id=expected["securityVnetId"],
@@ -120,7 +135,8 @@ def validate_checkpoint_foundation(
         management_nsg_id=expected["managementNsgId"],
         firewall_frontend_ip=expected["firewallFrontendPrivateIp"],
         firewall_backend_ip=expected["firewallBackendPrivateIp"],
-        route_server_asn=65515,
+        route_server_asn=asn,
         route_server_peers=peers,
         firewall_topology=firewall_topology,
+        connectivity_mode=connectivity_mode,
     )

@@ -11,6 +11,7 @@ from azure.storage.blob import BlobServiceClient, ContentSettings, generate_blob
 from .config import endpoint, uuid_text
 from .enrollment import CustomerBinding
 from .admin_access import normalize_admin_sources
+from .deployment_scope import ProviderScope, ScopeSelectionError, bind_scope
 
 ADMIN_SOURCES_FORM_OUTPUT = (
     "[if(or(equals(steps('basics').firewallType, 'ubuntu'), "
@@ -22,10 +23,14 @@ FIREWALL_TYPES = ["ubuntu", "checkpoint-byol", "checkpoint-vmss"]
 class ProfilePublisher:
     def __init__(self, credential, account_url: str, api_url: str, api_resource: str,
                  authority_tenant: str, template_directory: Path | None = None,
-                 admin_allowed_sources: list[str] | None = None) -> None:
+                 admin_allowed_sources: list[str] | None = None,
+                 provider_scope: ProviderScope | None = None) -> None:
+        self.provider_scope = provider_scope
         self.admin_sources = normalize_admin_sources([] if admin_allowed_sources is None else admin_allowed_sources)
         self.api_url = endpoint(api_url, ".azurewebsites.net")
         self.authority = uuid_text(authority_tenant)
+        if provider_scope is not None and provider_scope.tenant != self.authority:
+            raise ValueError("Provider scope authority does not match the provider tenant")
         if not api_resource.startswith("api://"):
             raise ValueError("Invalid API resource")
         uuid_text(api_resource.removeprefix("api://"))
@@ -151,6 +156,17 @@ class ProfilePublisher:
             raise ValueError("Customer secret must be a required empty UI field")
         fields["apiClientId"]["defaultValue"] = customer.client
         fields["runId"].update(defaultValue=defaults["runId"], visible=False)
+        if self.provider_scope is not None:
+            try:
+                self.provider_scope.validate(customer.scope_mode, customer.provider_lab_acknowledged,
+                                             customer.tenant, customer.subscription)
+            except ScopeSelectionError as error:
+                raise ValueError("Provider lab enrollment scope is invalid") from error
+        if customer.scope_mode == "provider-lab":
+            if self.provider_scope is None:
+                raise ValueError("Provider scope is not configured")
+        bind_scope(parameters, fields, customer.scope_mode, customer.tenant, customer.subscription,
+                   self.provider_scope.protected_groups if self.provider_scope is not None else ())
         return template, form
 
     def publish(self, customer: CustomerBinding) -> dict:

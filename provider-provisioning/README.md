@@ -1,6 +1,9 @@
 # CFWaaS technical operator guide
 
 **New administrator? Start with [Deploy from zero](../docs/getting-started.md).**
+For the new opt-in VMSS peering deployment, including release settings,
+dual-tenant authorization and qualification limits, see
+[automated peering lab](../docs/getting-started.md#optional-automated-peering-lab).
 This technical reference includes historical experiments as well as current
 implementation details. Use the current overview below and EW-44 through EW-46
 for recent results; older "unwired" or "not deployed" descriptions record their
@@ -1298,12 +1301,61 @@ The two runtime exceptions requiring explicit approval are:
 1. Keep worker **SCM management** reachable from the operator's public `/32`,
    with Entra publishing authorization and basic authentication disabled.
    Worker application ingress still denies all.
-2. Let customer `deploymentScripts` create its **own transient ACI and
-   shared-key backing storage**. This does not reopen public access or enable
-   shared keys on the provider's private operations account.
+2. Let customer `deploymentScripts` create its **own transient ACI**, using
+   dedicated customer-owned Azure Files backing accounts. Only those accounts
+   receive `SecurityControl=Ignore` and permit shared keys, after the existing
+   explicit approval. The exception is not attached to the script containers.
+   Provider application Blob access remains Entra-based with shared keys
+   disabled; Operations storage and Key Vault remain private.
 
 These require dedicated CLI approval flags as well as `--execute`. No code
 silently weakens either boundary to recover from a deployment error.
+
+Azure deploymentScripts currently requires an access key for its supporting
+Azure Files mount; changing the application's Blob SDK authentication does not
+change that platform dependency. See
+[Microsoft's backing-storage requirements](https://learn.microsoft.com/azure/azure-resource-manager/bicep/deployment-script-develop#use-an-existing-storage-account).
+The proof and network connector each use a separately named backing account.
+Because these accounts are explicitly deployed, they remain customer-owned
+resources after script cleanup and must be included in customer-led lab
+cleanup. No account keys are returned in template outputs or logged.
+
+**Fix published and verified (2026-11-08):** fresh customer deployment links
+contain the dedicated proof/connector backing accounts. An isolated first-use
+deployment-script test returned `StorageReady`; its temporary resources were
+removed. Generate a new deployment link to use the fix. Enrollment tenant and
+subscription restrictions are unchanged.
+
+### Deployment scope selection
+
+Provider onboarding offers **Customer tenant/subscription (separate)** by
+default and **Provider tenant/subscription (lab only)** as an explicit opt-in.
+The lab option fills and locks the IDs from trusted server configuration and
+requires an acknowledgement that the lab does not test cross-tenant
+organizational isolation. It creates a new enrollment and API client; it does
+not retarget an existing customer or grant cross-tenant Azure permissions.
+
+The issued Azure wizard displays the approved scope and exact tenant and
+subscription. Its scope choice is restricted to that enrollment. To change
+scope, create another enrollment. Both variants retain separate customer and
+provider groups/VNets, the same VPN/firewall traffic path, the storage exception
+approval, and the optional high-performance customer VMs.
+
+The full customer template checks enrollment scope and group tags before
+creating its identity, role assignments, or supporting storage. Provider-only
+labs also reject the provider's protected control/dataplane groups.
+
+Management uses `FAAS_PROVIDER_SUBSCRIPTION_ID` and the JSON array
+`FAAS_PROVIDER_PROTECTED_RESOURCE_GROUP_IDS` for trusted lab defaults. Provider
+installation sets these from its own control/dataplane scopes. Without complete
+configuration, the provider-only option is explicitly unavailable; existing
+separate-customer onboarding remains supported. Legacy CLI preparation remains
+separate-customer only.
+
+The automated peering workflow remains separate-tenant/subscription only.
+Provider-only lab enrollments use the VPN deployment link and are not offered
+in the peering customer picker. Existing peering features and authorization
+checks are preserved.
 
 ### Live network prerequisites
 
@@ -1654,6 +1706,15 @@ customer region and sizing dropdowns, plus the native subscription/RG picker:
 | Customer delivery VPN gateway | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
 | Provider VPN gateway (both provider gateways) | VpnGw1AZ, VpnGw2AZ, VpnGw3AZ, VpnGw4AZ, VpnGw5AZ | VpnGw1AZ |
 | Test workload VMs | Standard (`Standard_B1ms`), High performance (`Standard_D8s_v6`) | Standard |
+
+**Performance option published and verified (2026-11-08):** the existing provider
+management portal now issues customer deployment forms/templates containing
+the optional high-performance profile. Generate a new **Deployment link** to
+use it; earlier immutable links retain their original assets. Only the two
+customer deployment assets were updated; the later provider VPN sizing change
+was not included. Standard remains the default, and existing labs were not
+changed. This verifies publication, not a new high-performance VM deployment
+or its in-guest MANA driver.
 
 High performance deploys both test VMs (10.211.0.4 and 10.212.0.4) as
 `Standard_D8s_v6` with accelerated networking (MANA, required by the size) and

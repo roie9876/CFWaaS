@@ -12,6 +12,8 @@ param tableEndpoint string
 param apiUrl string
 param apiApplicationId string
 param apiRoleId string
+@description('Provider-owned dataplane group protected from co-located customer lab deployments.')
+param providerDataPlaneResourceGroupId string = ''
 param managementApplicationId string
 @description('Optional preapproved management app hostname. Empty retains the original generated name.')
 param managementAppName string = ''
@@ -138,6 +140,8 @@ resource app 'Microsoft.Web/sites@2023-12-01' = {
         { name: 'WEBSITE_DNS_SERVER', value: '168.63.129.16' }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'true' }
         { name: 'FAAS_MANAGEMENT_TENANT_ID', value: tenant().tenantId }
+        { name: 'FAAS_PROVIDER_SUBSCRIPTION_ID', value: subscription().subscriptionId }
+        { name: 'FAAS_PROVIDER_PROTECTED_RESOURCE_GROUP_IDS', value: string(concat([resourceGroup().id], empty(providerDataPlaneResourceGroupId) ? [] : [providerDataPlaneResourceGroupId])) }
         { name: 'FAAS_MANAGEMENT_CLIENT_ID', value: managementApplicationId }
         { name: 'FAAS_MANAGEMENT_CLIENT_SECRET', value: '@Microsoft.KeyVault(SecretUri=${managementSecretUri})' }
         { name: 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET', value: '@Microsoft.KeyVault(SecretUri=${managementSecretUri})' }

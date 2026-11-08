@@ -51,7 +51,15 @@ actual Check Point solution works.
 ## Tenant and trust boundary
 
 Treat the customer and Check Point as separate organizations, Azure tenants,
-and subscriptions. Neither side may receive Azure RBAC, service-principal
+and subscriptions by default. The explicitly acknowledged `provider-lab`
+onboarding mode is a nonproduction convenience variant that places both sides
+in the provider tenant/subscription. It does not qualify cross-tenant isolation.
+Keep separate customer/provider resource groups and VNets, preserve the VPN
+traffic path, bind the mode to trusted provider scope, and reject protected
+provider groups before customer resource creation. Never silently rebind an
+existing enrollment or disable scope checks.
+
+For the default two-organization path, neither side may receive Azure RBAC, service-principal
 permissions, or other Azure management control over the other side. Do not
 use cross-tenant VNet peering as a substitute for the VPN, or introduce a
 workaround that gives either side control over the other's Azure environment.

@@ -30,7 +30,7 @@ param apiAuthorityTenantId string = ''
 param apiClientId string = ''
 @secure()
 param apiClientSecret string = ''
-@description('Separate temporary ACI/shared-key supporting storage; never the private operations account.')
+@description('Separate dedicated customer-owned Azure Files backing storage; never the private operations account.')
 @allowed([true])
 param approveDeploymentScriptBackingException bool
 @minValue(60)
@@ -38,6 +38,7 @@ param approveDeploymentScriptBackingException bool
 @maxValue(14100)
 param waitSeconds int = firewallType != 'ubuntu' ? 14100 : 6900
 param networkAttemptTag string = utcNow()
+var backingAccountName = 'stfaasds${uniqueString(resourceGroup().id, runId, 'network')}'
 resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'customer-network-connector'
   location: executionLocation
@@ -50,6 +51,10 @@ resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     cleanupPreference: 'Always'
     retentionInterval: 'P1D'
     forceUpdateTag: networkAttemptTag
+    storageAccountSettings: {
+      storageAccountName: backing.name
+      storageAccountKey: backing.listKeys().keys[0].value
+    }
     environmentVariables: [
       { name: 'FAAS_CONNECTOR_MODE', value: 'network' }
       { name: 'FAAS_FIREWALL_TYPE', value: firewallType }
@@ -78,6 +83,25 @@ resource network 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
     ]
     // Keep ephemeral secure-parameter files off the supporting Azure Files mounts.
     scriptContent: 'set -euo pipefail\ncd "$HOME"\npython3 - <<\'FAAS_CONNECTOR_PY\'\n${loadTextContent('../scripts/customer_connector.py')}\nFAAS_CONNECTOR_PY\n'
+  }
+}
+resource backing 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  //checkov:skip=CKV_AZURE_35:Approved deployment-script Azure Files backing storage requires public routing; Operations stays private.
+  //checkov:skip=CKV_AZURE_59:Only this dedicated, approved backing account permits shared keys; anonymous access remains disabled.
+  //checkov:skip=CKV_AZURE_43:stfaasds plus uniqueString is a valid lowercase alphanumeric account name.
+  //checkov:skip=CKV_AZURE_206:Disposable script backing storage uses LRS, not production state storage.
+  name: backingAccountName
+  location: executionLocation
+  tags: { purpose: 'provider-provisioning-customer-auth', labRun: runId, SecurityControl: 'Ignore' }
+  kind: 'StorageV2'
+  sku: { name: 'Standard_LRS' }
+  properties: {
+    allowSharedKeyAccess: approveDeploymentScriptBackingException
+    allowBlobPublicAccess: false
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    publicNetworkAccess: 'Enabled'
+    networkAcls: { defaultAction: 'Allow', bypass: 'None' }
   }
 }
 output networkResult object = {

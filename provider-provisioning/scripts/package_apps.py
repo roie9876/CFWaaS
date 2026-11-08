@@ -71,6 +71,7 @@ def package(output: Path, checkpoint_source: Path | None = None) -> dict:
     template = compile_bicep("provider-dataplane.bicep")
     customer_template = json.loads(compile_bicep("customer-connections.bicep"))
     customer_deployment = compile_bicep("customer-deployment.bicep")
+    peering_customer = compile_bicep("peering-customer.bicep")
     provider_guided = compile_bicep("provider-guided-installation.bicep")
     template_sha256 = hashlib.sha256(template).hexdigest()
     output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -107,6 +108,7 @@ def package(output: Path, checkpoint_source: Path | None = None) -> dict:
                     archive.write(path, path.relative_to(ROOT))
             archive.writestr("service/templates/provider.json", template)
             archive.writestr("service/templates/customer.json", customer_deployment)
+            archive.writestr("service/templates/peering-customer.json", peering_customer)
             archive.writestr("service/templates/customer-connections.json",
                              json.dumps(customer_template, separators=(",", ":")))
             archive.writestr("service/templates/customer-form.json",

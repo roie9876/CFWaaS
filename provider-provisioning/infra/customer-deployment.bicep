@@ -24,6 +24,9 @@ param customerDeliveryVpnGatewaySku string = 'VpnGw1AZ'
 param providerVpnGatewaySku string = 'VpnGw1AZ'
 @allowed(['standard', 'high-performance'])
 param workloadVmProfile string = 'standard'
+@allowed(['customer', 'provider-lab'])
+param scopeMode string = 'customer'
+param providerProtectedResourceGroupIds array = []
 param enrolledCustomerResourceGroupId string = ''
 param expectedCustomerSubscriptionId string
 param expectedCustomerTenantId string
@@ -44,6 +47,34 @@ var oldTags = resourceGroup().?tags ?? {}
 var deploymentRunId = '${take(runId, 18)}-${uniqueString(resourceGroup().id, runId)}'
 var scopeMatches = subscription().subscriptionId == expectedCustomerSubscriptionId && tenant().tenantId == expectedCustomerTenantId && (empty(enrolledCustomerResourceGroupId) || toLower(resourceGroup().id) == toLower(enrolledCustomerResourceGroupId))
 var tagsMatch = (oldTags.?labRun ?? deploymentRunId) == deploymentRunId && (oldTags.?purpose ?? 'provider-provisioning') == 'provider-provisioning'
+var protectedProviderGroups = [for group in providerProtectedResourceGroupIds: toLower(group)]
+var groupMatches = scopeMode != 'provider-lab' || (!empty(protectedProviderGroups) && !contains(protectedProviderGroups, toLower(resourceGroup().id)))
+// Native ARM keeps this validation runtime-bound; Bicep module typing would require a literal true.
+#disable-next-line no-deployments-resources
+resource scopeCheck 'Microsoft.Resources/deployments@2025-04-01' = {
+  name: 'customer-enrollment-scope-check'
+  properties: {
+    expressionEvaluationOptions: { scope: 'inner' }
+    mode: 'Incremental'
+    parameters: {
+      deploymentMatchesApprovedEnrollment: { value: scopeMatches && tagsMatch && groupMatches }
+    }
+    template: {
+      '$schema': 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+      contentVersion: '1.0.0.0'
+      parameters: {
+        deploymentMatchesApprovedEnrollment: {
+          type: 'bool'
+          allowedValues: [true]
+          metadata: {
+            description: 'Select the enrolled tenant/subscription and a separate customer group, not a protected provider group.'
+          }
+        }
+      }
+      resources: []
+    }
+  }
+}
 resource enrollmentTags 'Microsoft.Resources/tags@2021-04-01' = if (scopeMatches && tagsMatch) {
   name: 'default'
   properties: { tags: union(oldTags, { purpose: 'provider-provisioning', labRun: deploymentRunId }) }
@@ -53,6 +84,7 @@ resource caller 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = 
   name: 'id-customer-${uniqueString(resourceGroup().id, runId)}'
   location: 'eastus2'
   tags: { purpose: 'provider-provisioning-customer-auth', labRun: deploymentRunId }
+  dependsOn: [scopeCheck]
 }
 resource customerScopeReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, caller.id, 'customer-scope-reader')

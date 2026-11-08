@@ -99,6 +99,7 @@ module management 'provider-management.bicep' = {
     apiApplicationId: apiApplicationId
     apiRoleId: apiRoleId
     managementApplicationId: managementApplicationId
+    providerDataPlaneResourceGroupId: dataplane.id
     managementAppName: managementAppName
     managementApplicationSecret: managementApplicationSecret
     setupVaultResourceGroupName: setupVaultResourceGroupName

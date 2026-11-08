@@ -23,6 +23,7 @@ from service.config import Customer, Settings
 from service.customer_stores import CustomerStores
 from service.enrollment import CustomerBinding, EnrollmentError
 from service.management import ManagementSettings, create_app, directory_settings
+from service.deployment_scope import ProviderScope, ScopeSelectionError
 from service.management_auth import ManagementAuthenticator
 from service.models import EnvironmentRequest
 from service.profiles import ProfilePublisher
@@ -100,6 +101,60 @@ def test_console_does_not_replace_forbidden_admin_response(dependencies, signing
     response = client.get("/", headers=headers)
     assert response.status_code == 403
     assert response.json() == {"detail": "AdministratorNotAuthorized"}
+
+def test_provider_scope_is_unavailable_until_configured(dependencies):
+    client, service, headers = dependencies
+    assert client.get("/admin/deployment-scopes").status_code == 401
+    assert client.get("/admin/deployment-scopes", headers=headers).json() == {
+        "providerLab": {"available": False, "reason": "ProviderScopeNotConfigured"}}
+    response = client.post("/admin/customers", headers=headers, json={
+        "name": "Provider lab", "tenantId": TENANT, "subscriptionId": uid(30),
+        "scopeMode": "provider-lab", "providerLabAcknowledged": True})
+    assert response.status_code == 503
+    assert response.json()["detail"] == "ProviderScopeNotConfigured"
+    service.onboard.assert_not_called()
+
+
+@pytest.mark.parametrize("mode,acknowledged,tenant,subscription,expected", [
+    ("provider-lab", False, TENANT, uid(30), 422),
+    ("provider-lab", True, uid(31), uid(30), 422),
+    ("provider-lab", True, TENANT, uid(31), 422),
+    ("customer", False, TENANT, uid(30), 422),
+    ("customer", False, uid(31), uid(32), 200),
+    ("provider-lab", True, TENANT, uid(30), 200),
+])
+def test_provider_lab_requires_acknowledged_trusted_scope(signing, mode, acknowledged,
+                                                         tenant, subscription, expected):
+    service = Mock()
+    service.onboard.return_value = {"customerId": uid(40), "status": "Ready"}
+    protected = f"/subscriptions/{uid(30)}/resourceGroups/provider-control"
+    scope = ProviderScope(TENANT, uid(30), (protected,))
+    with TestClient(create_app(service, authentication(signing), provider_scope=scope),
+                    base_url=ORIGIN) as client:
+        headers = {"x-ms-token-aad-id-token": identity(signing), "Origin": ORIGIN,
+                   "Idempotency-Key": str(uuid4())}
+        assert client.get("/admin/deployment-scopes", headers=headers).json() == {
+            "providerLab": {"available": True, "tenantId": TENANT, "subscriptionId": uid(30)}}
+        response = client.post("/admin/customers", headers=headers, json={
+            "name": "Scoped lab", "tenantId": tenant, "subscriptionId": subscription,
+            "scopeMode": mode, "providerLabAcknowledged": acknowledged})
+        assert response.status_code == expected
+        if expected == 200:
+            body = service.onboard.call_args.args[0]
+            assert body.scopeMode == mode
+            assert (body.tenantId, body.subscriptionId) == (tenant, subscription)
+        else:
+            service.onboard.assert_not_called()
+
+
+def test_provider_scope_rejects_unprotected_or_foreign_configuration():
+    with pytest.raises(ValueError, match="protected resource groups are required"):
+        ProviderScope(TENANT, uid(30), ())
+    with pytest.raises(ValueError, match="Invalid provider protected"):
+        ProviderScope(TENANT, uid(30), (f"/subscriptions/{uid(31)}/resourceGroups/control",))
+    scope = ProviderScope(TENANT, uid(30), (f"/subscriptions/{uid(30)}/resourceGroups/control",))
+    with pytest.raises(ScopeSelectionError, match="ProviderLabModeRequired"):
+        scope.validate("customer", False, uid(31), uid(30))
 
 
 @pytest.mark.parametrize("fragment,removed", [

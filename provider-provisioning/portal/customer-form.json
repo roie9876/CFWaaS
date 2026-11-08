@@ -17,6 +17,27 @@
               }
             },
             {
+              "name": "scopeMode",
+              "type": "Microsoft.Common.DropDown",
+              "label": "Approved deployment scope",
+              "defaultValue": "Customer tenant/subscription (separate)",
+              "toolTip": "The provider selects this scope during onboarding. The issued link restricts this field to that approved scope. A provider-only lab does not test cross-tenant organizational isolation.",
+              "constraints": {
+                "required": true,
+                "allowedValues": [
+                  {"label": "Customer tenant/subscription (separate)", "value": "customer"},
+                  {"label": "Provider tenant/subscription (lab only)", "value": "provider-lab"}
+                ]
+              }
+            },
+            {
+              "name": "deploymentScopeNotice",
+              "type": "Microsoft.Common.TextBlock",
+              "options": {
+                "text": "Use the tenant/subscription approved during onboarding and a separate customer resource group. The provider fills the exact scope in newly issued deployment links."
+              }
+            },
+            {
               "name": "customerLocation",
               "type": "Microsoft.Common.DropDown",
               "label": "Customer resource region",
@@ -237,6 +258,7 @@
     },
     "outputs": {
       "parameters": {
+        "scopeMode": "[steps('basics').scopeMode]",
         "location": "[steps('basics').customerLocation]",
         "firewallType": "[steps('basics').firewallType]",
         "adminAllowedSources": "[if(or(equals(steps('basics').firewallType, 'ubuntu'), empty(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''))), parse('[]'), split(replace(coalesce(steps('basics').adminAllowedSources, ''), ' ', ''), ','))]",

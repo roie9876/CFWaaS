@@ -17,9 +17,140 @@ They have separate Azure tenants and subscriptions.
 | Provider onboarding/firewall administrator | Provider only | Onboard customers, operate policy and view connection details |
 | Customer administrator | Customer only | Deploy customer resources and configure customer routes/peerings |
 
-One person can fill several roles in a lab, but must sign into the correct
+For the default VPN deployment, one person can fill several roles in a lab, but must sign into the correct
 tenant for each operation. Do **not** grant the provider access to customer
 Azure or vice versa. A VPN shared key is not an Azure management permission.
+
+### Optional automated peering lab
+
+The provider portal now offers **Deployment options > Cross vNet Peering
+Check Point VMSS**. This is an explicitly authorized lab alternative, not a
+change to the default VPN onboarding or its trust boundary.
+
+The new option creates dedicated resource groups in two separate subscriptions
+and tenants. Each customer VNet peers only with the Check Point security VNet.
+Static workload UDRs send the other customer's workload prefix and `0.0.0.0/0`
+to the internal Standard load balancer at `172.22.20.4`. The runner configures
+static customer routes on both gateway instances; no VPN gateways, Route Server,
+Routing Appliance or BGP are created. E-W has no NAT; outbound Internet traffic
+uses the existing Check Point policy/NAT. Inbound published applications are
+outside this option.
+
+**One-time authorization and release setup:**
+
+- Use the portal administrator for provider authorization and an authorized
+  administrator in the enrolled customer tenant for customer authorization.
+  Each needs deployment permission for its own new lab group and permission to
+  create role assignments there; the provider administrator also assigns the
+  existing runner's roles. These user sign-ins deploy everything except the
+  peering links themselves.
+- **Cross-tenant peering uses a dedicated peering identity, not the user sign-ins.**
+  ARM rejects a primary user token combined with an auxiliary token from a
+  different user (`AuxiliaryTokensInvalidUserIdentity`). All four peerings
+  therefore use one multitenant application, "CFWaaS Peering Network", which
+  exists in both tenants. It has **no password or certificate**: a federated
+  credential trusts only a user-assigned managed identity attached to the
+  management App Service. Before peering, each tenant's administrator grants
+  that application **Network Contributor on only its own lab VNets** (the provider
+  security VNet and the two customer workload VNets).
+- One-time peering identity setup:
+  1. Provider: create the user-assigned identity, attach it to the management
+     App Service, create the multitenant application with a federated credential
+     (issuer `https://login.microsoftonline.com/<provider-tenant>/v2.0`, subject =
+     that identity's principal ID, audience `api://AzureADTokenExchange`) and its
+     provider-tenant service principal.
+  2. Customer: a customer-tenant Entra administrator creates the application's
+     service principal there, for example in Cloud Shell in that tenant:
+     `az ad sp create --id <peering-application-client-id>`.
+     Confirm the directory first. A consent link accepted in the wrong tenant, or
+     by a non-administrator, leaves the lab at
+     `PeeringCustomerTenantConsentRequired` (Entra `AADSTS7000229`).
+  3. Set `FAAS_PEERING_NETWORK_CLIENT_ID` and
+     `FAAS_PEERING_NETWORK_IDENTITY_CLIENT_ID` on the management App Service.
+  The portal surfaces any Entra error number on the lab card; then use
+  **Resume / retry existing lab**. A brief 403 while new roles propagate is retried
+  automatically.
+  No customer Azure role is granted to a provider managed identity or API client.
+- An authorized Entra administrator must prepare a publisher-owned multitenant
+  public-client registration with device-code sign-in and delegated Azure
+  Service Management `user_impersonation` consent in both tenants. Tenant
+  Conditional Access/MFA policies still apply. The portal does not create guest
+  invitations, grant that consent, or elevate the signed-in user's permissions.
+- Rebuild and publish the management package and Check Point runner image.
+  The management package must contain `service/templates/peering-customer.json`;
+  `scripts/package_apps.py` now compiles and includes it. The runner must include
+  the new schema-5 static-peering configuration and the existing pinned VMSS
+  Terraform artifact. Do not enable this mode against an older runner image.
+- When updating an existing portal, `scripts/prepare_peering_publish.py` prepares
+  an overlay over an exact verified live ZIP, preserving the existing compiled
+  customer assets and checking their Check Point template pins. Its input
+  release-state snapshot and output must remain under private local storage;
+  never commit package URLs, credentials or full App Service settings.
+  Validate the exact merged candidate before publishing, not just the source tree.
+- On the **management App Service only**, configure `FAAS_PEERING_LAB_ENABLED=true`,
+  `FAAS_PEERING_OAUTH_CLIENT_ID`, `FAAS_PROVIDER_SUBSCRIPTION_ID`,
+  `FAAS_NVA_SSH_PUBLIC_KEY`, `FAAS_PEERING_NETWORK_CLIENT_ID`,
+  `FAAS_PEERING_NETWORK_IDENTITY_CLIENT_ID`, and the existing pinned `FAAS_CHECKPOINT_*` release
+  settings, including `FAAS_CHECKPOINT_ENABLED=true`, foundation/private template
+  hashes, publisher identity and control group, registry/image digest, explicit
+  appliance image versions and VM sizes. Peering does not use the managed-host
+  allocator or require its configuration. Operations storage and management
+  Key Vault remain private.
+
+Azure subscription Owner is not sufficient to grant Entra tenant consent.
+Have an authorized Entra administrator approve the public client's ARM-only
+delegated scope where tenant consent policy requires it. Do not grant additional
+Graph permissions or change tenant policy to work around a consent failure.
+
+**Deploy from the portal:**
+
+1. Select a Ready customer enrollment, enter the workload SSH **public** key and
+   approved Check Point administrator public IPv4 hosts/CIDRs.
+2. Explicitly approve lab costs and cross-tenant peering, then create the lab.
+3. Use **Authorize provider tenant** and **Authorize customer tenant** to finish
+   Microsoft sign-in. Device codes are short-lived; access/refresh tokens never
+   enter browser storage, deployment links, ordinary operation rows or logs.
+   MSAL caches are stored only in the private management vault and retired
+   after completion/failure.
+4. The server advances persisted deployment stages automatically. ARM and the
+   runner continue if the browser closes; after a server restart, deployment
+   resumes while authorization remains valid. Permission or consent errors
+   are surfaced explicitly. An expired login invalidates only that tenant;
+   an Azure permissions error retains completed logins and pauses at NeedsAttention.
+   Resolve permissions and use **Resume / retry existing lab** instead of creating
+   a new attempt. The deployment deadline is six hours.
+
+The active-lab limit is three pending attempts. **Cancel pending lab** stops future
+orchestration and releases an unused attempt's slot; it does not delete Azure
+resources, and an already-running ARM operation may still finish. Cancelled
+attempts cannot be resumed. Temporary authorization caches are retired by the
+background worker.
+
+Both workload VMs use the existing Ubuntu 24.04 high-performance profile:
+`Standard_D8s_v6`, Accelerated Networking, NVMe, MTU 9000, an HTTP receiver and
+iperf3. They have **no public IPs**. Only after the firewall and peerings are
+ready are the VMs deployed. Managed Run Command must find an actual `mana`
+driver on each VM, verify bidirectional original-source HTTP connectivity, and
+verify HTTPS Internet egress before the job reports Ready. A placement without
+MANA fails explicitly; it is never relabeled as a MANA VM.
+
+The fixed customer prefixes are `10.211.0.0/16` and `10.212.0.0/16`; the provider
+security VNet is `172.22.0.0/16`. This dedicated option is limited to East US 2.
+Check capacity, MANA-compatible hardware/OS, host-encryption registration,
+Marketplace terms and licensing in the approved subscriptions before spending.
+
+**Limits:** this new path is offline-tested, not live-qualified. Ready establishes
+the stated MANA/connectivity checks, not firewall-log correlation, HA/stateful
+failover, scaling or production readiness. The provider group is owner-authorized,
+not protected by the VPN path's managed-application deny assignment. Peering
+jobs and appliance credentials do not use the VPN operation registry/reveal
+flow; appliance credentials remain in the environment's private vault.
+Failed resources are retained for diagnosis. Existing **Decommission** actions
+apply only to VPN-managed environments; they do not delete peering labs.
+
+References: [cross-tenant peering authorization](https://learn.microsoft.com/azure/virtual-network/create-peering-different-subscriptions),
+[UDR service chaining](https://learn.microsoft.com/azure/virtual-network/virtual-network-peering-overview#service-chaining),
+[MANA hardware and OS requirements](https://learn.microsoft.com/azure/virtual-network/accelerated-networking-mana-overview).
 
 > **Important:** the GitHub source alone is not a ready-made public installer.
 > A provider-owned release account, package and setup Template Spec must exist

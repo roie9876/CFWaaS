@@ -336,3 +336,36 @@ def test_provider_settings_validate_optional_office_home_defaults(monkeypatch):
     monkeypatch.setenv("FAAS_ADMIN_ALLOWED_SOURCES", '["0.0.0.0/0"]')
     with pytest.raises(ValueError):
         ManagementSettings.from_env()
+
+
+class DictionaryRulebaseApi(AdminApi):
+    """Real Management API shape: rule actions are UIDs resolved through objects-dictionary."""
+
+    def __init__(self, action_name="Drop"):
+        super().__init__()
+        self.rules[-1]["action"] = "action-uid"
+        self.action_name = action_name
+
+    def call(self, command, body, allowed=()):
+        result = super().call(command, body, allowed)
+        if command == "show-access-rulebase":
+            result["objects-dictionary"] = [{"uid": "other", "name": "Accept"},
+                                            {"uid": "action-uid", "name": self.action_name}]
+        return result
+
+
+def test_admin_policy_resolves_cleanup_action_uid_through_objects_dictionary():
+    api = DictionaryRulebaseApi()
+    assert configurator(api, ["8.8.8.8"]).run() == gaia.BgpStatus(2, 2)
+    assert any(command == "install-policy" for command, _ in api.requests)
+    assert not any(command == "set-access-rule" for command, _ in api.requests)
+
+
+@pytest.mark.parametrize("action_name", ["Accept", None])
+def test_admin_policy_rejects_cleanup_rule_that_is_not_drop_or_unresolved(action_name):
+    api = DictionaryRulebaseApi(action_name or "Drop")
+    if action_name is None:
+        api.rules[-1]["action"] = "missing-uid"
+    with pytest.raises(gaia.CheckpointGaiaError, match="drop cleanup rule"):
+        configurator(api, ["8.8.8.8"]).run()
+    assert not any(command == "install-policy" for command, _ in api.requests)

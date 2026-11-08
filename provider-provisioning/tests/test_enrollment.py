@@ -203,6 +203,28 @@ def error(code, call):
     assert SECRET not in str(caught.value)
     return caught.value
 
+def test_customer_scope_defaults_preserve_legacy_onboarding_fields():
+    body = request()
+    assert body.enrollment_fields() == {
+        "name": body.name, "tenantId": body.tenantId, "subscriptionId": body.subscriptionId,
+        "credentialHours": 24, "maxEnvironments": 3}
+    with pytest.raises(ValidationError, match="ProviderLabAcknowledgementRequired"):
+        request(scopeMode="provider-lab")
+
+
+def test_provider_lab_scope_is_persisted_without_rebinding_other_customers(env):
+    existing = onboard(env)
+    body = request(scopeMode="provider-lab", providerLabAcknowledged=True)
+    created = onboard(env, body)
+    assert created["scopeMode"] == "provider-lab"
+    binding = env.registry._binding(env.registry._customer(created["customerId"]))
+    assert binding.scope_mode == "provider-lab" and binding.provider_lab_acknowledged
+    assert env.registry.get(existing["customerId"])["tenantId"] == existing["tenantId"]
+    assert "scopeMode" not in env.registry.get(existing["customerId"])
+    row = env.backend.rows[(PARTITION, "customer:" + created["customerId"])]
+    row["providerLabAcknowledged"] = False
+    error("EnrollmentStoreUnavailable", lambda: env.registry.get(created["customerId"]))
+
 
 def test_archive_requires_revocation_and_retains_worker_and_audit_records(env):
     customer = onboard(env)

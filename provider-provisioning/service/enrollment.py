@@ -16,9 +16,10 @@ from datetime import datetime, timezone
 from typing import Callable, Protocol, TypeVar, TypedDict
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .store import Backend, Change, Conflict, Row
+from .deployment_scope import ScopeMode, ScopeSelectionError, scope_mode
 
 PARTITION = "enrollments"
 ATTEMPTS = 8
@@ -54,6 +55,8 @@ class EnrollmentRequest(BaseModel):
     subscriptionId: str
     credentialHours: int = Field(default=24, ge=1, le=8760)
     maxEnvironments: int = Field(default=3, ge=0)
+    scopeMode: ScopeMode = "customer"
+    providerLabAcknowledged: bool = False
 
     @field_validator("tenantId", "subscriptionId")
     @classmethod
@@ -66,6 +69,21 @@ class EnrollmentRequest(BaseModel):
         if not value.strip() or any(ord(char) < 32 for char in value):
             raise ValueError("Expected a customer name")
         return value
+
+    @model_validator(mode="after")
+    def acknowledged_scope(self) -> "EnrollmentRequest":
+        if self.scopeMode == "provider-lab" and not self.providerLabAcknowledged:
+            raise ValueError("ProviderLabAcknowledgementRequired")
+        if self.scopeMode == "customer" and self.providerLabAcknowledged:
+            raise ValueError("ProviderLabAcknowledgementRequiresLabMode")
+        return self
+
+    def enrollment_fields(self) -> dict:
+        values = self.model_dump()
+        if self.scopeMode == "customer":
+            values.pop("scopeMode")
+            values.pop("providerLabAcknowledged")
+        return values
 
 
 class RotationRequest(BaseModel):
@@ -84,6 +102,8 @@ class CustomerBinding:
     max_environments: int
     status: str
     allocation_key: str = ""
+    scope_mode: ScopeMode = "customer"
+    provider_lab_acknowledged: bool = False
 
 
 @dataclass(frozen=True)
@@ -191,11 +211,23 @@ class EnrollmentRegistry:
         return rows
 
     @staticmethod
+    def _scope(row: Row) -> tuple[ScopeMode, bool]:
+        try:
+            mode = scope_mode(row.get("scopeMode", "customer"))
+            acknowledged = row.get("providerLabAcknowledged", False) is True
+            if mode == "provider-lab" and not acknowledged:
+                raise ScopeSelectionError("ProviderLabAcknowledgementRequired")
+        except ScopeSelectionError:
+            raise EnrollmentError(503, "EnrollmentStoreUnavailable") from None
+        return mode, acknowledged
+
+    @staticmethod
     def _safe(row: Row) -> dict:
+        EnrollmentRegistry._scope(row)
         fields = ("customerId", "name", "tenantId", "subscriptionId", "principalId",
                   "clientId", "status", "credentialHours", "credentialExpiresAt",
                   "revealed", "errorCode", "failureStage", "dependencyOperation",
-                  "dependencyReason", "recoveryGuidance")
+                  "dependencyReason", "recoveryGuidance", "scopeMode")
         safe = {key: row[key] for key in fields if key in row}
         if row.get("operation"):
             safe["recoveryAvailableAt"] = datetime.fromtimestamp(
@@ -206,12 +238,13 @@ class EnrollmentRegistry:
         tenant = str(row["tenantId"])
         customer_id = str(row["customerId"])
         allocation_key = str(row.get("allocationKey") or tenant)
+        mode, acknowledged = self._scope(row)
         if allocation_key not in (tenant, "customer:" + customer_id):
             raise EnrollmentError(503, "EnrollmentStoreUnavailable")
         return CustomerBinding(
             customer_id, str(row["name"]), tenant,
             str(row["subscriptionId"]), str(row["principalId"]), str(row["clientId"]),
-            int(row["maxEnvironments"]), str(row["status"]), allocation_key,
+            int(row["maxEnvironments"]), str(row["status"]), allocation_key, mode, acknowledged,
         )
 
     def list_customers(self) -> list[dict]:
@@ -404,7 +437,7 @@ class EnrollmentService:
             logger.warning("Legacy customer environment allocation limit is ignored")
         self._actor(actor_oid)
         operation, digest = self._operation(
-            actor_oid, idempotency_key, "onboard", request.model_dump())
+            actor_oid, idempotency_key, "onboard", request.enrollment_fields())
         customer_id = str(uuid4())
         name_key = customer_name_key(request.tenantId, request.name)
         for _ in range(ATTEMPTS):
@@ -424,7 +457,7 @@ class EnrollmentService:
                     raise EnrollmentError(409, "CustomerNameAlreadyEnrolled")
             row = _row(
                 "customer:" + customer_id, customerId=customer_id,
-                **request.model_dump(), status="Onboarding", operation=operation,
+                **request.enrollment_fields(), status="Onboarding", operation=operation,
                 allocationKey=request.tenantId if not owner else "customer:" + customer_id,
                 revealed=False, errorCode="", credentialVersion=0,
                 leaseUntil=time.time() + LEASE_SECONDS,
