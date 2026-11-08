@@ -3699,6 +3699,47 @@ def test_checkpoint_provisioner_fails_without_relaunch(checkpoint_journal, final
     assert len(fixture.puts) == 1
 
 
+def test_checkpoint_provisioner_tolerates_transient_runner_evidence(checkpoint_journal):
+    store, _, lease, _ = checkpoint_journal
+    fixture = checkpoint_provisioner_fixture(store, lease, [None, ("Running",), ("Running",), ("Terminated", 0)])
+    original = fixture.resources.resources.get_by_id.side_effect
+    partial = {"count": 0}
+
+    def starting(resource_id, api):
+        value = original(resource_id, api)
+        if resource_id.lower() == fixture.spec.job_id.lower() and partial["count"] < 2:
+            partial["count"] += 1
+            document = value.serialize()
+            document["identity"]["userAssignedIdentities"] = {
+                key: {} for key in document["identity"]["userAssignedIdentities"]}
+            return SimpleNamespace(serialize=lambda **_kwargs: document)
+        return value
+    fixture.resources.resources.get_by_id.side_effect = starting
+    run_checkpoint(fixture, store, lease)
+    assert partial["count"] == 2 and len(fixture.puts) == 1
+
+
+def test_checkpoint_provisioner_fails_on_persistent_invalid_runner_evidence(checkpoint_journal, monkeypatch):
+    from service import checkpoint_provisioner
+
+    store, _, lease, _ = checkpoint_journal
+    monkeypatch.setattr(checkpoint_provisioner, "RUNNER_OBSERVATION_TOLERANCE", 3)
+    fixture = checkpoint_provisioner_fixture(store, lease, [None] + [("Running",)] * 5)
+    original = fixture.resources.resources.get_by_id.side_effect
+
+    def wrong_image(resource_id, api):
+        value = original(resource_id, api)
+        if resource_id.lower() == fixture.spec.job_id.lower():
+            document = value.serialize()
+            document["properties"]["containers"][0]["properties"]["image"] = "attacker.example/runner:latest"
+            return SimpleNamespace(serialize=lambda **_kwargs: document)
+        return value
+    fixture.resources.resources.get_by_id.side_effect = wrong_image
+    with pytest.raises(ProvisionError) as error:
+        run_checkpoint(fixture, store, lease)
+    assert error.value.code == "CheckpointRunnerUnconfirmed" and not error.value.retryable
+
+
 def test_checkpoint_provisioner_never_relaunches_an_unconfirmed_job(checkpoint_journal, monkeypatch):
     from service import checkpoint_provisioner
 

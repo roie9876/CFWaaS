@@ -5,6 +5,7 @@ data, then exactly one runner job. The worker never reaches the environment's pr
 the runner does that inside the environment network.
 """
 import io
+import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -32,6 +33,9 @@ IDENTITY_API_VERSION = "2023-01-31"
 ROUTE_SERVER_API_VERSION = "2024-05-01"
 DEPLOYMENT_TIMEOUT = 3 * 3600
 RUNNER_TIMEOUT = 3 * 3600
+# ACI can briefly return partially populated runner evidence while the container starts.
+RUNNER_OBSERVATION_TOLERANCE = 10
+logger = logging.getLogger("faas.checkpoint")
 
 
 @dataclass(frozen=True)
@@ -146,9 +150,21 @@ class CheckpointProvisioner:
                 self.resources.resources.begin_create_or_update_by_id(
                     spec.job_id, RUNNER_API_VERSION, io.BytesIO(body), polling=False)
         deadline = time.monotonic() + RUNNER_TIMEOUT
+        rejected = 0
         while True:
             check()
-            observation = observer.observe(lease, spec)
+            try:
+                observation = observer.observe(lease, spec)
+            except CheckpointRunnerError as exc:
+                # Only waits are tolerated; success still requires a fully validated observation.
+                rejected += 1
+                logger.warning("operation=%s code=CheckpointRunnerObservationRejected attempt=%d reason=%s",
+                               spec.environment_id, rejected, exc)
+                if rejected >= RUNNER_OBSERVATION_TOLERANCE or time.monotonic() >= deadline:
+                    raise
+                self.wait(30)
+                continue
+            rejected = 0
             if observation.state == "completed":
                 if observation.exit_code != 0:
                     raise ProvisionError("CheckpointRunnerFailed", False)
