@@ -81,7 +81,7 @@ module workloads 'modules/vm.bicep' = [for (prefix, i) in prefixes: if (deployWo
     privateIp: addresses[i]
     sshPublicKey: sshPublicKey
     cloudInit: loadTextContent('cloud-init/workload-performance.yaml')
-    size: 'Standard_D8s_v6'
+    size: 'Standard_D4s_v6'
     acceleratedNetworking: true
     diskControllerType: 'NVMe'
   }

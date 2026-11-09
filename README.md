@@ -37,7 +37,7 @@ login details, routing and verification in plain language.
 
 An additional **opt-in peering lab** is available in the provider portal's
 **Deployment options** selector. It automatically deploys two customer VNets,
-two `Standard_D8s_v6` workload VMs, and the existing Check Point VMSS/LB/management
+two `Standard_D4s_v6` workload VMs, and the existing Check Point VMSS/LB/management
 release in separate customer/provider tenants. Each tenant authorizes its
 appropriate administrator; provider managed identities never deploy customer
 resources. Peering and static UDRs replace VPN, Route Server, Routing Appliance
@@ -134,6 +134,10 @@ in each direction, with **p50 10.6 ms / p99.9 39.2 ms** round-trip latency.
 See [E-W performance results](docs/ew-performance-results.md) for the
 topology, step-by-step results and the changes needed to get there.
 
+The cross-VNet peering lab, with no VPN gateways on the path, measured
+**p50 5.8 ms / p99.9 33.6 ms**, about half the VPN lab's median latency. See
+[E-W latency results, peering lab](docs/ew-performance-results-peering.md).
+
 ## Documentation
 
 | Document | Use it for |
@@ -143,6 +147,7 @@ topology, step-by-step results and the changes needed to get there.
 | [Provisioning flow](docs/provider-provisioning-flow.md) | Provider/customer ownership and control-plane design |
 | [Test register](docs/test-register.md) | What was actually measured and what remains unqualified |
 | [E-W performance results](docs/ew-performance-results.md) | Measured east-west throughput and latency, and how to reproduce them |
+| [E-W latency results, peering lab](docs/ew-performance-results-peering.md) | East-west latency through the cross-VNet peering lab, compared with the VPN lab |
 | [Security and publication](SECURITY.md) | Handling sensitive files and reporting concerns |
 | [Contributing](CONTRIBUTING.md) | Offline checks and publication boundaries |
 

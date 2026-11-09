@@ -23,7 +23,7 @@ from .checkpoint_plan import validate_checkpoint_public_key
 from .checkpoint_private_data import validate_checkpoint_private_data_outputs
 from .checkpoint_provisioner import CheckpointSettings, load_checkpoint_settings
 from .checkpoint_runner import (
-    build_checkpoint_runner_request, validate_checkpoint_runner_observation,
+    CheckpointRunnerError, build_checkpoint_runner_request, validate_checkpoint_runner_observation,
     validate_checkpoint_runner_request,
 )
 from .config import CheckpointWorkerSettings, uuid_text
@@ -42,6 +42,8 @@ SCOPES = ["https://management.azure.com/user_impersonation"]
 NETWORK_CONTRIBUTOR = "4d97b98b-1d4f-4787-a291-c67834d212e7"
 # Role assignments can take several minutes to reach ARM; peering 403s inside this window are retried.
 ROLE_PROPAGATION_SECONDS = 900
+# ACI briefly returns partially populated runner evidence while the container starts.
+RUNNER_OBSERVATION_TOLERANCE_SECONDS = 300
 # Failed labs that can be reopened: earlier stages are reused, only the runner is rerun.
 RUNNER_RETRYABLE_FAILURES = frozenset({"PeeringCheckpointRunnerFailed", "PeeringEvidenceInvalid"})
 PHASES = (
@@ -666,11 +668,22 @@ class PeeringLabs:
                     raise EnrollmentError(409, "PeeringRunnerStillActive")
                 return False
             evidence.pop("runnerRetry")
+            evidence.pop("runnerRejectedSince", None)
         if current is None:
             validate_checkpoint_runner_request(spec, body)
             self._arm("PUT", spec.job_id, "2023-05-01", tokens["provider"], json.loads(body))
             return False
-        observation = validate_checkpoint_runner_observation(current, spec)
+        try:
+            observation = validate_checkpoint_runner_observation(current, spec)
+        except CheckpointRunnerError as error:
+            # Only waiting is tolerated; success still requires a fully validated observation.
+            since = evidence.setdefault("runnerRejectedSince", int(time.time()))
+            logger.warning("environment=%s code=PeeringRunnerObservationRejected reason=%s",
+                           row["environmentId"], error)
+            if time.time() - since >= RUNNER_OBSERVATION_TOLERANCE_SECONDS:
+                raise
+            return False
+        evidence.pop("runnerRejectedSince", None)
         if observation.state == "provisioning_failed" or (
                 observation.state == "completed" and observation.exit_code != 0):
             raise EnrollmentError(422, "PeeringCheckpointRunnerFailed")
@@ -811,9 +824,11 @@ class PeeringLabs:
         except (AzureError, httpx.HTTPError):
             row.update(status="Retrying", errorCode="PeeringDependencyUnavailable")
             logger.warning("environment=%s code=PeeringDependencyUnavailable", environment)
-        except (KeyError, TypeError, ValueError):
+        except (KeyError, TypeError, ValueError) as error:
             row.update(status="Failed", errorCode="PeeringEvidenceInvalid")
-            logger.warning("environment=%s code=PeeringEvidenceInvalid", environment)
+            # Exception class only: messages may echo evidence values.
+            logger.warning("environment=%s code=PeeringEvidenceInvalid stage=%s error=%s",
+                           environment, row["stage"], type(error).__name__)
         row["busyUntil"] = 0
         self._save(row)
         return self.public(row)

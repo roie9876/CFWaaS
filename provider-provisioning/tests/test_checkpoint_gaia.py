@@ -85,6 +85,12 @@ class FakeApi:
         if task_id == "route":
             return {"task-details": [{"responseMessage": base64.b64encode(
                 b"faas-management-route-configured\n").decode()}]}
+        if task_id == "probe":
+            return {"task-details": [{"responseMessage": base64.b64encode(
+                b"cloud_balancer_port = 8117\nfaas-probe-responder-configured\n").decode()}]}
+        if task_id == "peering":
+            return {"task-details": [{"responseMessage": base64.b64encode(
+                b"faas-peering-routes-configured\n").decode()}]}
         return {}
 
     def discard_and_logout(self):
@@ -123,7 +129,8 @@ class FakeApi:
         elif command == "install-database":
             return {"tasks": [{"task-id": "database"}]}
         elif command == "run-script":
-            task = {"faas-bgp": "bgp", "faas-bgp-status": "status", "faas-management-route": "route"}
+            task = {"faas-bgp": "bgp", "faas-bgp-status": "status", "faas-management-route": "route",
+                    "faas-probe-responder": "probe", "faas-peering-routes": "peering"}
             return {"tasks": [{"task-id": task[body["script-name"]]}]}
         return {}
 

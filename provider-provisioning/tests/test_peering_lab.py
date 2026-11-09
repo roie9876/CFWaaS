@@ -145,7 +145,7 @@ def test_customer_template_deploys_exactly_two_mana_profile_vms_with_static_insp
     assert all(route["properties"]["nextHopIpAddress"] == "172.22.20.4" for route in routes["properties"]["routes"])
     workload = next(resource for resource in template["resources"] if resource["type"] == "Microsoft.Resources/deployments")
     values = workload["properties"]["parameters"]
-    assert values["size"]["value"] == "Standard_D8s_v6"
+    assert values["size"]["value"] == "Standard_D4s_v6"
     assert values["acceleratedNetworking"]["value"] is True
     assert values["diskControllerType"]["value"] == "NVMe"
     verification = next(resource for resource in template["resources"] if resource["type"].endswith("/runCommands"))
@@ -191,6 +191,12 @@ def test_gaia_peering_configures_each_gateway_without_bgp_or_nat():
         api, "00000000-0000-0000-0000-000000000004", "s" * 48, "P" * 16,
         None, None, logs.append, sleep=lambda _seconds: None, gateways=vmss.GATEWAYS,
         internal_load_balancer_ip="172.22.20.4", connectivity_mode="peering")
+    assert configurator.run() == BgpStatus(0, 0)
+    assert "health-probe-responder-configured" in logs
+    assert {targets for name, targets in api.script_targets if name == "faas-probe-responder"} == {
+        (gateway.name,) for gateway in vmss.GATEWAYS}
+    rules = {body["name"]: body for command, body in api.requests if command == "add-access-rule"}
+    assert rules[vmss.gaia.EAST_WEST_RULE]["service"] == rules[vmss.gaia.EGRESS_RULE]["service"] == "Any"
     configurator._run_script = Mock(return_value="faas-peering-routes-configured\n")
     assert configurator.ensure_peering_routes() == BgpStatus(0, 0)
     calls = configurator._run_script.call_args_list
@@ -750,6 +756,52 @@ def test_runner_retry_relaunches_once_the_old_runner_is_gone(lab):
     finally:
         module.validate_checkpoint_runner_request = original
     assert calls == ["GET", "PUT"] and evidence == {}
+
+
+def observe_runner(lab, monkeypatch, outcome, evidence):
+    import service.peering_lab as module
+    lab.service._arm = lambda *args, **kwargs: {"properties": {}}
+    lab.service._runner_spec = Mock(return_value=(SimpleNamespace(job_id="/subscriptions/x/runner"), b"{}"))
+    def validate(current, spec):
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+    monkeypatch.setattr(module, "validate_checkpoint_runner_observation", validate)
+    return lab.service._runner(lab.row, evidence, {"provider": "token"})
+
+
+def test_transient_runner_evidence_rejection_waits_instead_of_failing(lab, monkeypatch):
+    from service.checkpoint_runner import CheckpointRunnerError
+    evidence = {}
+    assert observe_runner(lab, monkeypatch, CheckpointRunnerError("Invalid Check Point runner status"), evidence) is False
+    assert evidence["runnerRejectedSince"] <= time.time()
+    running = SimpleNamespace(state="running", exit_code=None)
+    assert observe_runner(lab, monkeypatch, running, evidence) is False
+    assert "runnerRejectedSince" not in evidence
+
+
+def test_persistent_runner_evidence_rejection_still_fails(lab, monkeypatch):
+    from service.checkpoint_runner import CheckpointRunnerError
+    evidence = {"runnerRejectedSince": int(time.time()) - 301}
+    with pytest.raises(CheckpointRunnerError):
+        observe_runner(lab, monkeypatch, CheckpointRunnerError("Invalid Check Point runner image"), evidence)
+
+
+def test_transient_runner_rejection_is_persisted_by_advance_not_failed(lab, monkeypatch):
+    from service.checkpoint_runner import CheckpointRunnerError
+    row = authorize(lab)
+    row["stage"] = 6
+    lab.backend.transact([Change(row, row["_etag"])])
+    lab.service._tokens = Mock(return_value={"provider": "p", "customer": "c"})
+    lab.service._arm = lambda *args, **kwargs: {"properties": {}}
+    lab.service._runner_spec = Mock(return_value=(SimpleNamespace(job_id="/subscriptions/x/runner"), b"{}"))
+    import service.peering_lab as module
+    monkeypatch.setattr(module, "validate_checkpoint_runner_observation",
+                        Mock(side_effect=CheckpointRunnerError("Invalid Check Point runner status")))
+    result = lab.service.advance(row["environmentId"], OWNER)
+    assert result["status"] == "Deploying" and result["errorCode"] == ""
+    stored = lab.service._row(row["environmentId"], OWNER)
+    assert stored["stage"] == 6 and "runnerRejectedSince" in json.loads(stored["evidence"])
 
 
 def test_remove_hides_only_failed_labs_and_never_calls_azure(lab):

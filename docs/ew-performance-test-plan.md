@@ -4,7 +4,8 @@ Purpose: measure the **maximum east-west (E-W) throughput** and the **E-W latenc
 tail (p99.9)** between two customer workload VNets whose traffic is inspected by
 the provider Check Point firewall.
 
-Latest results: [E-W performance results](ew-performance-results.md).
+Latest results: [E-W performance results](ew-performance-results.md) (VPN lab) and
+[E-W latency results, peering lab](ew-performance-results-peering.md).
 
 Runner: [`scripts/ew_perf_test.py`](../scripts/ew_perf_test.py). It drives both
 workload VMs through `az vm run-command`, so it needs only Azure CLI access to

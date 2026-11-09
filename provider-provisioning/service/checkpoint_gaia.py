@@ -41,6 +41,19 @@ HEALTH_PROBE_RULE = "faas-lb-health-probe"
 AZURE_PROBE_HOST, AZURE_PROBE_SERVICE = "faas-azure-lb-probe", "faas-lb-probe-8117"
 AZURE_PROBE_IP = "168.63.129.16"
 EXPORT_ROUTEMAP = "faas-out"
+# The pinned VMSS bootstrap passes setHealthProbe="false", which leaves the kernel probe port at 0,
+# so gateways reset Azure load balancer probes and the internal load balancer forwards nothing.
+PROBE_RESPONDER_SCRIPT = (
+    '#!/bin/bash\nset -euo pipefail\n'
+    'fw ctl set int cloud_balancer_port 8117\n'
+    'F="$FWDIR/boot/modules/fwkern.conf"\n'
+    'touch "$F"\n'
+    '{ grep -v "^cloud_balancer_port=" "$F" || true; echo "cloud_balancer_port=8117"; } > "$F.faas"\n'
+    'cat "$F.faas" > "$F"\n'
+    'rm -f "$F.faas"\n'
+    'fw ctl get int cloud_balancer_port | grep -q "= 8117$"\n'
+    'echo faas-probe-responder-configured\n'
+)
 
 
 @dataclass(frozen=True)
@@ -460,12 +473,12 @@ class CheckpointConfigurator:
         self._ensure("show-group", "add-group", {"name": RFC1918_GROUP, "members": [item[0] for item in RFC1918]})
         self._ensure("show-access-rule", "add-access-rule", {
             "layer": ACCESS_LAYER, "position": "top", "name": EAST_WEST_RULE,
-            "source": RFC1918_GROUP, "destination": RFC1918_GROUP, "action": "Accept",
+            "source": RFC1918_GROUP, "destination": RFC1918_GROUP, "service": "Any", "action": "Accept",
             "track": {"type": "Log"}, "install-on": install_on})
         self._ensure("show-access-rule", "add-access-rule", {
             "layer": ACCESS_LAYER, "position": {"below": EAST_WEST_RULE}, "name": EGRESS_RULE,
             "source": RFC1918_GROUP, "destination": RFC1918_GROUP, "destination-negate": True,
-            "action": "Accept", "track": {"type": "Log"}, "install-on": install_on})
+            "service": "Any", "action": "Accept", "track": {"type": "Log"}, "install-on": install_on})
         rulebase = self.api.call("show-access-rulebase", {"name": ACCESS_LAYER, "limit": 50})
         rules = [rule for rule in rulebase.get("rulebase", []) if isinstance(rule, dict)
                  and rule.get("type") == "access-rule"]
@@ -529,6 +542,15 @@ class CheckpointConfigurator:
                 return status
             self.sleep(30)
 
+    def ensure_probe_responder(self) -> None:
+        if not self.scale_set:
+            return
+        for gateway in self.gateways:
+            output = self._run_script("faas-probe-responder", PROBE_RESPONDER_SCRIPT, target=gateway.name)
+            if "faas-probe-responder-configured" not in output.splitlines():
+                raise CheckpointGaiaError("Health probe responder configuration failed")
+        self.log("health-probe-responder-configured")
+
     def ensure_peering_routes(self) -> BgpStatus:
         script = (
             '#!/bin/bash\nset -euo pipefail\n'
@@ -551,6 +573,7 @@ class CheckpointConfigurator:
             self.ensure_gateway()
             self.ensure_management_logging()
             self.ensure_policy()
+            self.ensure_probe_responder()
             return self.ensure_peering_routes() if self.connectivity_mode == "peering" else self.ensure_bgp()
         finally:
             self.api.discard_and_logout()

@@ -301,6 +301,7 @@
     "archive/failed-scenarios/ew19-no-routing-appliance.md",
     "scripts/ew_perf_test.py",
     "docs/ew-performance-test-plan.md",
-    "docs/ew-performance-results.md"
+    "docs/ew-performance-results.md",
+    "docs/ew-performance-results-peering.md"
   ]
 }

@@ -470,9 +470,41 @@ def test_scale_set_configurator_registers_each_member_and_targets_all():
     assert hosts == [{"name": gaia.AZURE_PROBE_HOST, "ip-address": "168.63.129.16"}]
     networks = [body for command, body in api.requests if command == "add-network"]
     assert all(body["nat-settings"]["install-on"] == "All" for body in networks)
-    for script in ("faas-bgp", "faas-bgp-status", "faas-management-route"):
+    for script in ("faas-bgp", "faas-bgp-status", "faas-management-route", "faas-probe-responder"):
         assert {targets for name, targets in api.script_targets if name == script} == {
             (item.name,) for item in GATEWAYS}
+    assert all(rules[name]["service"] == "Any" for name in (gaia.EAST_WEST_RULE, gaia.EGRESS_RULE))
+    assert "health-probe-responder-configured" in logs
+    commands = [command for command, _body in api.requests]
+    first_probe = next(index for index, (command, body) in enumerate(api.requests)
+                       if command == "run-script" and body["script-name"] == "faas-probe-responder")
+    assert commands.index("install-policy") < first_probe
+
+
+def test_probe_responder_script_sets_and_persists_azure_probe_port():
+    script = gaia.PROBE_RESPONDER_SCRIPT
+    assert "set -euo pipefail" in script
+    assert "fw ctl set int cloud_balancer_port 8117" in script
+    assert 'grep -v "^cloud_balancer_port=" "$F"' in script
+    assert 'echo "cloud_balancer_port=8117"; } > "$F.faas"' in script
+    assert "sed -i" not in script
+    assert script.rstrip().endswith("echo faas-probe-responder-configured")
+
+
+def test_probe_responder_failure_stops_scale_set_configuration():
+    api, logs = ScaleSetApi(), []
+    configurator = scale_set_configurator(api, logs)
+    configurator._run_script = lambda *args, **kwargs: "cloud_balancer_port = 0\n"
+    with pytest.raises(gaia.CheckpointGaiaError, match="probe responder"):
+        configurator.ensure_probe_responder()
+    assert "health-probe-responder-configured" not in logs
+
+
+def test_single_gateway_does_not_touch_probe_responder():
+    api = gaia_tests.FakeApi([])
+    configurator = gaia_tests.configurator(api, [])
+    configurator.ensure_probe_responder()
+    assert not any(command == "run-script" for command, _body in api.requests)
 
 
 def test_single_gateway_configurator_rejects_unexpected_gateway_sets():

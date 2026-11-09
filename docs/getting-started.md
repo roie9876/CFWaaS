@@ -126,8 +126,8 @@ resources, and an already-running ARM operation may still finish. Cancelled
 attempts cannot be resumed. Temporary authorization caches are retired by the
 background worker.
 
-Both workload VMs use the existing Ubuntu 24.04 high-performance profile:
-`Standard_D8s_v6`, Accelerated Networking, NVMe, MTU 9000, an HTTP receiver and
+Both workload VMs use the Ubuntu 24.04 high-performance profile at a smaller size:
+`Standard_D4s_v6` (8 vCPUs total in the customer subscription), Accelerated Networking, NVMe, MTU 9000, an HTTP receiver and
 iperf3. They have **no public IPs**. Only after the firewall and peerings are
 ready are the VMs deployed. Managed Run Command must find an actual `mana`
 driver on each VM, verify bidirectional original-source HTTP connectivity, and
