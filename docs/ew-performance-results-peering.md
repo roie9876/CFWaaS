@@ -10,10 +10,12 @@ This page repeats the
 [latency test from the VPN lab](ew-performance-results.md#latency-icmp-round-trip-idle-path)
 with the same script and parameters, so the two results can be compared.
 
-> **Result in one line:** E-W traffic between the two workload VNets through
-> the Check Point firewall has **p50 5.8 ms, p99 24.8 ms and p99.9 33.6 ms**
-> round-trip latency, with no loss over 60,000 samples. That is about **half the
-> median latency of the tuned VPN lab** (p50 10.6 ms).
+> **Result in one line:** on an open TCP connection, E-W requests through the
+> Check Point firewall take **p50 0.70 ms, p99 1.0 ms and p99.9 1.75 ms**
+> round trip. Ping shows **p50 5.8 ms / p99.9 33.6 ms**, because the firewall
+> inspects every ICMP echo as a new connection. Both are lower than the tuned
+> VPN lab: about **4x lower** for TCP on an open connection and about **half**
+> for ping.
 
 How the tests were run: [E-W performance test plan](ew-performance-test-plan.md)
 and [`scripts/ew_perf_test.py`](../scripts/ew_perf_test.py).
@@ -23,6 +25,7 @@ and [`scripts/ew_perf_test.py`](../scripts/ew_perf_test.py).
 - [E-W packet path as tested](#e-w-packet-path-as-tested)
 - [Lab configuration under test](#lab-configuration-under-test)
 - [Results](#results)
+- [Latency by protocol](#latency-by-protocol)
 - [Comparison with the VPN lab](#comparison-with-the-vpn-lab)
 - [What had to be fixed first](#what-had-to-be-fixed-first)
 - [Findings and limits](#findings-and-limits)
@@ -83,9 +86,52 @@ the reference run: p50 between 4.3 ms and 6.7 ms, no loss.
 
 Throughput was not measured in this run.
 
+Throughput was not measured in this run.
+
+## Latency by protocol
+
+Ping is a poor proxy for application latency through Check Point: the
+firewall treats every ICMP echo as a new connection and handles it in its
+inspection (slow) path. To show what applications see, the same test was
+repeated with TCP ([EW-PERF-5](ew-performance-test-plan.md#test-matrix)):
+a 32-byte request echoed by `vm-peering-workload-1`, once on **one open
+connection** and once on **a new connection per request** (connect, request,
+response).
+
+Measured 2026-11-09 17:06–17:39 UTC, 60,000 samples per method at 10 ms
+intervals, in parallel with the [same test on the VPN lab](ew-performance-results.md#latency-by-protocol).
+One Check Point instance was serving: the second failed to restart after
+governance deallocated both (`AllocationFailed`).
+
+| Method | Samples | Loss | min | p50 | p90 | p99 | **p99.9** | max | avg |
+|---|---|---|---|---|---|---|---|---|---|
+| ICMP echo | 60,000 | 0.045% | 1.20 ms | 5.46 ms | 10.8 ms | 28.4 ms | 2,255 ms* | 2,897 ms | 12.4 ms |
+| **TCP, open connection** | **60,000** | **0%** | **0.54 ms** | **0.70 ms** | **0.81 ms** | **1.01 ms** | **1.75 ms** | 31.3 ms | 0.71 ms |
+| TCP, new connection | 60,000 | 0% | 2.08 ms | 5.95 ms | 13.0 ms | 35.9 ms | 44.4 ms | 82.1 ms | 7.64 ms |
+
+\* One disturbance of about 2–3 seconds during the ping run (27 lost echoes
+and about 60 delayed replies). The p50 to p99 values match the
+[reference run](#latency-icmp-round-trip-idle-path) taken two hours
+earlier, which had no such event (p99.9 33.6 ms).
+
+What this shows:
+
+- **Established TCP traffic is fast.** Once a connection exists, requests
+  cross peering, the load balancer and the firewall twice in **0.7 ms**
+  (p50) with a tight tail (p99.9 1.75 ms). This is the latency an
+  application sees on a kept-alive connection.
+- **Ping and new connections pay the inspection cost.** Both take about
+  6 ms at p50 and have a long tail. Each one is a new connection for the
+  firewall, which matches the explanation that slow-path inspection, not
+  the network, dominates ping latency.
+- **Applications that open a connection per request** (no keep-alive or
+  connection pooling) should expect the new-connection numbers.
+
 ## Comparison with the VPN lab
 
-Reference runs, 60,000 samples each, same script and parameters.
+### Ping (reference runs)
+
+60,000 samples each, same script and parameters.
 
 | Lab | Path per direction | min | p50 | p90 | p99 | p99.9 | Loss |
 |---|---|---|---|---|---|---|---|
@@ -96,6 +142,25 @@ Reference runs, 60,000 samples each, same script and parameters.
 Removing the VPN hops roughly halves the typical latency (p50 and p90). The
 tail (p99, p99.9) improves much less, which points to the shared part of the
 path, the firewall and load balancer, as the main source of slow replies.
+
+### By protocol (measured in parallel)
+
+Both labs measured at the same time, 2026-11-09 17:06 UTC, 60,000 samples per
+method, one Check Point instance serving in each lab. p50 / p99 / p99.9 in ms.
+
+| Method | VPN lab | **Peering lab** | Peering vs VPN (p50) |
+|---|---|---|---|
+| ICMP echo | 10.4 / 29.9 / 41.0 | 5.46 / 28.4 / 2,255* | -48% |
+| **TCP, open connection** | 2.87 / 6.09 / 20.8 | **0.70 / 1.01 / 1.75** | **-76%** |
+| TCP, new connection | 14.0 / 34.9 / 47.4 | 5.95 / 35.9 / 44.4 | -57% |
+
+\* One 2–3 second disturbance; see [Latency by protocol](#latency-by-protocol).
+
+On an open connection the peering lab is about **4x faster** at p50 and
+**12x faster** at p99.9, because it has no VPN gateways and IPsec tunnels
+on the path. For anything that starts a new connection, the firewall's
+connection setup dominates in both labs, and the tails (p99, p99.9) are
+almost the same.
 
 ## What had to be fixed first
 
@@ -118,23 +183,26 @@ applied by hand.
 
 ## Findings and limits
 
-- **The firewall path sets the latency floor.** With no VPN gateways, the
-  remaining hops are VNet peering, the internal load balancer and one Check
-  Point gateway per direction. A minimum of 1.24 ms but a median of 5.8 ms
-  suggests most of the time is spent in processing, not on the wire.
+- **The firewall's inspection path, not the network, sets ping latency.**
+  TCP on an open connection crosses the same peering, load balancer and
+  gateway in 0.7 ms (p50), while ping and new TCP connections take about
+  6 ms. The difference is the per-connection inspection work.
 - **Not tuned yet.** Several factors were left at their defaults and may
   affect the result: small gateways (`Standard_F4s`), logging on every E-W
-  connection (`Track: Log`), the firewall's inspection path for this traffic,
-  and no availability-zone pinning (the VMs and gateways may be in different
-  zones).
-- **Ping is the latency method.** ICMP shows the network path, not
-  application-level latency.
+  connection (`Track: Log`), and no availability-zone pinning (the VMs and
+  gateways may be in different zones).
+- **ICMP and TCP measure different things.** ICMP shows the cost of a new
+  connection through the firewall; TCP on an open connection shows what an
+  established application flow sees. Report both.
 - **Subscription governance interfered with this lab too.** An automation
   principal rewrote the Check Point management NSG every hour during testing,
   removing admin access and, once, the rule that lets the gateways reach
-  management. In the VPN lab, the Check Point management VM and one VMSS
-  instance were also found deallocated. Repeat measurements need a governance
-  exemption or must check that every component is running first.
+  management. Both Check Point instances in this lab were later deallocated
+  with no caller in the activity log, and one could not be restarted
+  (`AllocationFailed`). In the VPN lab, the Check Point management VM, one
+  VMSS instance and a workload VM were also found deallocated. Repeat
+  measurements need a governance exemption or must check that every
+  component is running first.
 
 ## How to reproduce
 
@@ -152,6 +220,14 @@ python3 scripts/ew_perf_test.py \
   --resource-group rg-faas-peering-<environment-id> \
   --client-vm vm-peering-workload-0 --server-vm vm-peering-workload-1 \
   --skip-throughput --load-streams 0 --ping-count 60000 --ping-interval 0.01
+
+# Latency by protocol: ping, TCP open connection and TCP new connection
+# (60,000 samples each, about 32 minutes)
+python3 scripts/ew_perf_test.py \
+  --subscription <customer-subscription-id> \
+  --resource-group rg-faas-peering-<environment-id> \
+  --client-vm vm-peering-workload-0 --server-vm vm-peering-workload-1 \
+  --skip-throughput --load-streams 0 --tcp-latency --ping-count 60000 --ping-interval 0.01
 ```
 
 Before running, check that both Check Point VMSS instances, the management VM

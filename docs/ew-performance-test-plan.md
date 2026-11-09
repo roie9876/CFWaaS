@@ -62,6 +62,13 @@ aborts before the load tests if E-W TCP is blocked.
 | EW-PERF-2 | Max throughput | iperf3 TCP, 30 s per run (3 s warm-up omitted), parallel streams 1, 4, 8, 16, 32, forward (0 to 1) and reverse (1 to 0) | Gbps received, retransmits, CPU |
 | EW-PERF-3 | Idle latency | 20,000 ICMP echoes at 10 ms intervals (about 200 s), 56-byte payload | loss %, min/p50/p90/p99/**p99.9**/max ms |
 | EW-PERF-4 | Latency under load | Same as EW-PERF-3 while iperf3 runs 8 streams between the same VMs | as above, plus load Gbps |
+| EW-PERF-5 | Latency by protocol (`--tcp-latency`) | Same count and interval as EW-PERF-3, using a 32-byte TCP request echoed by the peer: (a) on one open connection, (b) on a new connection each time (connect, request, response) | loss %, min/p50/p90/p99/**p99.9**/max ms per method |
+
+Why EW-PERF-5: Check Point inspects every ICMP echo as a new connection, so
+ping measures the firewall's slow path. A request on an open TCP connection
+shows what an application on an established connection sees. A new
+connection per request shows the cost of connection setup through the
+firewall.
 
 Why 20,000 samples: p99.9 is the 20th-worst sample out of 20,000. Fewer than
 10,000 samples leave p99.9 decided by a handful of packets.
@@ -85,6 +92,13 @@ Useful options:
 - `--mss 1300`: force a VPN-safe MSS if retransmits are high or throughput collapses.
 - `--ping-count 50000 --ping-interval 0.005`: tighter p99.9 (about 250 s per latency run).
 - `--skip-throughput` / `--skip-latency`: run one part only.
+- `--tcp-latency`: add EW-PERF-5. Starts a small TCP echo server on the
+  server VM (port `--tcp-port`, default 5202). The firewall and workload NSG
+  must allow that port.
+- `--skip-ping`: skip the idle ICMP run (for example with `--tcp-latency`).
+
+Results are written after every step, so a later failure keeps the
+completed measurements. Transient Azure CLI network errors are retried.
 
 A full default run takes about 15 minutes. Results go to
 `ew-perf-results/ew-perf-<timestamp>.json` and `.md`. That directory is

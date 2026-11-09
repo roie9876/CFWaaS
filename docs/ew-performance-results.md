@@ -8,7 +8,8 @@ what is still open.
 > **Result in one line:** after tuning, east-west (E-W) traffic between the two
 > workload VNets reaches **about 2.2 Gbps in each direction** through the
 > Check Point firewall, with **p50 10.6 ms, p99 29.7 ms and p99.9 39.2 ms**
-> round-trip latency.
+> round-trip ping latency. On an open TCP connection, requests take
+> **p50 2.9 ms / p99.9 20.8 ms**.
 
 How the tests were run: [E-W performance test plan](ew-performance-test-plan.md)
 and [`scripts/ew_perf_test.py`](../scripts/ew_perf_test.py).
@@ -108,6 +109,31 @@ The latency floor comes from the path itself: each direction crosses four VPN
 gateway hops, two load balancers and the firewall. Active-active delivery
 raised throughput without changing latency.
 
+### Latency by protocol
+
+Check Point inspects every ICMP echo as a new connection, so ping includes
+the firewall's per-connection work. To show what applications see, the same
+test was repeated with TCP ([EW-PERF-5](ew-performance-test-plan.md#test-matrix)):
+a 32-byte request echoed by `vm-customer-workload-1`, once on **one open
+connection** and once on **a new connection per request**.
+
+Measured 2026-11-09 17:06–17:48 UTC on configuration 4, 60,000 samples per
+method at 10 ms intervals, in parallel with the
+[same test on the peering lab](ew-performance-results-peering.md#latency-by-protocol).
+One Check Point instance was running.
+
+| Method | Samples | Loss | min | p50 | p90 | p99 | **p99.9** | max | avg |
+|---|---|---|---|---|---|---|---|---|---|
+| ICMP echo | 60,000 | 0.002% | 3.74 ms | 10.4 ms | 19.6 ms | 29.9 ms | 41.0 ms | 107 ms | 13.9 ms |
+| **TCP, open connection** | **60,000** | **0%** | **1.85 ms** | **2.87 ms** | **3.22 ms** | **6.09 ms** | **20.8 ms** | 81.7 ms | 2.97 ms |
+| TCP, new connection | 60,000 | 0.023% | 7.56 ms | 14.0 ms | 24.7 ms | 34.9 ms | 47.4 ms | 287 ms | 17.0 ms |
+
+The ping run matches the reference above (p50 10.4 ms versus 10.6 ms). On an
+established connection, requests take **2.9 ms at p50**, about a quarter of
+the ping value; that is what a kept-alive application connection sees. A new
+connection per request costs more than ping, because it adds the TCP
+handshake to the firewall's connection setup.
+
 ## What changed to reach these numbers
 
 Before any performance number could be measured, E-W traffic had to work at all.
@@ -137,9 +163,10 @@ These are the problems found and fixed, in the order they appeared.
 - **The firewall is not the bottleneck yet.** One `Standard_F4s` instance stayed
   near 5% CPU at the original limit. Adding a second instance was deliberately
   not tested.
-- **Ping is the latency method.** ICMP shows the network path, not
-  application-level latency, and is processed the same way by every hop in
-  this path.
+- **ICMP and TCP measure different things.** Ping includes the firewall's
+  per-connection inspection on every packet; TCP on an open connection shows
+  what an established application flow sees (p50 2.9 ms versus 10.4 ms).
+  See [Latency by protocol](#latency-by-protocol).
 
 ### Subscription governance interfered with the lab
 
@@ -182,6 +209,12 @@ python3 scripts/ew_perf_test.py \
 python3 scripts/ew_perf_test.py \
   --subscription <subscription-id> --resource-group <customer-resource-group> \
   --skip-throughput --ping-count 60000 --ping-interval 0.01 --load-streams 0
+
+# Latency by protocol: ping, TCP open connection and TCP new connection
+# (60,000 samples each, about 35 minutes)
+python3 scripts/ew_perf_test.py \
+  --subscription <subscription-id> --resource-group <customer-resource-group> \
+  --skip-throughput --tcp-latency --ping-count 60000 --ping-interval 0.01 --load-streams 0
 ```
 
 Check the preconditions in the [test plan](ew-performance-test-plan.md#preconditions)

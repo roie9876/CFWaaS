@@ -138,6 +138,11 @@ The cross-VNet peering lab, with no VPN gateways on the path, measured
 **p50 5.8 ms / p99.9 33.6 ms**, about half the VPN lab's median latency. See
 [E-W latency results, peering lab](docs/ew-performance-results-peering.md).
 
+Ping overstates application latency, because Check Point inspects every ICMP
+echo as a new connection. On an open TCP connection, round trips measured
+**p50 2.9 ms** in the VPN lab and **p50 0.7 ms** in the peering lab
+([latency by protocol](docs/ew-performance-results-peering.md#latency-by-protocol)).
+
 ## Documentation
 
 | Document | Use it for |
