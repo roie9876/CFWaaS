@@ -127,6 +127,13 @@ See [EW-44 through EW-46](docs/test-register.md#ew-44-customer-16-bidirectional-
 for the measured traffic, administrator-access and connection-details results.
 Older experiments are evidence, not an alternative supported installation path.
 
+## East-west performance
+
+A tuned lab reached **about 2.2 Gbps** of firewall-inspected east-west traffic
+in each direction, with **p50 10.6 ms / p99.9 39.2 ms** round-trip latency.
+See [E-W performance results](docs/ew-performance-results.md) for the
+topology, step-by-step results and the changes needed to get there.
+
 ## Documentation
 
 | Document | Use it for |
@@ -135,6 +142,7 @@ Older experiments are evidence, not an alternative supported installation path.
 | [Technical operator guide](provider-provisioning/README.md) | Release engineering, identities, settings and recovery |
 | [Provisioning flow](docs/provider-provisioning-flow.md) | Provider/customer ownership and control-plane design |
 | [Test register](docs/test-register.md) | What was actually measured and what remains unqualified |
+| [E-W performance results](docs/ew-performance-results.md) | Measured east-west throughput and latency, and how to reproduce them |
 | [Security and publication](SECURITY.md) | Handling sensitive files and reporting concerns |
 | [Contributing](CONTRIBUTING.md) | Offline checks and publication boundaries |
 

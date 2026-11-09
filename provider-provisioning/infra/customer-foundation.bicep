@@ -164,14 +164,10 @@ var workloadAdminRules = [
       sourcePortRange: '*', destinationAddressPrefix: '*', destinationPortRange: '22'
     }
   }
-  {
-    name: 'deny-other-inbound'
-    properties: {
-      priority: 200, access: 'Deny', direction: 'Inbound', protocol: '*'
-      sourceAddressPrefix: '*', sourcePortRange: '*', destinationAddressPrefix: '*', destinationPortRange: '*'
-    }
-  }
 ]
+// No explicit deny: Azure's default DenyAllInBound already blocks other Internet inbound, while the default
+// AllowVnetInBound keeps firewall-inspected east-west traffic working if subscription governance strips the
+// custom allow rules (observed on customer-24-r2, where a priority-200 deny then blocked all east-west traffic).
 resource workloadAdminNsgRules 'Microsoft.Network/networkSecurityGroups/securityRules@2025-05-01' = [for rule in workloadAdminRules: if (!empty(adminSources)) {
   parent: nsg
   name: rule.name

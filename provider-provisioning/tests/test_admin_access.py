@@ -216,8 +216,9 @@ def test_customer_public_ips_return_routes_and_scoped_nsgs_are_conditional(templ
     nsg = next(item for item in foundation["resources"] if item["type"] == "Microsoft.Network/networkSecurityGroups")
     assert nsg["properties"].endswith(", createObject())]")
     rules = foundation["variables"]["workloadAdminRules"]
-    assert len(rules) == 3 and rules[1]["properties"]["destinationPortRange"] == "22"
+    assert len(rules) == 2 and rules[1]["properties"]["destinationPortRange"] == "22"
     assert rules[1]["properties"]["sourceAddressPrefixes"] == "[variables('adminSources')]"
+    assert all(rule["properties"]["access"] == "Allow" for rule in rules)
 
 
 def test_provider_admin_management_routes_and_automation_allow_are_fixed_per_environment(templates):
