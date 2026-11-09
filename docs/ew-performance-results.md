@@ -13,6 +13,9 @@ what is still open.
 How the tests were run: [E-W performance test plan](ew-performance-test-plan.md)
 and [`scripts/ew_perf_test.py`](../scripts/ew_perf_test.py).
 
+The same latency test on the cross-VNet peering lab (no VPN gateways):
+[E-W latency results, peering lab](ew-performance-results-peering.md).
+
 ## Contents
 
 - [Lab topology](#lab-topology)
@@ -155,17 +158,17 @@ from the subscription owners, or must account for these interruptions.
 
 ## Status of the changes in the deployment templates
 
-The tuned configuration was applied to the live lab by hand. A new lab
-deployment gets it only when these items are in the templates:
+The tuned configuration was first applied to the live lab by hand. New lab
+deployments now get it from the templates (published 2026-11-09):
 
 | Change | In the templates? |
 |---|---|
-| Workload NSG without the custom deny rule | Updated in `customer-foundation.bicep` (not yet published) |
-| Check Point rules with service `Any` | Updated in the runner code (not yet published) |
-| Check Point probe responder on TCP 8117 | Updated in the runner code (not yet published) |
-| GCMAES128 IPsec policy on all connections | **Not yet** |
-| Active-active delivery gateways with a four-tunnel BGP mesh | **Not yet** |
-| Customer ingress gateway kept active-standby | Already the default |
+| Workload NSG without the custom deny rule | Yes (`customer-foundation.bicep`) |
+| GCMAES128 IPsec policy on all connections | Yes (`modules/connection.bicep` default) |
+| Active-active delivery gateways with a four-tunnel BGP mesh | Yes (customer and provider templates exchange the second instance's public IP and BGP address) |
+| Customer ingress gateway kept active-standby | Yes (unchanged default, now documented) |
+| Check Point rules with service `Any` | In the runner code, not yet published |
+| Check Point probe responder on TCP 8117 | In the runner code, not yet published |
 
 ## How to reproduce
 
