@@ -216,6 +216,9 @@ module cd 'modules/gateway.bicep' = {
     sku: customerDeliveryVpnGatewaySku
     subnetId: '${delivery.id}/subnets/GatewaySubnet'
     asn: 65021
+    // Active-active + BGP mesh to an active-active provider delivery gateway spreads E-W flows over four tunnels (ECMP).
+    // The ingress gateway stays active-standby: the Routing Appliance stops forwarding to an active-active gateway.
+    activeActive: true
     tags: tags
   }
 }

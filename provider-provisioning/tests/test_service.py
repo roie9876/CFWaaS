@@ -1093,6 +1093,62 @@ def test_network_template_validation_accepts_only_exact_provider_gateway_sku_par
                 "providerVpnGatewaySku": {**template["parameters"]["providerVpnGatewaySku"], **change}}}, True)
 
 
+SECONDARY = {"secondaryPublicIp": "9.9.9.9", "secondaryBgpAddress": "10.0.0.5"}
+SECONDARY_PARAMETERS = {"customerDeliverySecondaryPublicIp": {"type": "string", "defaultValue": ""},
+                        "customerDeliverySecondaryBgpAddress": {"type": "string", "defaultValue": ""}}
+
+
+def test_secondary_delivery_endpoint_pair_keeps_single_instance_digest():
+    single = EnvironmentRequest.model_validate(NETWORK)
+    assert "secondaryPublicIp" not in single.stored_fields()["customerDelivery"]
+    assert single.canonical() == EnvironmentRequest.model_validate(NETWORK).canonical()
+    paired = EnvironmentRequest.model_validate({**NETWORK, "customerDelivery": {**NETWORK["customerDelivery"], **SECONDARY}})
+    assert paired.stored_fields()["customerDelivery"]["secondaryPublicIp"] == "9.9.9.9"
+    assert paired.digest() != single.digest()
+    assert parse_stored_environment_request(stored_environment_request(paired, False, True))[0] == paired
+    for bad in ({"secondaryPublicIp": "9.9.9.9"}, {"secondaryBgpAddress": "10.0.0.5"},
+                {**SECONDARY, "secondaryPublicIp": "10.0.0.9"}, {**SECONDARY, "secondaryBgpAddress": "9.9.9.9"}):
+        with pytest.raises(ValidationError):
+            EnvironmentRequest.model_validate({**NETWORK, "customerDelivery": {**NETWORK["customerDelivery"], **bad}})
+    manifest = ConnectionManifest.model_validate({**MANIFEST, "providerDelivery": {**ENDPOINT, **SECONDARY}})
+    assert manifest.model_dump(exclude_none=True)["providerDelivery"]["secondaryBgpAddress"] == "10.0.0.5"
+    assert "secondaryPublicIp" not in ConnectionManifest.model_validate(MANIFEST).model_dump(exclude_none=True)["providerIngress"]
+
+
+def test_network_secondary_delivery_passed_only_when_requested_and_supported(templates, target):
+    template = network_templates(templates).network
+    paired = EnvironmentRequest.model_validate({**NETWORK, "customerDelivery": {**NETWORK["customerDelivery"], **SECONDARY}})
+    for supported in (False, True):
+        if supported:
+            template["parameters"].update(SECONDARY_PARAMETERS)
+        for request in (paired, EnvironmentRequest.model_validate(NETWORK)):
+            arm = FakeArm(outputs={"connectionManifest": {"type": "Object", "value": MANIFEST}})
+            vault = Mock(spec=Vault)
+            vault.ensure.side_effect = [SecretMaterial("i", "v1"), SecretMaterial("d", "v2")]
+            Provisioner(arm, vault, templates, target).provision(str(uuid4()), request, lambda: None,
+                                                                 bind_versions=Mock())
+            sent = arm.starts[0][2]
+            if supported and request is paired:
+                assert sent["customerDeliverySecondaryPublicIp"] == {"value": "9.9.9.9"}
+                assert sent["customerDeliverySecondaryBgpAddress"] == {"value": "10.0.0.5"}
+            else:
+                assert "customerDeliverySecondaryPublicIp" not in sent
+
+
+def test_template_validation_accepts_only_optional_secondary_delivery_parameters(templates):
+    template = network_templates(templates).network
+    template["parameters"].update(SECONDARY_PARAMETERS)
+    Templates.validate(template, True)
+    for change in ({"customerDeliverySecondaryPublicIp": {"type": "string"}},
+                   {"customerDeliverySecondaryBgpAddress": {"type": "string", "defaultValue": "10.0.0.5"}}):
+        with pytest.raises(ValueError):
+            Templates.validate({**template, "parameters": {**template["parameters"], **change}}, True)
+    partial = {name: value for name, value in template["parameters"].items()
+               if name != "customerDeliverySecondaryBgpAddress"}
+    with pytest.raises(ValueError):
+        Templates.validate({**template, "parameters": partial}, True)
+
+
 def test_network_retry_uses_pinned_versions_not_latest(templates, target):
     network_templates(templates)
     arm = FakeArm(outputs={"connectionManifest": {"type": "Object", "value": MANIFEST}})
@@ -4140,6 +4196,21 @@ def test_checkpoint_foundation_receives_provider_gateway_sku_only_when_non_defau
         assert "providerVpnGatewaySku" not in parameters
     else:
         assert parameters["providerVpnGatewaySku"] == {"value": sku}
+
+
+def test_checkpoint_foundation_receives_secondary_delivery_only_when_supported(checkpoint_journal):
+    store, backend, lease, _ = checkpoint_journal
+    row = store.owned(OWNER, lease.environment_id)
+    request, _, _ = parse_stored_environment_request(row["request"])
+    request.customerDelivery.secondaryPublicIp, request.customerDelivery.secondaryBgpAddress = "9.9.9.9", "10.0.0.5"
+    row["request"] = stored_environment_request(request, False, True)
+    backend.transact([Change(row, str(row["_etag"]))])
+    fixture = checkpoint_provisioner_fixture(store, lease, [None, ("Running",), ("Terminated", 0)])
+    fixture.provisioner.settings.foundation_template["parameters"] = dict(SECONDARY_PARAMETERS)
+    assert run_checkpoint(fixture, store, lease) == fixture.foundation["connectionManifest"]["value"]
+    parameters = fixture.arm.starts[0][2]
+    assert parameters["customerDeliverySecondaryPublicIp"] == {"value": "9.9.9.9"}
+    assert parameters["customerDeliverySecondaryBgpAddress"] == {"value": "10.0.0.5"}
 
 
 def test_checkpoint_scale_set_requires_separate_provider_opt_in(settings, backend, store, auth, signing_key,

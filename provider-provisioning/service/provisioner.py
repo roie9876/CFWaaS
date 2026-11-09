@@ -131,6 +131,9 @@ class Provisioner:
                     }
                     if gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
                         values["providerVpnGatewaySku"] = gateway_sku
+                    if second.secondaryPublicIp and Templates.secondary_delivery_parameters(template):
+                        values["customerDeliverySecondaryPublicIp"] = second.secondaryPublicIp
+                        values["customerDeliverySecondaryBgpAddress"] = second.secondaryBgpAddress
                     parameters.update({key: {"value": value} for key, value in values.items()})
                 check()
                 arm.start(name, template, parameters)

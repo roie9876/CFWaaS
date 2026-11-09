@@ -14,6 +14,9 @@ param customerDeliveryBgpAddress string
 @minValue(64512)
 @maxValue(65534)
 param customerDeliveryAsn int
+// Optional second instance of an active-active customer delivery gateway (four-tunnel BGP ECMP mesh).
+param customerDeliverySecondaryPublicIp string = ''
+param customerDeliverySecondaryBgpAddress string = ''
 @secure()
 param ingressSharedKey string
 @secure()
@@ -174,7 +177,8 @@ module gateways 'modules/gateway.bicep' = [for i in range(0, 2): {
     name: '${definitions[i].name}-${suffix}'
     subnetId: '${networks[i].id}/subnets/GatewaySubnet'
     asn: i == 0 ? 65515 : 65031
-    activeActive: i == 0
+    // Ingress must be active-active for Route Server; delivery is active-active for the BGP ECMP mesh.
+    activeActive: true
     defaultSiteId: i == 1 ? deliveryLocalGateway.id : ''
     sku: providerVpnGatewaySku
     tags: tags
@@ -301,6 +305,20 @@ module deliveryConnection 'modules/connection.bicep' = {
     useExistingLocalGateway: true
     sharedKey: deliverySharedKey
   }
+}
+module deliverySecondaryConnection 'modules/connection.bicep' = if (!empty(customerDeliverySecondaryPublicIp)) {
+  name: 'provider-delivery-connection-2-${suffix}'
+  params: {
+    location: location
+    name: 'pd-${suffix}-2'
+    tags: tags
+    gatewayId: gateways[1].outputs.id
+    remoteEndpoint: { publicIp: customerDeliverySecondaryPublicIp, bgpAddress: customerDeliverySecondaryBgpAddress, asn: customerDeliveryAsn }
+    remotePrefixes: ['${customerDeliverySecondaryBgpAddress}/32']
+    enableBgp: true
+    sharedKey: deliverySharedKey
+  }
+  dependsOn: [deliveryConnection]
 }
 output connectionManifest object = {
   providerIngress: gateways[0].outputs.endpoint

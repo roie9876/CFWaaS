@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.44.1.10279",
-      "templateHash": "16169610634380335441"
+      "templateHash": "17769378258334039608"
     }
   },
   "parameters": {
@@ -42,6 +42,14 @@
       "type": "int",
       "minValue": 64512,
       "maxValue": 65534
+    },
+    "customerDeliverySecondaryPublicIp": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "customerDeliverySecondaryBgpAddress": {
+      "type": "string",
+      "defaultValue": ""
     },
     "ingressSharedKey": {
       "type": "securestring"
@@ -391,7 +399,7 @@
           },
           "asn": "[if(equals(range(0, 2)[copyIndex()], 0), createObject('value', 65515), createObject('value', 65031))]",
           "activeActive": {
-            "value": "[equals(range(0, 2)[copyIndex()], 0)]"
+            "value": true
           },
           "defaultSiteId": "[if(equals(range(0, 2)[copyIndex()], 1), createObject('value', resourceId('Microsoft.Network/localNetworkGateways', format('lng-pd-{0}', variables('suffix')))), createObject('value', ''))]",
           "sku": {
@@ -408,7 +416,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "17465228505822937815"
+              "templateHash": "489539654590736673"
             }
           },
           "parameters": {
@@ -465,7 +473,8 @@
                   }
                 }
               }
-            ]
+            ],
+            "secondaryIndex": "[if(parameters('activeActive'), 1, 0)]"
           },
           "resources": [
             {
@@ -510,11 +519,7 @@
             },
             "endpoint": {
               "type": "object",
-              "value": {
-                "publicIp": "[reference(resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[0], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))), '2025-05-01').ipAddress]",
-                "bgpAddress": "[split(reference(resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name'))), '2025-05-01').bgpSettings.bgpPeeringAddress, ',')[0]]",
-                "asn": "[parameters('asn')]"
-              }
+              "value": "[union(createObject('publicIp', reference(resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[0], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))), '2025-05-01').ipAddress, 'bgpAddress', split(reference(resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name'))), '2025-05-01').bgpSettings.bgpPeeringAddress, ',')[0], 'asn', parameters('asn')), if(parameters('activeActive'), createObject('publicIp', reference(resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[0], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))), '2025-05-01').ipAddress, 'bgpAddress', filter(reference(resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name'))), '2025-05-01').bgpSettings.bgpPeeringAddresses, lambda('peer', endsWith(lambdaVariables('peer').ipconfigurationId, '/ipConfigurations/primary')))[0].defaultBgpIpAddresses[0], 'secondaryPublicIp', reference(resourceId('Microsoft.Network/publicIPAddresses', if(equals(range(0, if(parameters('activeActive'), 2, 1))[variables('secondaryIndex')], 0), format('pip-{0}', parameters('name')), format('pip-{0}-secondary', parameters('name')))), '2025-05-01').ipAddress, 'secondaryBgpAddress', filter(reference(resourceId('Microsoft.Network/virtualNetworkGateways', format('gw-{0}', parameters('name'))), '2025-05-01').bgpSettings.bgpPeeringAddresses, lambda('peer', endsWith(lambdaVariables('peer').ipconfigurationId, '/ipConfigurations/secondary')))[0].defaultBgpIpAddresses[0]), createObject()))]"
             }
           }
         }
@@ -1289,7 +1294,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "18247138936526848521"
+              "templateHash": "16625832026785917772"
             }
           },
           "parameters": {
@@ -1329,15 +1334,15 @@
                   "ikeEncryption": "AES256",
                   "ikeIntegrity": "SHA256",
                   "dhGroup": "DHGroup14",
-                  "ipsecEncryption": "None",
-                  "ipsecIntegrity": "SHA256",
+                  "ipsecEncryption": "GCMAES128",
+                  "ipsecIntegrity": "GCMAES128",
                   "pfsGroup": "None",
                   "saLifeTimeSeconds": 27000,
                   "saDataSizeKilobytes": 102400000
                 }
               ],
               "metadata": {
-                "description": "Lab default: IPsec encryption None (ESP integrity only). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches."
+                "description": "Lab default: GCMAES128 for both IPsec encryption and integrity (hardware accelerated on Azure VPN gateways; roughly 3x the throughput of encryption None + SHA256 integrity in the E-W performance lab). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches."
               }
             }
           },
@@ -1434,7 +1439,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "18247138936526848521"
+              "templateHash": "16625832026785917772"
             }
           },
           "parameters": {
@@ -1474,15 +1479,15 @@
                   "ikeEncryption": "AES256",
                   "ikeIntegrity": "SHA256",
                   "dhGroup": "DHGroup14",
-                  "ipsecEncryption": "None",
-                  "ipsecIntegrity": "SHA256",
+                  "ipsecEncryption": "GCMAES128",
+                  "ipsecIntegrity": "GCMAES128",
                   "pfsGroup": "None",
                   "saLifeTimeSeconds": 27000,
                   "saDataSizeKilobytes": 102400000
                 }
               ],
               "metadata": {
-                "description": "Lab default: IPsec encryption None (ESP integrity only). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches."
+                "description": "Lab default: GCMAES128 for both IPsec encryption and integrity (hardware accelerated on Azure VPN gateways; roughly 3x the throughput of encryption None + SHA256 integrity in the E-W performance lab). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches."
               }
             }
           },
@@ -1523,6 +1528,148 @@
         }
       },
       "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix')))]"
+      ]
+    },
+    {
+      "condition": "[not(empty(parameters('customerDeliverySecondaryPublicIp')))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('provider-delivery-connection-2-{0}', variables('suffix'))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "name": {
+            "value": "[format('pd-{0}-2', variables('suffix'))]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "gatewayId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix'))), '2025-04-01').outputs.id.value]"
+          },
+          "remoteEndpoint": {
+            "value": {
+              "publicIp": "[parameters('customerDeliverySecondaryPublicIp')]",
+              "bgpAddress": "[parameters('customerDeliverySecondaryBgpAddress')]",
+              "asn": "[parameters('customerDeliveryAsn')]"
+            }
+          },
+          "remotePrefixes": {
+            "value": [
+              "[format('{0}/32', parameters('customerDeliverySecondaryBgpAddress'))]"
+            ]
+          },
+          "enableBgp": {
+            "value": true
+          },
+          "sharedKey": {
+            "value": "[parameters('deliverySharedKey')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "16625832026785917772"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "gatewayId": {
+              "type": "string"
+            },
+            "remoteEndpoint": {
+              "type": "object"
+            },
+            "remotePrefixes": {
+              "type": "array"
+            },
+            "enableBgp": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "useExistingLocalGateway": {
+              "type": "bool",
+              "defaultValue": false
+            },
+            "sharedKey": {
+              "type": "securestring"
+            },
+            "ipsecPolicies": {
+              "type": "array",
+              "defaultValue": [
+                {
+                  "ikeEncryption": "AES256",
+                  "ikeIntegrity": "SHA256",
+                  "dhGroup": "DHGroup14",
+                  "ipsecEncryption": "GCMAES128",
+                  "ipsecIntegrity": "GCMAES128",
+                  "pfsGroup": "None",
+                  "saLifeTimeSeconds": 27000,
+                  "saDataSizeKilobytes": 102400000
+                }
+              ],
+              "metadata": {
+                "description": "Lab default: GCMAES128 for both IPsec encryption and integrity (hardware accelerated on Azure VPN gateways; roughly 3x the throughput of encryption None + SHA256 integrity in the E-W performance lab). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches."
+              }
+            }
+          },
+          "resources": [
+            {
+              "condition": "[not(parameters('useExistingLocalGateway'))]",
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2025-05-01",
+              "name": "[format('lng-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": "[union(createObject('gatewayIpAddress', parameters('remoteEndpoint').publicIp, 'localNetworkAddressSpace', createObject('addressPrefixes', parameters('remotePrefixes'))), if(parameters('enableBgp'), createObject('bgpSettings', createObject('asn', parameters('remoteEndpoint').asn, 'bgpPeeringAddress', parameters('remoteEndpoint').bgpAddress)), createObject()))]"
+            },
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2025-05-01",
+              "name": "[format('conn-{0}', parameters('name'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "connectionType": "IPsec",
+                "virtualNetworkGateway1": {
+                  "id": "[parameters('gatewayId')]"
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+                },
+                "enableBgp": "[parameters('enableBgp')]",
+                "sharedKey": "[parameters('sharedKey')]",
+                "connectionProtocol": "IKEv2",
+                "ipsecPolicies": "[parameters('ipsecPolicies')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/localNetworkGateways', format('lng-{0}', parameters('name')))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', format('provider-delivery-connection-{0}', variables('suffix')))]",
         "[resourceId('Microsoft.Resources/deployments', format('provider-gateway-{0}-{1}', range(0, 2)[1], variables('suffix')))]"
       ]
     }

@@ -771,7 +771,8 @@ class BicepTests(unittest.TestCase):
             "location", "environmentId", "customerIngressPublicIp", "customerIngressBgpAddress",
             "customerIngressAsn", "customerDeliveryPublicIp", "customerDeliveryBgpAddress",
             "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "adminAllowedSources",
-            "firewallTopology", "providerVpnGatewaySku"})
+            "firewallTopology", "providerVpnGatewaySku",
+            "customerDeliverySecondaryPublicIp", "customerDeliverySecondaryBgpAddress"})
         self.assertEqual(template["parameters"]["firewallTopology"]["defaultValue"], "single")
         self.assertEqual(set(template["outputs"]), {"connectionManifest", "checkpointFoundation"})
         for key in ("ingressSharedKey", "deliverySharedKey"):
@@ -1280,7 +1281,8 @@ class BicepTests(unittest.TestCase):
         expected = {"location", "environmentId", "customerIngressPublicIp", "customerIngressBgpAddress",
                     "customerIngressAsn", "customerDeliveryPublicIp", "customerDeliveryBgpAddress",
                     "customerDeliveryAsn", "ingressSharedKey", "deliverySharedKey", "sshPublicKey",
-                    "parallelProviderNetworking", "providerVpnGatewaySku"}
+                    "parallelProviderNetworking", "providerVpnGatewaySku",
+                    "customerDeliverySecondaryPublicIp", "customerDeliverySecondaryBgpAddress"}
         self.assertEqual(set(template["parameters"]), expected)
         self.assertFalse(template["parameters"]["parallelProviderNetworking"]["defaultValue"])
         self.assertEqual(template["parameters"]["ingressSharedKey"]["type"].lower(), "securestring")
@@ -1320,6 +1322,28 @@ class BicepTests(unittest.TestCase):
         self.assertEqual(site["properties"]["localNetworkAddressSpace"]["addressPrefixes"],
                          ["[format('{0}/32', parameters('customerDeliveryBgpAddress'))]"])
         self.assertEqual(site["properties"]["bgpSettings"]["asn"], "[parameters('customerDeliveryAsn')]")
+
+    def test_active_active_delivery_mesh(self):
+        endpoint = json.dumps(self.compiled["modules/gateway.bicep"]["outputs"]["endpoint"])
+        for text in ("secondaryPublicIp", "secondaryBgpAddress", "/ipConfigurations/primary",
+                     "/ipConfigurations/secondary"):
+            self.assertIn(text, endpoint)
+        customer = json.dumps(self.compiled["customer-foundation.bicep"])
+        self.assertRegex(customer, r"customer-delivery-gateway.{0,600}activeActive\W+\{\W+value\W+true")
+        self.assertNotRegex(customer, r"customer-ingress-gateway.{0,600}activeActive")
+        for name, prefix in (("provider-checkpoint-foundation.bicep", "checkpoint"), ("provider-dataplane.bicep", "provider")):
+            template = self.compiled[name]
+            for parameter in ("customerDeliverySecondaryPublicIp", "customerDeliverySecondaryBgpAddress"):
+                self.assertEqual(template["parameters"][parameter], {"type": "string", "defaultValue": ""})
+            second = next(r for r in template["resources"] if f"{prefix}-delivery-connection-2" in str(r.get("name")))
+            self.assertEqual(second["condition"], "[not(empty(parameters('customerDeliverySecondaryPublicIp')))]")
+            gateways = next(r for r in template["resources"] if f"{prefix}-gateway-" in str(r.get("name")))
+            self.assertEqual(gateways["properties"]["parameters"]["activeActive"]["value"], True)
+        connections = self.compiled["customer-connections.bicep"]
+        second = next(r for r in connections["resources"] if r.get("name") == "customer-to-provider-delivery-2")
+        self.assertEqual(second["condition"], "[not(empty(variables('providerDeliverySecondaryIp')))]")
+        self.assertIn("secondaryPublicIp", connections["variables"]["providerDeliverySecondaryIp"])
+        self.assertEqual(second["properties"]["parameters"]["enableBgp"]["value"], True)
 
     def test_gateway_bgp_and_nva_ha_shape(self):
         gateway = self.compiled["modules/gateway.bicep"]["resources"][-1]["properties"]
@@ -1652,7 +1676,7 @@ class BicepTests(unittest.TestCase):
         self.assertFalse(connection["parameters"]["useExistingLocalGateway"]["defaultValue"])
         policies = connection["parameters"]["ipsecPolicies"]["defaultValue"]
         self.assertEqual([(p["ipsecEncryption"], p["ipsecIntegrity"], p["pfsGroup"]) for p in policies],
-                         [("None", "SHA256", "None")])
+                         [("GCMAES128", "GCMAES128", "None")])
         resource = next(r for r in connection["resources"] if r["type"] == "Microsoft.Network/connections")
         self.assertEqual(resource["properties"]["ipsecPolicies"], "[parameters('ipsecPolicies')]")
         for name in ("provider-dataplane.bicep", "provider-checkpoint-foundation.bicep", "customer-connections.bicep"):
@@ -1661,7 +1685,7 @@ class BicepTests(unittest.TestCase):
                 self.assertNotIn("ipsecPolicies", module["properties"]["parameters"])
         for name in ("provider-dataplane.bicep", "customer-connections.bicep"):
             modules = [r for r in self.compiled[name]["resources"] if r["type"] == "Microsoft.Resources/deployments"
-                       and "sharedKey" in r["properties"].get("parameters", {})]
+                       and "sharedKey" in r["properties"].get("parameters", {}) and "condition" not in r]
             self.assertEqual(len(modules), 2)
             enabled = [module["properties"]["parameters"].get("enableBgp", {}).get("value", False)
                        for module in modules]

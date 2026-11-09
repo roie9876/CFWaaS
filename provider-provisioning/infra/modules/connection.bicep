@@ -8,14 +8,14 @@ param enableBgp bool = false
 param useExistingLocalGateway bool = false
 @secure()
 param sharedKey string
-@description('Lab default: IPsec encryption None (ESP integrity only). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches.')
+@description('Lab default: GCMAES128 for both IPsec encryption and integrity (hardware accelerated on Azure VPN gateways; roughly 3x the throughput of encryption None + SHA256 integrity in the E-W performance lab). Both tunnel ends use this module, so overriding it on one connection breaks the tunnel unless the peer connection matches.')
 param ipsecPolicies array = [
   {
     ikeEncryption: 'AES256'
     ikeIntegrity: 'SHA256'
     dhGroup: 'DHGroup14'
-    ipsecEncryption: 'None'
-    ipsecIntegrity: 'SHA256'
+    ipsecEncryption: 'GCMAES128'
+    ipsecIntegrity: 'GCMAES128'
     pfsGroup: 'None'
     saLifeTimeSeconds: 27000
     saDataSizeKilobytes: 102400000

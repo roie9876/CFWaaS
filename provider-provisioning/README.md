@@ -887,12 +887,24 @@ insertion or qualify real Check Point licensing/VMSS/state synchronization.
 
 Every provider and customer connection is built from
 `infra/modules/connection.bicep`, whose default IPsec policy is IKEv2
-AES256/SHA256/DHGroup14 with IPsec encryption **None** (ESP integrity SHA256
-only, PFS None). Both tunnel ends must use the same policy, so override
-`ipsecPolicies` on all four connections together or not at all. In Lab 16,
-encryption None measured the same east-west RTT as the encrypted default
-(median ~7.2 ms vs ~7.3 ms), so it is not a latency fix; with None, tunnel
-traffic is not encrypted on the Microsoft backbone.
+AES256/SHA256/DHGroup14 with IPsec **GCMAES128** encryption and integrity (PFS
+None). Both tunnel ends must use the same policy, so override `ipsecPolicies`
+on all connections together or not at all. GCM is hardware accelerated on the
+gateways: in the [E-W performance lab](../docs/ew-performance-results.md) it
+raised throughput about threefold over the earlier default (encryption None +
+SHA256 integrity, which hashes every packet in software), with unchanged
+latency. In Lab 16, encryption None measured the same east-west RTT as an
+encrypted policy (median ~7.2 ms vs ~7.3 ms).
+
+The **delivery** VPN gateways on both sides are active-active. When the
+customer endpoint carries a second instance (`secondaryPublicIp` /
+`secondaryBgpAddress`), each side adds a second local network gateway and
+connection, giving a four-tunnel BGP mesh that spreads flows with ECMP. The
+customer **ingress** gateway stays active-standby on purpose: the customer
+Routing Appliance stops forwarding through its `VirtualNetworkGateway` route
+when that gateway is active-active, and ingress cannot use BGP ECMP anyway
+because the provider ingress gateway's Route Server ASN 65515 is rejected on a
+local network gateway.
 
 ### Replacement lab results (2026-10-30)
 

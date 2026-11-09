@@ -22,23 +22,36 @@ class Endpoint(StrictModel):
     publicIp: str
     bgpAddress: str
     asn: int = Field(ge=64512, le=65534)
+    # Second instance of an active-active gateway; both fields or neither.
+    secondaryPublicIp: str | None = None
+    secondaryBgpAddress: str | None = None
 
-    @field_validator("publicIp")
+    @field_validator("publicIp", "secondaryPublicIp")
     @classmethod
-    def global_ip(cls, value: str) -> str:
+    def global_ip(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         ip = ipaddress.IPv4Address(value)
         if not ip.is_global or ip.is_multicast or ip.is_reserved:
             raise ValueError("Expected a global unicast IPv4 address")
         return str(ip)
 
-    @field_validator("bgpAddress")
+    @field_validator("bgpAddress", "secondaryBgpAddress")
     @classmethod
-    def private_ip(cls, value: str) -> str:
+    def private_ip(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         ip = ipaddress.IPv4Address(value)
         if not any(ip in ipaddress.IPv4Network(network)
                    for network in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")):
             raise ValueError("Expected an RFC1918 IPv4 address")
         return str(ip)
+
+    @model_validator(mode="after")
+    def secondary_pair(self) -> "Endpoint":
+        if (self.secondaryPublicIp is None) != (self.secondaryBgpAddress is None):
+            raise ValueError("Secondary public IP and BGP address must be provided together")
+        return self
 
 
 class RoutingAddress(StrictModel):
@@ -90,7 +103,13 @@ class EnvironmentRequest(StrictModel):
         # Omitting the default keeps digests of requests stored before this field existed.
         if self.providerVpnGatewaySku == DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
             excluded.add("providerVpnGatewaySku")
-        return self.model_dump(exclude=excluded)
+        fields = self.model_dump(exclude=excluded)
+        # Unset secondary endpoint fields are omitted so digests of earlier single-instance requests do not change.
+        for key in ("customerIngress", "customerDelivery"):
+            if isinstance(fields.get(key), dict):
+                fields[key] = {name: value for name, value in fields[key].items()
+                               if not (name.startswith("secondary") and value is None)}
+        return fields
 
     def canonical(self) -> str:
         return json.dumps(self.stored_fields(), sort_keys=True, separators=(",", ":"))

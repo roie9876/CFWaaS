@@ -25,6 +25,7 @@ from .checkpoint_runner_config import CheckpointRunnerSettings
 from .checkpoint_runner_journal import CheckpointRunnerJournal, CheckpointRunnerStateError
 from .config import CheckpointWorkerSettings
 from .models import CHECKPOINT_TOPOLOGIES, DEFAULT_PROVIDER_VPN_GATEWAY_SKU, ConnectionManifest, EnvironmentRequest
+from .templates import Templates
 from .provisioner import Arm, ProvisionError
 from .store import Lease, Store
 
@@ -215,6 +216,9 @@ class CheckpointProvisioner:
                 parameters["firewallTopology"] = {"value": "vmss"}
             if gateway_sku != DEFAULT_PROVIDER_VPN_GATEWAY_SKU:
                 parameters["providerVpnGatewaySku"] = {"value": gateway_sku}
+            if second.secondaryPublicIp and Templates.secondary_delivery_parameters(self.settings.foundation_template):
+                parameters["customerDeliverySecondaryPublicIp"] = {"value": second.secondaryPublicIp}
+                parameters["customerDeliverySecondaryBgpAddress"] = {"value": second.secondaryBgpAddress}
             foundation_outputs = self._deploy(arm, "faas-cp-foundation-" + environment_id,
                                               self.settings.foundation_template, parameters, check)
             foundation_outputs = self._current_route_server_peers(foundation_outputs, group, environment_id)

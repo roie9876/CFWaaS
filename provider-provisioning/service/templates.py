@@ -18,6 +18,10 @@ NETWORK_PARAMETERS = {
     "sshPublicKey": "string", "parallelProviderNetworking": "bool",
 }
 PROOF_PARAMETERS = {"location": "string", "environmentId": "string"}
+# Optional: second instance of an active-active customer delivery gateway (four-tunnel BGP mesh).
+SECONDARY_DELIVERY_PARAMETERS = {
+    "customerDeliverySecondaryPublicIp": "string", "customerDeliverySecondaryBgpAddress": "string",
+}
 CHECKPOINT_FOUNDATION_PARAMETERS = {
     name: kind for name, kind in NETWORK_PARAMETERS.items()
     if name not in {"sshPublicKey", "parallelProviderNetworking"}
@@ -87,10 +91,26 @@ class Templates:
         return True
 
     @staticmethod
+    def secondary_delivery_parameters(template: dict) -> bool:
+        """Optional secondary customer delivery endpoint: both string parameters defaulting to empty, or neither."""
+        parameters = template.get("parameters") if isinstance(template, dict) else None
+        if not isinstance(parameters, dict):
+            return False
+        present = [name for name in SECONDARY_DELIVERY_PARAMETERS if name in parameters]
+        if not present:
+            return False
+        if len(present) != len(SECONDARY_DELIVERY_PARAMETERS) or any(
+                parameters[name] != {"type": "string", "defaultValue": ""} for name in present):
+            raise ValueError("Secondary delivery parameters must be optional strings defaulting to empty")
+        return True
+
+    @staticmethod
     def validate(template: dict, network: bool) -> dict:
         root = NETWORK_PARAMETERS if network else PROOF_PARAMETERS
         if network and Templates._gateway_sku_parameter(template):
             root = {**root, "providerVpnGatewaySku": "string"}
+        if network and Templates.secondary_delivery_parameters(template):
+            root = {**root, **SECONDARY_DELIVERY_PARAMETERS}
         Templates._validate_structure(template, network, 0, root)
         outputs = template.get("outputs", {})
         if network:
@@ -122,6 +142,8 @@ class Templates:
             parameters["firewallTopology"] = "string"
         if Templates._gateway_sku_parameter(template):
             parameters["providerVpnGatewaySku"] = "string"
+        if Templates.secondary_delivery_parameters(template):
+            parameters.update(SECONDARY_DELIVERY_PARAMETERS)
         Templates._validate_structure(template, True, 0, parameters, allowed)
         if admin_access:
             Templates._validate_checkpoint_admin_access(template, topology)

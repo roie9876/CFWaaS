@@ -370,3 +370,14 @@ def test_admin_policy_rejects_cleanup_rule_that_is_not_drop_or_unresolved(action
     with pytest.raises(gaia.CheckpointGaiaError, match="drop cleanup rule"):
         configurator(api, ["8.8.8.8"]).run()
     assert not any(command == "install-policy" for command, _ in api.requests)
+
+
+def test_connector_endpoint_accepts_optional_secondary_pair():
+    base = {"publicIp": "8.8.8.8", "bgpAddress": "172.19.255.4", "asn": 65021}
+    paired = {**base, "secondaryPublicIp": "9.9.9.9", "secondaryBgpAddress": "172.19.255.5"}
+    assert customer_connector.endpoint(base) == base
+    assert customer_connector.endpoint(paired) == paired
+    for bad in ({**base, "secondaryPublicIp": "9.9.9.9"}, {**paired, "secondaryBgpAddress": "9.9.9.9"},
+                {**base, "extra": 1}):
+        with pytest.raises(ValueError):
+            customer_connector.endpoint(bad)

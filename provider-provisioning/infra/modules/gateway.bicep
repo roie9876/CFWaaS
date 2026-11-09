@@ -39,8 +39,16 @@ resource gateway 'Microsoft.Network/virtualNetworkGateways@2025-05-01' = {
   }, empty(defaultSiteId) ? {} : { gatewayDefaultSite: { id: defaultSiteId } })
 }
 output id string = gateway.id
-output endpoint object = {
+// Each active-active instance has its own public IP and BGP address; map them by IP configuration name.
+var bgpPeers = gateway.properties.bgpSettings.bgpPeeringAddresses
+var secondaryIndex = activeActive ? 1 : 0
+output endpoint object = union({
   publicIp: pip[0].properties.ipAddress
   bgpAddress: split(gateway.properties.bgpSettings.bgpPeeringAddress, ',')[0]
   asn: asn
-}
+}, activeActive ? {
+  publicIp: pip[0].properties.ipAddress
+  bgpAddress: filter(bgpPeers, peer => endsWith(peer.ipconfigurationId, '/ipConfigurations/primary'))[0].defaultBgpIpAddresses[0]
+  secondaryPublicIp: pip[secondaryIndex].properties.ipAddress
+  secondaryBgpAddress: filter(bgpPeers, peer => endsWith(peer.ipconfigurationId, '/ipConfigurations/secondary'))[0].defaultBgpIpAddresses[0]
+} : {})

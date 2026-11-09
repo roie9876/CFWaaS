@@ -33,3 +33,23 @@ module delivery 'modules/connection.bicep' = {
     sharedKey: deliverySharedKey
   }
 }
+// Second provider delivery instance (active-active): completes the four-tunnel BGP ECMP mesh.
+var providerDeliverySecondaryIp = providerManifest.providerDelivery.?secondaryPublicIp ?? ''
+module deliverySecondary 'modules/connection.bicep' = if (!empty(providerDeliverySecondaryIp)) {
+  name: 'customer-to-provider-delivery-2'
+  params: {
+    location: location
+    name: 'customer-delivery-2'
+    tags: tags
+    gatewayId: resourceId('Microsoft.Network/virtualNetworkGateways', 'gw-customer-delivery')
+    remoteEndpoint: {
+      publicIp: providerDeliverySecondaryIp
+      bgpAddress: providerManifest.providerDelivery.?secondaryBgpAddress ?? ''
+      asn: providerManifest.providerDelivery.asn
+    }
+    remotePrefixes: ['${providerManifest.providerDelivery.?secondaryBgpAddress ?? ''}/32']
+    enableBgp: true
+    sharedKey: deliverySharedKey
+  }
+  dependsOn: [delivery]
+}

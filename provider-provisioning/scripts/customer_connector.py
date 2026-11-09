@@ -118,16 +118,22 @@ def az(arguments: list[str], deadline: float, output: str = "json"):
 
 
 def endpoint(value: dict) -> dict:
-    if not isinstance(value, dict) or set(value) != {"publicIp", "bgpAddress", "asn"}:
+    base = {"publicIp", "bgpAddress", "asn"}
+    secondary = {"secondaryPublicIp", "secondaryBgpAddress"}
+    if not isinstance(value, dict) or set(value) not in (base, base | secondary):
         raise ValueError("Unexpected endpoint schema")
-    ipaddress.IPv4Address(value["publicIp"])
-    bgp = ipaddress.IPv4Address(value["bgpAddress"])
-    if (not any(bgp in ipaddress.IPv4Network(prefix) for prefix in (
-            "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
-            or type(value["asn"]) is not int or not 64512 <= value["asn"] <= 65534):
+    for address, bgp_key in (("publicIp", "bgpAddress"), ("secondaryPublicIp", "secondaryBgpAddress")):
+        if address not in value:
+            continue
+        ipaddress.IPv4Address(value[address])
+        bgp = ipaddress.IPv4Address(value[bgp_key])
+        if not any(bgp in ipaddress.IPv4Network(prefix) for prefix in (
+                "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")):
+            raise ValueError("Invalid private BGP endpoint")
+    if type(value["asn"]) is not int or not 64512 <= value["asn"] <= 65534:
         raise ValueError("Invalid private BGP endpoint")
     # The provider additionally enforces globally routable public IPs.
-    return {key: value[key] for key in ("publicIp", "bgpAddress", "asn")}
+    return {key: value[key] for key in ("publicIp", "bgpAddress", "asn", *sorted(secondary)) if key in value}
 
 
 def admin_sources(value: object) -> list[str]:
